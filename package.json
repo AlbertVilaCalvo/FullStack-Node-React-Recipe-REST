@@ -1,0 +1,10 @@
+{
+  "name": "recipe-rest",
+  "version": "1.0.0",
+  "description": "Recipe manager app, with REST API",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Albert",
+  "license": "ISC"
+}
