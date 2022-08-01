@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express'
 import { Recipe } from './Recipe'
+import { StatusCode } from '../misc/StatusCode'
 
 const recipes: Recipe[] = [
   {
@@ -23,4 +24,23 @@ export const getAllRecipes: RequestHandler = (req, res) => {
   res.json({
     recipes: recipes,
   })
+}
+
+/**
+ * GET /api/recipes/:recipeId
+ *
+ * curl http://localhost:5000/api/recipes/1
+ */
+export const getRecipe: RequestHandler = (req, res) => {
+  const recipeId = Number(req.params.recipeId)
+  const recipe = recipes.find((recipe) => recipe.id === recipeId)
+  if (recipe) {
+    res.json({
+      recipe: recipe,
+    })
+  } else {
+    res.status(StatusCode.NOT_FOUND_404).json({
+      error: `Recipe with id ${recipeId} not found`,
+    })
+  }
 }

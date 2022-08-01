@@ -9,3 +9,11 @@ export function getAllRecipes(): Promise<Recipe[]> {
       return response.data.recipes
     })
 }
+
+export function getRecipe(recipeId: number): Promise<Recipe> {
+  return httpClient
+    .get(`/recipes/${recipeId}`)
+    .then((response: AxiosResponse<{ recipe: Recipe }>) => {
+      return response.data.recipe
+    })
+}
