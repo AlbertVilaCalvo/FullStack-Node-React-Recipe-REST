@@ -1,7 +1,9 @@
 import { useParams } from 'react-router-dom'
-import { CircularProgress, Heading } from '@chakra-ui/react'
 import { useGetRecipe } from '../recipe/useGetRecipe'
 import { isError, isLoading } from '../misc/result'
+import { Progress } from '../components/Progress'
+import { ErrorMessage } from '../components/ErrorMessage'
+import { H1 } from '../components/H1'
 
 export function RecipeDetailPage() {
   const params = useParams()
@@ -10,22 +12,22 @@ export function RecipeDetailPage() {
   const getRecipeResult = useGetRecipe(recipeId)
 
   if (isLoading(getRecipeResult)) {
-    return <CircularProgress isIndeterminate size="100px" thickness="4px" />
+    return <Progress />
   }
 
   if (isError(getRecipeResult)) {
-    return <p>{getRecipeResult.message}</p>
+    return <ErrorMessage message={getRecipeResult.message} />
   }
 
   const recipe = getRecipeResult
 
   return (
-    <div>
-      <Heading as="h1" size="2xl">
-        {recipe.title}
-      </Heading>
-      <p>{`ID: ${recipeId}`}</p>
-      <p>{`Cooking time: ${recipe.cookingTimeMinutes} minutes`}</p>
+    <div className="main-container">
+      <div className="main-container-child-centered">
+        <H1>{recipe.title}</H1>
+        <p>{`ID: ${recipeId}`}</p>
+        <p>{`Cooking time: ${recipe.cookingTimeMinutes} minutes`}</p>
+      </div>
     </div>
   )
 }

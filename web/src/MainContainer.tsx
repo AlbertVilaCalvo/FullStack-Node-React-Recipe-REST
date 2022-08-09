@@ -4,11 +4,13 @@ import { CustomNavLink } from './components/CustomNavLink'
 export function MainContainer() {
   return (
     <div>
-      <nav>
-        <CustomNavLink to="/">Home</CustomNavLink> |{' '}
-        <CustomNavLink to="/recipes/new">Create Recipe</CustomNavLink> |{' '}
-        <CustomNavLink to="/about">About</CustomNavLink>
-      </nav>
+      <header className="main-container">
+        <nav className="main-container-child-centered">
+          <CustomNavLink to="/">Home</CustomNavLink> |{' '}
+          <CustomNavLink to="/recipes/new">Create Recipe</CustomNavLink> |{' '}
+          <CustomNavLink to="/about">About</CustomNavLink>
+        </nav>
+      </header>
       <Outlet />
     </div>
   )

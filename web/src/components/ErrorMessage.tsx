@@ -1,10 +1,12 @@
-import { H1 } from '../components/H1'
+type Props = {
+  message: string
+}
 
-export function CreateRecipePage() {
+export function ErrorMessage({ message }: Props) {
   return (
     <div className="main-container">
       <div className="main-container-child-centered">
-        <H1>New Recipe </H1>
+        <p>{message}</p>
       </div>
     </div>
   )
