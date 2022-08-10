@@ -7,7 +7,7 @@ export function HomePage() {
   const getRecipesResult = useGetAllRecipes()
 
   return (
-    <div className="main-container">
+    <div className="main-container page">
       <div className="main-container-child-centered">
         <H1>Home Page</H1>
         {isLoading(getRecipesResult) ? (

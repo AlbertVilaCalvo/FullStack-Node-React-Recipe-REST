@@ -22,7 +22,7 @@ export function RecipeDetailPage() {
   const recipe = getRecipeResult
 
   return (
-    <div className="main-container">
+    <div className="main-container page">
       <div className="main-container-child-centered">
         <H1>{recipe.title}</H1>
         <p>{`ID: ${recipeId}`}</p>

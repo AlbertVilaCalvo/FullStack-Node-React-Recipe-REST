@@ -3,7 +3,7 @@ import { CustomNavLink } from './components/CustomNavLink'
 
 export function MainContainer() {
   return (
-    <div>
+    <>
       <header className="main-container">
         <nav className="main-container-child-centered">
           <CustomNavLink to="/">Home</CustomNavLink> |{' '}
@@ -12,6 +12,13 @@ export function MainContainer() {
         </nav>
       </header>
       <Outlet />
-    </div>
+      <footer className="main-container">
+        <div className="main-container-child-centered">
+          <div id="footer-content">
+            <p>The best recipe app!</p>
+          </div>
+        </div>
+      </footer>
+    </>
   )
 }
