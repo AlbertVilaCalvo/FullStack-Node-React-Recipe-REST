@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express'
 import { Recipe } from './Recipe'
 import { StatusCode } from '../misc/StatusCode'
+import { requestFullUrl } from '../misc/util'
 
 const recipes: Recipe[] = [
   {
@@ -61,6 +62,6 @@ export const createRecipe: RequestHandler = (req, res) => {
   recipes.push(recipe)
   res
     .status(StatusCode.CREATED_201)
-    .location(`/api/recipes/${recipeId}`)
+    .location(`${requestFullUrl(req)}/${recipeId}`)
     .json({ id: recipeId })
 }
