@@ -44,3 +44,23 @@ export const getRecipe: RequestHandler = (req, res) => {
     })
   }
 }
+
+/**
+ * POST /api/recipes
+ *
+ * curl http://localhost:5000/api/recipes -H "Content-Type: application/json" -d '{"title":"Something", "cookingTimeMinutes":22}'
+ */
+export const createRecipe: RequestHandler = (req, res) => {
+  const lastRecipeId = recipes[recipes.length - 1].id
+  const recipeId = lastRecipeId + 1
+  const recipe: Recipe = {
+    id: recipeId,
+    title: req.body.title,
+    cookingTimeMinutes: req.body.cookingTimeMinutes,
+  }
+  recipes.push(recipe)
+  res
+    .status(StatusCode.CREATED_201)
+    .location(`/api/recipes/${recipeId}`)
+    .json({ id: recipeId })
+}

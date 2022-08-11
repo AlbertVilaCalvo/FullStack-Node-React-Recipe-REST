@@ -17,3 +17,13 @@ export function getRecipe(recipeId: number): Promise<Recipe> {
       return response.data.recipe
     })
 }
+
+export function createRecipe(
+  data: Omit<Recipe, 'id'>
+): Promise<{ recipeId: number }> {
+  return httpClient
+    .post(`/recipes/`, data)
+    .then((response: AxiosResponse<{ id: number }>) => {
+      return { recipeId: response.data.id }
+    })
+}
