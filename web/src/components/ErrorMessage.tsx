@@ -12,7 +12,7 @@ export function ErrorMessagePage({ message }: Props) {
   return (
     <div className="main-container page">
       <div className="main-container-child-centered">
-        <p>{message}</p>
+        <ErrorMessage>{message}</ErrorMessage>
       </div>
     </div>
   )
