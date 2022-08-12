@@ -35,3 +35,7 @@ export function updateRecipe(recipe: Recipe): Promise<{ recipeId: number }> {
       return { recipeId: response.data.recipe.id }
     })
 }
+
+export function deleteRecipe(recipeId: number): Promise<void> {
+  return httpClient.delete(`/recipes/${recipeId}`)
+}

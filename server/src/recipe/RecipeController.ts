@@ -98,3 +98,17 @@ export const updateRecipe: RequestHandler = (req, res) => {
   }
   res.status(StatusCode.OK_200).json({ recipe: recipe })
 }
+
+/**
+ * DELETE /api/recipes/:recipeId
+ *
+ * curl http://localhost:5000/api/recipes/1 -X DELETE
+ */
+export const deleteRecipe: RequestHandler = (req, res) => {
+  const recipeId = Number(req.params.recipeId)
+  const index = recipes.findIndex((recipe) => recipe.id === recipeId)
+  if (index !== -1) {
+    recipes.splice(index, 1)
+  }
+  res.sendStatus(StatusCode.NO_CONTENT_204)
+}

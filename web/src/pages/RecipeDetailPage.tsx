@@ -5,10 +5,12 @@ import { Progress } from '../components/Progress'
 import { NotFound404Page } from './NotFound404Page'
 import { ErrorMessagePage } from '../components/ErrorMessage'
 import { H1 } from '../components/H1'
-import { Button } from '@chakra-ui/react'
+import { Button, useToast } from '@chakra-ui/react'
+import * as RecipeApi from '../recipe/RecipeApi'
 
 export function RecipeDetailPage() {
   const navigate = useNavigate()
+  const toast = useToast()
 
   const params = useParams()
   const recipeId = Number(params.recipeId)
@@ -42,6 +44,27 @@ export function RecipeDetailPage() {
           colorScheme="teal"
         >
           Edit
+        </Button>
+        <Button
+          colorScheme="red"
+          onClick={() => {
+            RecipeApi.deleteRecipe(recipeId)
+              .then(() => {
+                navigate(`/`)
+              })
+              .catch((error) => {
+                toast({
+                  title: 'An error occurred',
+                  description: error.message,
+                  status: 'error',
+                  position: 'top',
+                  duration: 7000,
+                  isClosable: true,
+                })
+              })
+          }}
+        >
+          Delete
         </Button>
       </div>
     </div>
