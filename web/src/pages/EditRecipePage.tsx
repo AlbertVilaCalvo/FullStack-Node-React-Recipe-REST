@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom'
 import { useGetRecipe } from '../recipe/useGetRecipe'
 import { isError, isLoading } from '../misc/result'
 import { Progress } from '../components/Progress'
+import { NotFoundPage } from './NotFoundPage'
 import { ErrorMessagePage } from '../components/ErrorMessage'
 
 export function EditRecipePage() {
@@ -15,6 +16,10 @@ export function EditRecipePage() {
 
   if (isLoading(getRecipeResult)) {
     return <Progress />
+  }
+
+  if (getRecipeResult === '404-not-found') {
+    return <NotFoundPage />
   }
 
   if (isError(getRecipeResult)) {

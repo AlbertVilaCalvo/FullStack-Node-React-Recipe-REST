@@ -2,10 +2,11 @@ import * as React from 'react'
 import { Recipe } from './Recipe'
 import * as RecipeApi from './RecipeApi'
 
-export function useGetRecipe(recipeId: number): 'loading' | Recipe | Error {
-  const [result, setResult] = React.useState<'loading' | Recipe | Error>(
-    'loading'
-  )
+export function useGetRecipe(
+  recipeId: number
+): 'loading' | Recipe | '404-not-found' | Error {
+  const [result, setResult] =
+    React.useState<ReturnType<typeof useGetRecipe>>('loading')
 
   React.useEffect(() => {
     setResult('loading')
@@ -14,7 +15,12 @@ export function useGetRecipe(recipeId: number): 'loading' | Recipe | Error {
         setResult(recipe)
       })
       .catch((error) => {
-        setResult(error)
+        console.log(`useGetRecipe error`, error)
+        if (error.response && error.response.status === 404) {
+          setResult('404-not-found')
+        } else {
+          setResult(error)
+        }
       })
   }, [recipeId])
 
