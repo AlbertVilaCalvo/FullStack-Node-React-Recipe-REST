@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useGetRecipe } from '../recipe/useGetRecipe'
 import { isError, isLoading } from '../misc/result'
 import { Progress } from '../components/Progress'
-import { NotFoundPage } from './NotFoundPage'
+import { NotFound404Page } from './NotFound404Page'
 import { ErrorMessagePage } from '../components/ErrorMessage'
 import { H1 } from '../components/H1'
 import { Button } from '@chakra-ui/react'
@@ -20,7 +20,7 @@ export function RecipeDetailPage() {
   }
 
   if (getRecipeResult === '404-not-found') {
-    return <NotFoundPage />
+    return <NotFound404Page />
   }
 
   if (isError(getRecipeResult)) {
