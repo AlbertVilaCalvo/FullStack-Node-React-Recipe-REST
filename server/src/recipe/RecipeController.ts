@@ -52,12 +52,24 @@ export const getRecipe: RequestHandler = (req, res) => {
  * curl http://localhost:5000/api/recipes -H "Content-Type: application/json" -d '{"title":"Something", "cookingTimeMinutes":22}'
  */
 export const createRecipe: RequestHandler = (req, res) => {
+  const title = req.body.title
+  if (!title) {
+    res.status(StatusCode.BAD_REQUEST_400).json({ error: 'title is missing' })
+    return
+  }
+  const cookingTimeMinutes = req.body.cookingTimeMinutes
+  if (!cookingTimeMinutes) {
+    res
+      .status(StatusCode.BAD_REQUEST_400)
+      .json({ error: 'cookingTimeMinutes is missing' })
+    return
+  }
   const lastRecipeId = recipes[recipes.length - 1].id
   const recipeId = lastRecipeId + 1
   const recipe: Recipe = {
     id: recipeId,
-    title: req.body.title,
-    cookingTimeMinutes: req.body.cookingTimeMinutes,
+    title: title,
+    cookingTimeMinutes: cookingTimeMinutes,
   }
   recipes.push(recipe)
   res

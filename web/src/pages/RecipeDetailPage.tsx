@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useGetRecipe } from '../recipe/useGetRecipe'
 import { isError, isLoading } from '../misc/result'
 import { Progress } from '../components/Progress'
-import { ErrorMessage } from '../components/ErrorMessage'
+import { ErrorMessagePage } from '../components/ErrorMessage'
 import { H1 } from '../components/H1'
 
 export function RecipeDetailPage() {
@@ -16,7 +16,7 @@ export function RecipeDetailPage() {
   }
 
   if (isError(getRecipeResult)) {
-    return <ErrorMessage message={getRecipeResult.message} />
+    return <ErrorMessagePage message={getRecipeResult.message} />
   }
 
   const recipe = getRecipeResult

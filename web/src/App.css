@@ -60,6 +60,10 @@ h1 {
   padding-bottom: 35px;
 }
 
+.error-message {
+  color: var(--chakra-colors-red-500);
+}
+
 .progress-container {
   display: flex;
   justify-content: center;

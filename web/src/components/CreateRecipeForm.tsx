@@ -14,6 +14,7 @@ import {
   Stack,
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
+import { ErrorMessage } from './ErrorMessage'
 
 const MAX_COOKING_TIME_MINUTES = 72 * 60 // 72 hours
 
@@ -25,9 +26,12 @@ export function CreateRecipeForm() {
   const [showCookingTimeEmptyError, setShowCokingTimeEmptyError] =
     React.useState(false)
 
+  const [errorMessage, setErrorMessage] = React.useState('')
+
   const navigate = useNavigate()
 
-  const onClick = () => {
+  const onSubmit = () => {
+    setErrorMessage('')
     const titleEmpty = title.trim() === ''
     if (titleEmpty) {
       setShowTitleEmptyError(true)
@@ -49,6 +53,12 @@ export function CreateRecipeForm() {
       })
       .catch((error) => {
         console.error(`RecipeApi.createRecipe error`, error)
+        if (error.response && error.response.data) {
+          // Status code not 2XX
+          setErrorMessage(error.response.data.error)
+        } else {
+          setErrorMessage(error.message)
+        }
       })
   }
 
@@ -92,9 +102,14 @@ export function CreateRecipeForm() {
           <FormErrorMessage>Cooking time is required</FormErrorMessage>
         )}
       </FormControl>
-      <Button onClick={onClick} alignSelf="flex-start" colorScheme="teal">
+      <Button onClick={onSubmit} alignSelf="flex-start" colorScheme="teal">
         Publish Recipe
       </Button>
+      {errorMessage && (
+        <ErrorMessage>
+          An error occurred: {errorMessage}. Please try again.
+        </ErrorMessage>
+      )}
     </Stack>
   )
 }
