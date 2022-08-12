@@ -1,5 +1,5 @@
 import { H1 } from '../components/H1'
-import { CreateRecipeForm } from '../components/CreateRecipeForm'
+import { RecipeForm } from '../components/RecipeForm'
 import * as RecipeApi from '../recipe/RecipeApi'
 import { useParams } from 'react-router-dom'
 import { useGetRecipe } from '../recipe/useGetRecipe'
@@ -27,7 +27,7 @@ export function EditRecipePage() {
     <div className="main-container page">
       <div className="main-container-child-centered">
         <H1>Edit Recipe</H1>
-        <CreateRecipeForm
+        <RecipeForm
           recipe={recipe}
           onSubmit={(data) => {
             return RecipeApi.updateRecipe({

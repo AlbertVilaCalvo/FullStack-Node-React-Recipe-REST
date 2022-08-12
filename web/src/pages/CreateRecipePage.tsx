@@ -1,5 +1,5 @@
 import { H1 } from '../components/H1'
-import { CreateRecipeForm } from '../components/CreateRecipeForm'
+import { RecipeForm } from '../components/RecipeForm'
 import * as RecipeApi from '../recipe/RecipeApi'
 
 export function CreateRecipePage() {
@@ -7,7 +7,7 @@ export function CreateRecipePage() {
     <div className="main-container page">
       <div className="main-container-child-centered">
         <H1>New Recipe</H1>
-        <CreateRecipeForm onSubmit={RecipeApi.createRecipe} />
+        <RecipeForm onSubmit={RecipeApi.createRecipe} />
       </div>
     </div>
   )

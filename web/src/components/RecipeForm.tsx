@@ -23,7 +23,7 @@ type Props = {
   onSubmit: (data: Omit<Recipe, 'id'>) => Promise<{ recipeId: number }>
 }
 
-export function CreateRecipeForm({ recipe, onSubmit }: Props) {
+export function RecipeForm({ recipe, onSubmit }: Props) {
   const [title, setTitle] = React.useState(recipe ? recipe.title : '')
   const [cookingTimeMinutes, setCookingTimeMinutes] = React.useState(
     recipe ? recipe.cookingTimeMinutes.toString(10) : '10'
