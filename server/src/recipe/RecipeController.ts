@@ -77,3 +77,24 @@ export const createRecipe: RequestHandler = (req, res) => {
     .location(`${requestFullUrl(req)}/${recipeId}`)
     .json({ id: recipeId })
 }
+
+/**
+ * PATCH /api/recipes/:recipeId
+ *
+ * curl http://localhost:5000/api/recipes/1 -X PATCH -H "Content-Type: application/json" -d '{"title":"Something"}'
+ */
+export const updateRecipe: RequestHandler = (req, res) => {
+  const recipeId = Number(req.params.recipeId)
+  const recipe = recipes.find((recipe) => recipe.id === recipeId)
+  if (!recipe) {
+    res.sendStatus(StatusCode.NOT_FOUND_404)
+    return
+  }
+  if (req.body.title) {
+    recipe.title = req.body.title
+  }
+  if (req.body.cookingTimeMinutes) {
+    recipe.cookingTimeMinutes = req.body.cookingTimeMinutes
+  }
+  res.status(StatusCode.OK_200).json({ recipe: recipe })
+}

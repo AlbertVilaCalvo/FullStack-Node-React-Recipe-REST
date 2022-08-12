@@ -27,3 +27,11 @@ export function createRecipe(
       return { recipeId: response.data.id }
     })
 }
+
+export function updateRecipe(recipe: Recipe): Promise<{ recipeId: number }> {
+  return httpClient
+    .patch(`/recipes/${recipe.id}`, recipe)
+    .then((response: AxiosResponse<{ recipe: Recipe }>) => {
+      return { recipeId: response.data.recipe.id }
+    })
+}

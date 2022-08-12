@@ -1,16 +1,15 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { H1 } from '../components/H1'
+import { CreateRecipeForm } from '../components/CreateRecipeForm'
+import * as RecipeApi from '../recipe/RecipeApi'
+import { useParams } from 'react-router-dom'
 import { useGetRecipe } from '../recipe/useGetRecipe'
 import { isError, isLoading } from '../misc/result'
 import { Progress } from '../components/Progress'
 import { ErrorMessagePage } from '../components/ErrorMessage'
-import { H1 } from '../components/H1'
-import { Button } from '@chakra-ui/react'
 
-export function RecipeDetailPage() {
-  const navigate = useNavigate()
-
+export function EditRecipePage() {
   const params = useParams()
-  const recipeId = Number(params.recipeId)
+  const recipeId = parseInt(params.recipeId!, 10)
 
   const getRecipeResult = useGetRecipe(recipeId)
 
@@ -27,17 +26,16 @@ export function RecipeDetailPage() {
   return (
     <div className="main-container page">
       <div className="main-container-child-centered">
-        <H1>{recipe.title}</H1>
-        <p>{`ID: ${recipeId}`}</p>
-        <p>{`Cooking time: ${recipe.cookingTimeMinutes} minutes`}</p>
-        <Button
-          onClick={() => {
-            navigate(`/recipes/${recipeId}/edit`)
+        <H1>Edit Recipe</H1>
+        <CreateRecipeForm
+          recipe={recipe}
+          onSubmit={(data) => {
+            return RecipeApi.updateRecipe({
+              ...data,
+              id: recipeId,
+            })
           }}
-          colorScheme="teal"
-        >
-          Edit
-        </Button>
+        />
       </div>
     </div>
   )

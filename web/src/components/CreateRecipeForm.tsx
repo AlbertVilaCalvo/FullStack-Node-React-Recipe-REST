@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as RecipeApi from '../recipe/RecipeApi'
+import { Recipe } from '../recipe/Recipe'
 import {
   Button,
   FormControl,
@@ -18,9 +18,16 @@ import { ErrorMessage } from './ErrorMessage'
 
 const MAX_COOKING_TIME_MINUTES = 72 * 60 // 72 hours
 
-export function CreateRecipeForm() {
-  const [title, setTitle] = React.useState('')
-  const [cookingTimeMinutes, setCookingTimeMinutes] = React.useState('10')
+type Props = {
+  recipe?: Recipe
+  onSubmit: (data: Omit<Recipe, 'id'>) => Promise<{ recipeId: number }>
+}
+
+export function CreateRecipeForm({ recipe, onSubmit }: Props) {
+  const [title, setTitle] = React.useState(recipe ? recipe.title : '')
+  const [cookingTimeMinutes, setCookingTimeMinutes] = React.useState(
+    recipe ? recipe.cookingTimeMinutes.toString(10) : '10'
+  )
 
   const [showTitleEmptyError, setShowTitleEmptyError] = React.useState(false)
   const [showCookingTimeEmptyError, setShowCokingTimeEmptyError] =
@@ -30,7 +37,7 @@ export function CreateRecipeForm() {
 
   const navigate = useNavigate()
 
-  const onSubmit = () => {
+  const onClick = () => {
     setErrorMessage('')
     const titleEmpty = title.trim() === ''
     if (titleEmpty) {
@@ -43,17 +50,21 @@ export function CreateRecipeForm() {
     if (titleEmpty || cookingTimeEmpty) {
       return
     }
-    RecipeApi.createRecipe({
+    onSubmit({
       title,
       cookingTimeMinutes: Number(cookingTimeMinutes),
     })
       .then((response) => {
-        console.log(`RecipeApi.createRecipe response`, response)
+        console.log(`RecipeApi response`, response)
         navigate(`/recipes/${response.recipeId}`)
       })
       .catch((error) => {
-        console.error(`RecipeApi.createRecipe error`, error)
-        if (error.response && error.response.data) {
+        console.error(`RecipeApi error`, error)
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
           // Status code not 2XX
           setErrorMessage(error.response.data.error)
         } else {
@@ -87,7 +98,6 @@ export function CreateRecipeForm() {
           allowMouseWheel
           value={cookingTimeMinutes}
           onChange={(valueAsString, valueAsNumber) => {
-            console.log(`valueAsString`, valueAsString)
             setCookingTimeMinutes(valueAsString)
             setShowCokingTimeEmptyError(false)
           }}
@@ -102,8 +112,8 @@ export function CreateRecipeForm() {
           <FormErrorMessage>Cooking time is required</FormErrorMessage>
         )}
       </FormControl>
-      <Button onClick={onSubmit} alignSelf="flex-start" colorScheme="teal">
-        Publish Recipe
+      <Button onClick={onClick} alignSelf="flex-start" colorScheme="teal">
+        {recipe ? 'Update Recipe' : 'Publish Recipe'}
       </Button>
       {errorMessage && (
         <ErrorMessage>
