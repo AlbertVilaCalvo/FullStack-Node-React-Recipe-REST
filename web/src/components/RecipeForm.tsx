@@ -16,7 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { ErrorMessage } from './ErrorMessage'
 
-const MAX_COOKING_TIME_MINUTES = 72 * 60 // 72 hours
+const MAX_COOKING_TIME_MINUTES = 3 * 24 * 60 // 3 days
 
 type Props = {
   recipe?: Recipe
