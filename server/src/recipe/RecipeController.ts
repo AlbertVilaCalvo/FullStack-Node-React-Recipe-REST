@@ -4,7 +4,6 @@ import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import { database } from '../database'
 import * as RecipeDatabase from './RecipeDatabase'
-import { getRecipeById } from './getRecipeById'
 
 /**
  * GET /api/recipes
@@ -34,7 +33,7 @@ export const getRecipe: RequestHandler = async (req, res) => {
     return
   }
 
-  const getRecipeResult = await getRecipeById(recipeId)
+  const getRecipeResult = await RecipeDatabase.getRecipeById(recipeId)
   if (getRecipeResult === 'recipe-not-found') {
     res.status(StatusCode.NOT_FOUND_404).json({
       error: `Recipe with id ${recipeId} not found`,
@@ -99,7 +98,7 @@ export const updateRecipe: RequestHandler = async (req, res) => {
   }
 
   let recipe: Recipe
-  const getRecipeResult = await getRecipeById(recipeId)
+  const getRecipeResult = await RecipeDatabase.getRecipeById(recipeId)
   if (getRecipeResult === 'recipe-not-found') {
     res.status(StatusCode.NOT_FOUND_404).json({
       error: `Recipe with id ${recipeId} not found`,
