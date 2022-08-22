@@ -2,12 +2,12 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
-// Fix error "Type 'string | undefined' is not assignable to type 'string'."
-// https://stackoverflow.com/a/50235545/4034572
-declare let process: {
-  env: {
-    [key: string]: string
+function getEnvar(environmentVariable: string): string {
+  const value = process.env[environmentVariable]
+  if (!value) {
+    throw Error(`process.env.${environmentVariable} is not defined`)
   }
+  return value
 }
 
 type Config = Readonly<{
@@ -23,13 +23,13 @@ type Config = Readonly<{
 }>
 
 export const config: Config = {
-  port: Number(process.env.PORT),
-  env: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-  isDevelopment: process.env.NODE_ENV === 'development',
+  port: Number(getEnvar('PORT')),
+  env: getEnvar('NODE_ENV') === 'production' ? 'production' : 'development',
+  isDevelopment: getEnvar('NODE_ENV') === 'development',
 
-  databaseName: process.env.DB_NAME,
-  databaseUser: process.env.DB_USER,
-  databasePassword: process.env.DB_PASSWORD,
-  databaseHost: process.env.DB_HOST,
-  databasePort: Number(process.env.DB_PORT),
+  databaseName: getEnvar('DB_NAME'),
+  databaseUser: getEnvar('DB_USER'),
+  databasePassword: getEnvar('DB_PASSWORD'),
+  databaseHost: getEnvar('DB_HOST'),
+  databasePort: Number(getEnvar('DB_PORT')),
 }
