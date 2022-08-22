@@ -137,22 +137,13 @@ export const updateRecipe: RequestHandler = async (req, res) => {
  *
  * curl http://localhost:5000/api/recipes/1 -X DELETE
  */
-export const deleteRecipe: RequestHandler = (req, res) => {
+export const deleteRecipe: RequestHandler = async (req, res) => {
   const recipeId = Number(req.params.recipeId)
   if (isNaN(recipeId) || recipeId <= 0) {
     res.sendStatus(StatusCode.NO_CONTENT_204)
     return
   }
 
-  database
-    .query('DELETE FROM recipe WHERE id = $1', [recipeId])
-    .catch((error) => {
-      console.error(
-        `deleteRecipe 'DELETE FROM recipe WHERE id = ${recipeId}' error`,
-        error
-      )
-    })
-    .finally(() => {
-      res.sendStatus(StatusCode.NO_CONTENT_204)
-    })
+  await RecipeDatabase.deleteRecipe(recipeId)
+  res.sendStatus(StatusCode.NO_CONTENT_204)
 }

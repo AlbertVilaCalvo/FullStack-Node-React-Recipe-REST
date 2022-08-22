@@ -41,3 +41,15 @@ export async function getRecipeById(
     return toError(error)
   }
 }
+
+export async function deleteRecipe(recipeId: number): Promise<void | Error> {
+  try {
+    await database.query('DELETE FROM recipe WHERE id = $1', [recipeId])
+  } catch (error) {
+    console.error(
+      `deleteRecipe 'DELETE FROM recipe WHERE id = ${recipeId}' error`,
+      error
+    )
+    return toError(error)
+  }
+}
