@@ -3,6 +3,7 @@ import { Recipe } from './Recipe'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import { database } from '../database'
+import { getRecipeById } from './getRecipeById'
 
 /**
  * GET /api/recipes
@@ -33,26 +34,17 @@ export const getRecipe: RequestHandler = async (req, res) => {
     return
   }
 
-  try {
-    const result = await database.query<Recipe>(
-      'SELECT * FROM recipe WHERE id = $1',
-      [recipeId]
-    )
-    if (result.rows[0]) {
-      res.json({
-        recipe: result.rows[0],
-      })
-    } else {
-      res.status(StatusCode.NOT_FOUND_404).json({
-        error: `Recipe with id ${recipeId} not found`,
-      })
-    }
-  } catch (error) {
-    console.error(
-      `getRecipe 'SELECT * FROM recipe WHERE id = ${recipeId}' error`,
-      error
-    )
+  const getRecipeResult = await getRecipeById(recipeId)
+  if (getRecipeResult === 'recipe-not-found') {
+    res.status(StatusCode.NOT_FOUND_404).json({
+      error: `Recipe with id ${recipeId} not found`,
+    })
+  } else if (getRecipeResult instanceof Error) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  } else {
+    res.json({
+      recipe: getRecipeResult,
+    })
   }
 }
 
@@ -107,25 +99,17 @@ export const updateRecipe: RequestHandler = async (req, res) => {
   }
 
   let recipe: Recipe
-  try {
-    const result = await database.query<Recipe>(
-      'SELECT * FROM recipe WHERE id = $1',
-      [recipeId]
-    )
-    if (!result.rows[0]) {
-      res.status(StatusCode.NOT_FOUND_404).json({
-        error: `Recipe with id ${recipeId} not found`,
-      })
-      return
-    }
-    recipe = result.rows[0]
-  } catch (error) {
-    console.error(
-      `updateRecipe 'SELECT * FROM recipe WHERE id = ${recipeId}' error`,
-      error
-    )
+  const getRecipeResult = await getRecipeById(recipeId)
+  if (getRecipeResult === 'recipe-not-found') {
+    res.status(StatusCode.NOT_FOUND_404).json({
+      error: `Recipe with id ${recipeId} not found`,
+    })
+    return
+  } else if (getRecipeResult instanceof Error) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
     return
+  } else {
+    recipe = getRecipeResult
   }
 
   if (req.body.title) {
