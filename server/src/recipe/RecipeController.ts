@@ -3,6 +3,7 @@ import { Recipe } from './Recipe'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import { database } from '../database'
+import * as RecipeDatabase from './RecipeDatabase'
 import { getRecipeById } from './getRecipeById'
 
 /**
@@ -11,14 +12,13 @@ import { getRecipeById } from './getRecipeById'
  * curl http://localhost:5000/api/recipes
  */
 export const getAllRecipes: RequestHandler = async (req, res) => {
-  try {
-    const result = await database.query<Recipe>('SELECT * FROM recipe')
-    res.json({
-      recipes: result.rows,
-    })
-  } catch (error) {
-    console.error(`getAllRecipes 'SELECT * FROM recipe' error`, error)
+  const getRecipesResult = await RecipeDatabase.getAllRecipes()
+  if (getRecipesResult instanceof Error) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  } else {
+    res.json({
+      recipes: getRecipesResult,
+    })
   }
 }
 
