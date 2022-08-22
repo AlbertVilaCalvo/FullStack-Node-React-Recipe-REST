@@ -1,6 +1,15 @@
 import { Recipe } from './Recipe'
 import { database } from '../database'
 
+function toError(error: unknown): Error {
+  if (error instanceof Error) {
+    return error
+  } else {
+    console.error('RecipeDatabase - Unknown error', error)
+    return Error('Unknown error')
+  }
+}
+
 export async function getAllRecipes(): Promise<Recipe[] | Error> {
   try {
     const result = await database.query<Recipe>('SELECT * FROM recipe')
@@ -8,11 +17,7 @@ export async function getAllRecipes(): Promise<Recipe[] | Error> {
     return recipes
   } catch (error) {
     console.error(`getAllRecipes 'SELECT * FROM recipe' error`, error)
-    if (error instanceof Error) {
-      return error
-    } else {
-      return Error('Unknown error')
-    }
+    return toError(error)
   }
 }
 
@@ -32,16 +37,7 @@ export async function getRecipeById(
       return 'recipe-not-found'
     }
   } catch (error) {
-    console.error(
-      `getRecipeById with id = ${recipeId} error. error instanceof Error? ${
-        error instanceof Error
-      }.`,
-      error
-    )
-    if (error instanceof Error) {
-      return error
-    } else {
-      return Error('Unknown error')
-    }
+    console.error(`getRecipeById with id = ${recipeId} error`, error)
+    return toError(error)
   }
 }
