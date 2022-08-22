@@ -1,14 +1,7 @@
 import * as dotenv from 'dotenv'
+import { isNumber } from './misc/util'
 
 dotenv.config()
-
-function getEnvar(environmentVariable: string): string {
-  const value = process.env[environmentVariable]
-  if (!value) {
-    throw Error(`process.env.${environmentVariable} is not defined`)
-  }
-  return value
-}
 
 type Config = Readonly<{
   /** PORT */
@@ -30,7 +23,7 @@ type Config = Readonly<{
 }>
 
 export const config: Config = {
-  port: Number(getEnvar('PORT')),
+  port: getEnvarAsNumber('PORT'),
   env: getEnvar('NODE_ENV') === 'production' ? 'production' : 'development',
   isDevelopment: getEnvar('NODE_ENV') === 'development',
 
@@ -38,5 +31,22 @@ export const config: Config = {
   databaseUser: getEnvar('DB_USER'),
   databasePassword: getEnvar('DB_PASSWORD'),
   databaseHost: getEnvar('DB_HOST'),
-  databasePort: Number(getEnvar('DB_PORT')),
+  databasePort: getEnvarAsNumber('DB_PORT'),
+}
+
+function getEnvar(environmentVariable: string): string {
+  const value = process.env[environmentVariable]
+  if (!value) {
+    throw Error(`process.env.${environmentVariable} is not defined`)
+  }
+  return value
+}
+
+function getEnvarAsNumber(environmentVariable: string): number {
+  const value = getEnvar(environmentVariable)
+  if (isNumber(value)) {
+    return Number(value)
+  } else {
+    throw Error(`process.env.${environmentVariable} is not a number`)
+  }
 }
