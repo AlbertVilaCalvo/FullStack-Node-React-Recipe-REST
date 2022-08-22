@@ -2,6 +2,7 @@ import { RecipeList } from '../components/RecipeList'
 import { useGetAllRecipes } from '../recipe/useGetAllRecipes'
 import { isLoading, isSuccess } from '../misc/result'
 import { H1 } from '../components/H1'
+import { ErrorMessage } from '../components/ErrorMessage'
 
 export function HomePage() {
   const getRecipesResult = useGetAllRecipes()
@@ -15,7 +16,7 @@ export function HomePage() {
         ) : isSuccess(getRecipesResult) ? (
           <RecipeList recipes={getRecipesResult} />
         ) : (
-          <p>{`Error: ${getRecipesResult}`}</p>
+          <ErrorMessage>{`Error: ${getRecipesResult}`}</ErrorMessage>
         )}
       </div>
     </div>
