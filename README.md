@@ -1,4 +1,4 @@
-# Recipe manager - Full Stack Node, React, PostgreSQL, REST app
+# Recipe Manager - A Full Stack app built with Node, React, PostgreSQL, REST API
 
 ## Database setup
 
