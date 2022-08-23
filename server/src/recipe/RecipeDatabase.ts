@@ -69,6 +69,18 @@ export async function insertNewRecipe(
     })
 }
 
+export async function updateRecipe(recipe: Recipe): Promise<void | Error> {
+  try {
+    await database.query(
+      'UPDATE recipe SET title = $1, cooking_time_minutes = $2 WHERE id = $3',
+      [recipe.title, recipe.cooking_time_minutes, recipe.id]
+    )
+  } catch (error) {
+    console.error(`RecipeDatabase - updateRecipe error`, error)
+    return toError(error)
+  }
+}
+
 export async function deleteRecipe(recipeId: number): Promise<void | Error> {
   try {
     await database.query('DELETE FROM recipe WHERE id = $1', [recipeId])

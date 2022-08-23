@@ -2,7 +2,6 @@ import { RequestHandler } from 'express'
 import { Recipe } from './Recipe'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
-import { database } from '../database'
 import * as RecipeDatabase from './RecipeDatabase'
 import { isError } from '../misc/result'
 
@@ -116,17 +115,11 @@ export const updateRecipe: RequestHandler = async (req, res) => {
     recipe.cooking_time_minutes = req.body.cooking_time_minutes
   }
 
-  try {
-    const result = await database.query(
-      'UPDATE recipe SET title = $1, cooking_time_minutes = $2 WHERE id = $3 RETURNING *',
-      [recipe.title, recipe.cooking_time_minutes, recipe.id]
-    )
-    res.status(StatusCode.OK_200).json({ recipe: result.rows[0] })
-    return
-  } catch (error) {
-    console.error(`updateRecipe UPDATE error`, error)
+  const updateRecipeResult = await RecipeDatabase.updateRecipe(recipe)
+  if (isError(updateRecipeResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-    return
+  } else {
+    res.status(StatusCode.OK_200).json({ recipe: recipe })
   }
 }
 
