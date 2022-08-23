@@ -53,7 +53,8 @@ export const getRecipe: RequestHandler = async (req, res) => {
  * curl http://localhost:5000/api/recipes -H "Content-Type: application/json" -d '{"title":"Salad", "cooking_time_minutes":22}'
  */
 export const createRecipe: RequestHandler = async (req, res) => {
-  // TODO validate title length and 0 < cooking_time_minutes <= 3*24*60
+  // TODO validate title type string and length <= 255
+  // TODO validate cooking_time_minutes type number and length 0 > 0 and <= 3*24*60
   const title = req.body.title
   if (!title) {
     res.status(StatusCode.BAD_REQUEST_400).json({ error: 'title is missing' })
@@ -108,6 +109,8 @@ export const updateRecipe: RequestHandler = async (req, res) => {
     recipe = getRecipeResult
   }
 
+  // TODO validate title type string and length <= 255
+  // TODO validate cooking_time_minutes type number and length 0 > 0 and <= 3*24*60
   if (req.body.title) {
     recipe.title = req.body.title
   }
