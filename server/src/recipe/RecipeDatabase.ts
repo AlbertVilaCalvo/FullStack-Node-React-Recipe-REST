@@ -5,7 +5,7 @@ function toError(error: unknown): Error {
   if (error instanceof Error) {
     return error
   } else {
-    console.error('RecipeDatabase - Unknown error', error)
+    console.error('RecipeDatabase - Not an instanceof error', error)
     return Error('Unknown error')
   }
 }
@@ -16,7 +16,10 @@ export async function getAllRecipes(): Promise<Recipe[] | Error> {
     const recipes: Recipe[] = result.rows
     return recipes
   } catch (error) {
-    console.error(`getAllRecipes 'SELECT * FROM recipe' error`, error)
+    console.error(
+      `RecipeDatabase - getAllRecipes 'SELECT * FROM recipe' error`,
+      error
+    )
     return toError(error)
   }
 }
@@ -33,11 +36,16 @@ export async function getRecipeById(
       const recipe: Recipe = result.rows[0]
       return recipe
     } else {
-      console.info(`getRecipeById - Recipe with id ${recipeId} not found`)
+      console.info(
+        `RecipeDatabase - getRecipeById - Recipe with id ${recipeId} not found`
+      )
       return 'recipe-not-found'
     }
   } catch (error) {
-    console.error(`getRecipeById with id = ${recipeId} error`, error)
+    console.error(
+      `RecipeDatabase - getRecipeById with id = ${recipeId} error`,
+      error
+    )
     return toError(error)
   }
 }
@@ -66,7 +74,7 @@ export async function deleteRecipe(recipeId: number): Promise<void | Error> {
     await database.query('DELETE FROM recipe WHERE id = $1', [recipeId])
   } catch (error) {
     console.error(
-      `deleteRecipe 'DELETE FROM recipe WHERE id = ${recipeId}' error`,
+      `RecipeDatabase - deleteRecipe 'DELETE FROM recipe WHERE id = ${recipeId}' error`,
       error
     )
     return toError(error)
