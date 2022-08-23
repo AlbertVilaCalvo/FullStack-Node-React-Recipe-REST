@@ -126,7 +126,9 @@ export const updateRecipe: RequestHandler = async (req, res) => {
 /**
  * DELETE /api/recipes/:recipeId
  *
- * curl http://localhost:5000/api/recipes/1 -X DELETE
+ * curl http://localhost:5000/api/recipes/1 -X DELETE -v
+ *
+ * Note that it returns 204 'No Content' if the recipe doesn't exist.
  */
 export const deleteRecipe: RequestHandler = async (req, res) => {
   const recipeId = Number(req.params.recipeId)
@@ -135,6 +137,10 @@ export const deleteRecipe: RequestHandler = async (req, res) => {
     return
   }
 
-  await RecipeDatabase.deleteRecipe(recipeId)
-  res.sendStatus(StatusCode.NO_CONTENT_204)
+  const deleteRecipeResult = await RecipeDatabase.deleteRecipe(recipeId)
+  if (isError(deleteRecipeResult)) {
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  } else {
+    res.sendStatus(StatusCode.NO_CONTENT_204)
+  }
 }
