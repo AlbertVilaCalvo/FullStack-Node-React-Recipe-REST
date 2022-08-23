@@ -42,6 +42,25 @@ export async function getRecipeById(
   }
 }
 
+export async function insertNewRecipe(
+  title: string,
+  cooking_time_minutes: number
+): Promise<Recipe | Error> {
+  return database
+    .query(
+      'INSERT INTO recipe (title, cooking_time_minutes) VALUES($1, $2) RETURNING *',
+      [title, cooking_time_minutes]
+    )
+    .then((result) => {
+      const recipe: Recipe = result.rows[0]
+      return recipe
+    })
+    .catch((error) => {
+      console.error(`RecipeDatabase - insertNewRecipe error`, error)
+      return toError(error)
+    })
+}
+
 export async function deleteRecipe(recipeId: number): Promise<void | Error> {
   try {
     await database.query('DELETE FROM recipe WHERE id = $1', [recipeId])

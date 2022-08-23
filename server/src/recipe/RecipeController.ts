@@ -4,6 +4,7 @@ import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import { database } from '../database'
 import * as RecipeDatabase from './RecipeDatabase'
+import { isError } from '../misc/result'
 
 /**
  * GET /api/recipes
@@ -52,7 +53,7 @@ export const getRecipe: RequestHandler = async (req, res) => {
  *
  * curl http://localhost:5000/api/recipes -H "Content-Type: application/json" -d '{"title":"Salad", "cooking_time_minutes":22}'
  */
-export const createRecipe: RequestHandler = (req, res) => {
+export const createRecipe: RequestHandler = async (req, res) => {
   // TODO validate title length and 0 < cooking_time_minutes <= 3*24*60
   const title = req.body.title
   if (!title) {
@@ -67,22 +68,19 @@ export const createRecipe: RequestHandler = (req, res) => {
     return
   }
 
-  database
-    .query(
-      'INSERT INTO recipe (title, cooking_time_minutes) VALUES($1, $2) RETURNING *',
-      [title, cooking_time_minutes]
-    )
-    .then((result) => {
-      const recipe: Recipe = result.rows[0]
-      res
-        .status(StatusCode.CREATED_201)
-        .location(`${requestFullUrl(req)}/${recipe.id}`)
-        .json({ id: recipe.id })
-    })
-    .catch((error) => {
-      console.error(`createRecipe INSERT error`, error)
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-    })
+  const insertResult = await RecipeDatabase.insertNewRecipe(
+    title,
+    cooking_time_minutes
+  )
+  if (isError(insertResult)) {
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  } else {
+    const recipe: Recipe = insertResult
+    res
+      .status(StatusCode.CREATED_201)
+      .location(`${requestFullUrl(req)}/${recipe.id}`)
+      .json({ id: recipe.id })
+  }
 }
 
 /**
