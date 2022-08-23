@@ -13,7 +13,7 @@ import { isError } from '../misc/result'
  */
 export const getAllRecipes: RequestHandler = async (req, res) => {
   const getRecipesResult = await RecipeDatabase.getAllRecipes()
-  if (getRecipesResult instanceof Error) {
+  if (isError(getRecipesResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   } else {
     res.json({
@@ -39,7 +39,7 @@ export const getRecipe: RequestHandler = async (req, res) => {
     res.status(StatusCode.NOT_FOUND_404).json({
       error: `Recipe with id ${recipeId} not found`,
     })
-  } else if (getRecipeResult instanceof Error) {
+  } else if (isError(getRecipeResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   } else {
     res.json({
@@ -102,7 +102,7 @@ export const updateRecipe: RequestHandler = async (req, res) => {
       error: `Recipe with id ${recipeId} not found`,
     })
     return
-  } else if (getRecipeResult instanceof Error) {
+  } else if (isError(getRecipeResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
     return
   } else {
