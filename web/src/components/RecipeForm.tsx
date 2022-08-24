@@ -37,7 +37,8 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
 
   const navigate = useNavigate()
 
-  const onClick = () => {
+  const onSubmitInternal = (event: React.SyntheticEvent) => {
+    event.preventDefault()
     setErrorMessage('')
     const titleEmpty = title.trim() === ''
     if (titleEmpty) {
@@ -74,7 +75,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
   }
 
   return (
-    <Stack spacing={6}>
+    <Stack as="form" onSubmit={onSubmitInternal} spacing={6}>
       <FormControl isRequired isInvalid={showTitleEmptyError}>
         <FormLabel>Title</FormLabel>
         <Input
@@ -112,7 +113,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           <FormErrorMessage>Cooking time is required</FormErrorMessage>
         )}
       </FormControl>
-      <Button onClick={onClick} alignSelf="flex-start" colorScheme="teal">
+      <Button type="submit" alignSelf="flex-start" colorScheme="teal">
         {recipe ? 'Update Recipe' : 'Publish Recipe'}
       </Button>
       {errorMessage && (
