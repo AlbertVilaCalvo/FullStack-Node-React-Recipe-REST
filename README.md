@@ -6,6 +6,7 @@
 2. Create the database: `createdb reciperest`.
 3. Start psql with `psql reciperest`.
 4. In psql, run the commands in `server/database.sql` by loading it with `\i server/database-setup.sql`.
+5. (Optional) Seed data into the database with `\i server/database-seed.sql` .
 
 ## Develop
 
