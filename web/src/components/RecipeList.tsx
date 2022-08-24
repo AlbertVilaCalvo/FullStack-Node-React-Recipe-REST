@@ -6,6 +6,14 @@ type Props = {
 }
 
 export function RecipeList({ recipes }: Props) {
+  if (recipes.length === 0) {
+    return (
+      <div>
+        <p>There are no recipes yet!</p>
+      </div>
+    )
+  }
+
   return (
     <div>
       {recipes.map((recipe) => (
