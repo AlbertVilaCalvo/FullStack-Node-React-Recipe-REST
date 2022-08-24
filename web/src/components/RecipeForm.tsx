@@ -33,6 +33,8 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
   const [showCookingTimeEmptyError, setShowCokingTimeEmptyError] =
     React.useState(false)
 
+  const [isLoading, setIsLoading] = React.useState(false)
+
   const [errorMessage, setErrorMessage] = React.useState('')
 
   const navigate = useNavigate()
@@ -51,6 +53,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
     if (titleEmpty || cookingTimeEmpty) {
       return
     }
+    setIsLoading(true)
     onSubmit({
       title,
       cookingTimeMinutes: Number(cookingTimeMinutes),
@@ -71,6 +74,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
         } else {
           setErrorMessage(error.message)
         }
+        setIsLoading(false)
       })
   }
 
@@ -113,7 +117,12 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           <FormErrorMessage>Cooking time is required</FormErrorMessage>
         )}
       </FormControl>
-      <Button type="submit" alignSelf="flex-start" colorScheme="teal">
+      <Button
+        type="submit"
+        isLoading={isLoading}
+        alignSelf="flex-start"
+        colorScheme="teal"
+      >
         {recipe ? 'Update Recipe' : 'Publish Recipe'}
       </Button>
       {errorMessage && (
