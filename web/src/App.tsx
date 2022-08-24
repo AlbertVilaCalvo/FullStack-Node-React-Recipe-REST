@@ -6,9 +6,9 @@ import { MainContainer } from './MainContainer'
 import { HomePage } from './pages/HomePage'
 import { AboutPage } from './pages/AboutPage'
 import { NotFound404Page } from './pages/NotFound404Page'
-import { CreateRecipePage } from './pages/CreateRecipePage'
-import { RecipeDetailPage } from './pages/RecipeDetailPage'
-import { EditRecipePage } from './pages/EditRecipePage'
+import { CreateRecipePage } from './pages/recipe/CreateRecipePage'
+import { RecipeDetailPage } from './pages/recipe/RecipeDetailPage'
+import { EditRecipePage } from './pages/recipe/EditRecipePage'
 
 function App() {
   return (

@@ -1,12 +1,12 @@
-import { H1 } from '../components/H1'
-import { RecipeForm } from '../components/RecipeForm'
-import * as RecipeApi from '../recipe/RecipeApi'
+import { H1 } from '../../components/H1'
+import { RecipeForm } from '../../components/RecipeForm'
+import * as RecipeApi from '../../recipe/RecipeApi'
 import { useParams } from 'react-router-dom'
-import { useGetRecipe } from '../recipe/useGetRecipe'
-import { isError, isLoading } from '../misc/result'
-import { Progress } from '../components/Progress'
-import { NotFound404Page } from './NotFound404Page'
-import { ErrorMessagePage } from '../components/ErrorMessage'
+import { useGetRecipe } from '../../recipe/useGetRecipe'
+import { isError, isLoading } from '../../misc/result'
+import { Progress } from '../../components/Progress'
+import { NotFound404Page } from '../NotFound404Page'
+import { ErrorMessagePage } from '../../components/ErrorMessage'
 
 export function EditRecipePage() {
   const params = useParams()
