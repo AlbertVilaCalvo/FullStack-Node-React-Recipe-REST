@@ -6,9 +6,17 @@ export function MainContainer() {
     <>
       <header className="main-container">
         <nav className="main-container-child-centered">
-          <CustomNavLink to="/">Home</CustomNavLink> |{' '}
-          <CustomNavLink to="/recipes/new">Create Recipe</CustomNavLink> |{' '}
-          <CustomNavLink to="/about">About</CustomNavLink>
+          <ul>
+            <li>
+              <CustomNavLink to="/">Home</CustomNavLink>
+            </li>
+            <li>
+              <CustomNavLink to="/recipes/new">Create Recipe</CustomNavLink>
+            </li>
+            <li>
+              <CustomNavLink to="/about">About</CustomNavLink>
+            </li>
+          </ul>
         </nav>
       </header>
       <Outlet />

@@ -41,8 +41,20 @@ header {
   padding-bottom: 25px;
 }
 
-nav {
+header > nav {
   color: var(--chakra-colors-gray-50);
+}
+
+header > nav > ul {
+  list-style-type: none;
+}
+
+header > nav > ul > li {
+  display: inline-block;
+}
+
+header > nav > ul > li:not(:last-child) {
+  margin-right: 22px;
 }
 
 footer {
