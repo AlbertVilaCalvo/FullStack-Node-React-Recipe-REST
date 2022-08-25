@@ -16,6 +16,13 @@ export function MainContainer() {
             <li>
               <CustomNavLink to="/about">About</CustomNavLink>
             </li>
+            <li aria-hidden="true" className="nav-spacer"></li>
+            <li>
+              <CustomNavLink to="/register">Register</CustomNavLink>
+            </li>
+            <li>
+              <CustomNavLink to="/login">Login</CustomNavLink>
+            </li>
           </ul>
         </nav>
       </header>

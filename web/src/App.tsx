@@ -6,6 +6,8 @@ import { MainContainer } from './MainContainer'
 import { HomePage } from './pages/HomePage'
 import { AboutPage } from './pages/AboutPage'
 import { NotFound404Page } from './pages/NotFound404Page'
+import { RegisterPage } from './pages/auth/RegisterPage'
+import { LoginPage } from './pages/auth/LoginPage'
 import { CreateRecipePage } from './pages/recipe/CreateRecipePage'
 import { RecipeDetailPage } from './pages/recipe/RecipeDetailPage'
 import { EditRecipePage } from './pages/recipe/EditRecipePage'
@@ -18,6 +20,8 @@ function App() {
           <Route path="/" element={<MainContainer />}>
             <Route path="" element={<HomePage />} />
             <Route path="about" element={<AboutPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="login" element={<LoginPage />} />
             <Route path="recipes/new" element={<CreateRecipePage />} />
             <Route path="recipes/:recipeId" element={<RecipeDetailPage />} />
             <Route path="recipes/:recipeId/edit" element={<EditRecipePage />} />

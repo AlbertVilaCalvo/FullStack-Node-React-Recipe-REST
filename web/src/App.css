@@ -45,12 +45,16 @@ header > nav {
   color: var(--chakra-colors-gray-50);
 }
 
-header > nav > ul > li {
-  display: inline-block;
+header > nav > ul {
+  display: flex;
 }
 
 header > nav > ul > li:not(:last-child) {
   margin-right: 22px;
+}
+
+.nav-spacer {
+  flex-grow: 1;
 }
 
 footer {
