@@ -20,7 +20,7 @@ cd web
 npm start
 ```
 
-## Git hook to run Prettier and ESLint checks on every commit
+## Git hook to run Prettier, ESLint and TypeScript checks on every commit
 
 To run Prettier and ESLint on every commit, run `cp pre-commit .git/hooks`.
 

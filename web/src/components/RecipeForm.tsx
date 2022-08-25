@@ -95,6 +95,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           <FormErrorMessage>Title is required</FormErrorMessage>
         )}
       </FormControl>
+
       <FormControl isRequired isInvalid={showCookingTimeEmptyError}>
         <FormLabel>Cooking Time (minutes)</FormLabel>
         <NumberInput
@@ -117,6 +118,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           <FormErrorMessage>Cooking time is required</FormErrorMessage>
         )}
       </FormControl>
+
       <Button
         type="submit"
         isLoading={isLoading}
@@ -125,6 +127,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
       >
         {recipe ? 'Update Recipe' : 'Publish Recipe'}
       </Button>
+
       {errorMessage && (
         <ErrorMessage>
           An error occurred: {errorMessage}. Please try again.
