@@ -6,7 +6,7 @@ export function MainContainer() {
     <>
       <header className="main-container">
         <nav className="main-container-child-centered">
-          <ul>
+          <ul className="list-style-type-none">
             <li>
               <CustomNavLink to="/">Home</CustomNavLink>
             </li>

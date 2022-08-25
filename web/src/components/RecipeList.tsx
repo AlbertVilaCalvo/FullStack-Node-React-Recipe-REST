@@ -15,14 +15,14 @@ export function RecipeList({ recipes }: Props) {
   }
 
   return (
-    <div>
+    <ul className="list-style-type-none">
       {recipes.map((recipe) => (
-        <div key={recipe.id}>
+        <li key={recipe.id}>
           <Link
             to={`/recipes/${recipe.id}`}
           >{`#${recipe.id} - ${recipe.title}`}</Link>
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
