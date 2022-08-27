@@ -1,6 +1,7 @@
 import express, { RequestHandler } from 'express'
 import { router } from './router'
 import { config } from './config'
+import cors from 'cors'
 
 const app = express()
 
@@ -12,6 +13,12 @@ if (config.isDevelopment) {
   }
   app.use('/api', fakeDelay)
 }
+
+app.use(
+  cors({
+    origin: ['http://localhost:3000'],
+  })
+)
 
 app.use('/api', router)
 
