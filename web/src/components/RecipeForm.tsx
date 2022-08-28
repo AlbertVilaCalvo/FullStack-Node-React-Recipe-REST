@@ -33,7 +33,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
   const [showCookingTimeEmptyError, setShowCokingTimeEmptyError] =
     React.useState(false)
 
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
 
   const [errorMessage, setErrorMessage] = React.useState('')
 
@@ -53,7 +53,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
     if (titleEmpty || cookingTimeEmpty) {
       return
     }
-    setIsLoading(true)
+    setLoading(true)
     onSubmit({
       title,
       cookingTimeMinutes: Number(cookingTimeMinutes),
@@ -74,7 +74,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
         } else {
           setErrorMessage(error.message)
         }
-        setIsLoading(false)
+        setLoading(false)
       })
   }
 
@@ -121,7 +121,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
 
       <Button
         type="submit"
-        isLoading={isLoading}
+        isLoading={loading}
         alignSelf="flex-start"
         colorScheme="teal"
       >

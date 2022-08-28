@@ -26,7 +26,7 @@ export function RegisterPage() {
   const [emailError, setEmailError] = React.useState('')
   const [errorMessage, setErrorMessage] = React.useState('')
 
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
 
   const onSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault()
@@ -34,7 +34,7 @@ export function RegisterPage() {
       setEmailError('This email is not valid')
       return
     }
-    setIsLoading(true)
+    setLoading(true)
     AuthApi.registerNewUser(name, email, password)
       .then((response) => {
         console.log(`AuthApi.registerNewUser response`, response)
@@ -43,16 +43,16 @@ export function RegisterPage() {
             setEmailError(response.error.message)
           }
           setErrorMessage(response.error.message)
-          setIsLoading(false)
+          setLoading(false)
         } else {
           // Success
           // TODO add redirect and remove next line
-          setIsLoading(false)
+          setLoading(false)
         }
       })
       .catch((error) => {
         // An unexpected error
-        setIsLoading(false)
+        setLoading(false)
         setErrorMessage(error.message)
       })
   }
@@ -108,7 +108,7 @@ export function RegisterPage() {
 
           <Button
             type="submit"
-            isLoading={isLoading}
+            isLoading={loading}
             alignSelf="flex-start"
             colorScheme="teal"
           >

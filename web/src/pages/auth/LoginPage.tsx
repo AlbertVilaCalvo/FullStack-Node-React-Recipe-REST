@@ -25,7 +25,7 @@ export function LoginPage() {
     React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState('')
 
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
 
   const onSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault()
@@ -33,21 +33,21 @@ export function LoginPage() {
       setShowEmailNotValidError(true)
       return
     }
-    setIsLoading(true)
+    setLoading(true)
     AuthApi.login(email, password)
       .then((response) => {
         console.log(`AuthApi.login response`, response)
         if (isAipError(response)) {
           setErrorMessage(response.error.message)
-          setIsLoading(false)
+          setLoading(false)
         } else {
           // Success
           // TODO add redirect and remove next line
-          setIsLoading(false)
+          setLoading(false)
         }
       })
       .catch((error) => {
-        setIsLoading(false)
+        setLoading(false)
         setErrorMessage(error.message)
       })
   }
@@ -91,7 +91,7 @@ export function LoginPage() {
 
           <Button
             type="submit"
-            isLoading={isLoading}
+            isLoading={loading}
             alignSelf="flex-start"
             colorScheme="teal"
           >
