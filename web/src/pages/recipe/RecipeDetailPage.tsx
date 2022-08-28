@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useGetRecipe } from '../../recipe/useGetRecipe'
 import { isError, isLoading } from '../../misc/result'
@@ -14,6 +15,8 @@ export function RecipeDetailPage() {
 
   const params = useParams()
   const recipeId = Number(params.recipeId)
+
+  const [loading, setLoading] = React.useState(false)
 
   const getRecipeResult = useGetRecipe(recipeId)
 
@@ -47,12 +50,15 @@ export function RecipeDetailPage() {
         </Button>
         <Button
           colorScheme="red"
+          isLoading={loading}
           onClick={() => {
+            setLoading(true)
             RecipeApi.deleteRecipe(recipeId)
               .then(() => {
                 navigate(`/`)
               })
               .catch((error) => {
+                setLoading(false)
                 toast({
                   title: 'An error occurred',
                   description: error.message,
