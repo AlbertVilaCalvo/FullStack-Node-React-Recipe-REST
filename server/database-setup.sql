@@ -11,8 +11,8 @@ CREATE TABLE recipe
 
 CREATE TABLE "user"
 (
-    id         SERIAL PRIMARY KEY,
-    email      VARCHAR(254) NOT NULL UNIQUE,
-    password   CHAR(60)     NOT NULL,
-    name       VARCHAR(254) NOT NULL
+    id       SERIAL PRIMARY KEY,
+    email    VARCHAR(254) NOT NULL UNIQUE,
+    password CHAR(60)     NOT NULL,
+    name     VARCHAR(255) NOT NULL
 );
