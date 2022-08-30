@@ -1,5 +1,6 @@
 import { Request, RequestHandler } from 'express'
 import { Recipe } from './Recipe'
+import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
@@ -32,7 +33,7 @@ export const getAllRecipes: RequestHandler<
  */
 export const getRecipe: RequestHandler<
   { recipeId: string },
-  { recipe: Recipe } | { error: string },
+  { recipe: Recipe } | ApiError,
   undefined
 > = async (req, res) => {
   const recipeId = Number(req.params.recipeId)
@@ -43,9 +44,7 @@ export const getRecipe: RequestHandler<
 
   const getRecipeResult = await RecipeDatabase.getRecipeById(recipeId)
   if (getRecipeResult === 'recipe-not-found') {
-    res.status(StatusCode.NOT_FOUND_404).json({
-      error: `Recipe with id ${recipeId} not found`,
-    })
+    res.status(StatusCode.NOT_FOUND_404).json(ApiError.recipeNotFound(recipeId))
   } else if (isError(getRecipeResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   } else {
@@ -62,21 +61,19 @@ export const getRecipe: RequestHandler<
  */
 export const createRecipe: RequestHandler<
   undefined,
-  { id: number } | { error: string },
+  { id: number } | ApiError,
   Partial<Omit<Recipe, 'id'>>
 > = async (req, res) => {
   // TODO validate title type string and length <= 255
   // TODO validate cooking_time_minutes type number and length 0 > 0 and <= 3*24*60
   const title = req.body.title
   if (!title) {
-    res.status(StatusCode.BAD_REQUEST_400).json({ error: 'title is missing' })
+    res.status(StatusCode.BAD_REQUEST_400).json(ApiError.titleRequired())
     return
   }
   const cooking_time_minutes = req.body.cooking_time_minutes
   if (!cooking_time_minutes) {
-    res
-      .status(StatusCode.BAD_REQUEST_400)
-      .json({ error: 'cooking_time_minutes is missing' })
+    res.status(StatusCode.BAD_REQUEST_400).json(ApiError.cookingTimeRequired())
     return
   }
 
@@ -102,7 +99,7 @@ export const createRecipe: RequestHandler<
  */
 export const updateRecipe: RequestHandler<
   { recipeId: string },
-  { recipe: Recipe } | { error: string },
+  { recipe: Recipe } | ApiError,
   Partial<Omit<Recipe, 'id'>>
 > = async (req, res) => {
   const recipeId = Number(req.params.recipeId)
@@ -114,9 +111,7 @@ export const updateRecipe: RequestHandler<
   let recipe: Recipe
   const getRecipeResult = await RecipeDatabase.getRecipeById(recipeId)
   if (getRecipeResult === 'recipe-not-found') {
-    res.status(StatusCode.NOT_FOUND_404).json({
-      error: `Recipe with id ${recipeId} not found`,
-    })
+    res.status(StatusCode.NOT_FOUND_404).json(ApiError.recipeNotFound(recipeId))
     return
   } else if (isError(getRecipeResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)

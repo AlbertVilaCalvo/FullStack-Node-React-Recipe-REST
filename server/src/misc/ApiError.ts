@@ -1,4 +1,7 @@
 type ApiErrorCode =
+  | 'recipe_not_found'
+  | 'title_required'
+  | 'cooking_time_minutes_required'
   | 'name_required'
   | 'email_required'
   | 'password_required'
@@ -13,6 +16,24 @@ export class ApiError {
 
   constructor(error: { code: ApiErrorCode; message: string }) {
     this.error = error
+  }
+
+  static recipeNotFound(recipeId: number): ApiError {
+    return makeApiError(
+      'recipe_not_found',
+      `Recipe with id ${recipeId} not found`
+    )
+  }
+
+  static titleRequired(): ApiError {
+    return makeApiError('title_required', 'The title field is required')
+  }
+
+  static cookingTimeRequired(): ApiError {
+    return makeApiError(
+      'cooking_time_minutes_required',
+      'The cooking_time_minutes field is required'
+    )
   }
 
   static nameRequired(): ApiError {
