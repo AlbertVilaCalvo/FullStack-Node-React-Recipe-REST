@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express'
+import { Request, RequestHandler } from 'express'
 import { StatusCode } from '../misc/StatusCode'
 import * as UserDatabase from '../user/UserDatabase'
 import { checkIfPasswordsMatch, hashPassword } from './password'
@@ -12,7 +12,11 @@ import { ApiError } from '../misc/ApiError'
  *
  * curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Peter", "email":"a@a.com", "password":"123456"}'
  */
-export const register: RequestHandler = async (req, res) => {
+export const register: RequestHandler<
+  undefined,
+  { id: number } | ApiError,
+  { name?: string; email?: string; password?: string }
+> = async (req, res) => {
   const name = req.body.name
   if (!name) {
     res.status(StatusCode.BAD_REQUEST_400).json(ApiError.nameRequired())
@@ -64,7 +68,11 @@ export const register: RequestHandler = async (req, res) => {
  *
  * curl http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d '{"email":"a@a.com", "password":"123456"}' -v
  */
-export const login: RequestHandler = async (req, res) => {
+export const login: RequestHandler<
+  undefined,
+  ApiError,
+  { email?: string; password?: string }
+> = async (req, res) => {
   const email = req.body.email
   if (!email) {
     res.status(StatusCode.BAD_REQUEST_400).json(ApiError.emailRequired())

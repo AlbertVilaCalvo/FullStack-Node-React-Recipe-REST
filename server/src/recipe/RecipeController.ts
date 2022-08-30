@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express'
+import { Request, RequestHandler } from 'express'
 import { Recipe } from './Recipe'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
@@ -10,7 +10,11 @@ import { isError } from '../misc/result'
  *
  * curl http://localhost:5000/api/recipes
  */
-export const getAllRecipes: RequestHandler = async (req, res) => {
+export const getAllRecipes: RequestHandler<
+  undefined,
+  { recipes: Recipe[] },
+  undefined
+> = async (req, res) => {
   const getRecipesResult = await RecipeDatabase.getAllRecipes()
   if (isError(getRecipesResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
@@ -26,7 +30,11 @@ export const getAllRecipes: RequestHandler = async (req, res) => {
  *
  * curl http://localhost:5000/api/recipes/1
  */
-export const getRecipe: RequestHandler = async (req, res) => {
+export const getRecipe: RequestHandler<
+  { recipeId: string },
+  { recipe: Recipe } | { error: string },
+  undefined
+> = async (req, res) => {
   const recipeId = Number(req.params.recipeId)
   if (isNaN(recipeId) || recipeId <= 0) {
     res.sendStatus(StatusCode.NOT_FOUND_404)
@@ -52,7 +60,11 @@ export const getRecipe: RequestHandler = async (req, res) => {
  *
  * curl http://localhost:5000/api/recipes -H "Content-Type: application/json" -d '{"title":"Salad", "cooking_time_minutes":22}'
  */
-export const createRecipe: RequestHandler = async (req, res) => {
+export const createRecipe: RequestHandler<
+  undefined,
+  { id: number } | { error: string },
+  Partial<Omit<Recipe, 'id'>>
+> = async (req, res) => {
   // TODO validate title type string and length <= 255
   // TODO validate cooking_time_minutes type number and length 0 > 0 and <= 3*24*60
   const title = req.body.title
@@ -78,7 +90,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
     const recipe: Recipe = insertResult
     res
       .status(StatusCode.CREATED_201)
-      .location(`${requestFullUrl(req)}/${recipe.id}`)
+      .location(`${requestFullUrl(req as unknown as Request)}/${recipe.id}`)
       .json({ id: recipe.id })
   }
 }
@@ -88,7 +100,11 @@ export const createRecipe: RequestHandler = async (req, res) => {
  *
  * curl http://localhost:5000/api/recipes/1 -X PATCH -H "Content-Type: application/json" -d '{"title":"Something"}'
  */
-export const updateRecipe: RequestHandler = async (req, res) => {
+export const updateRecipe: RequestHandler<
+  { recipeId: string },
+  { recipe: Recipe } | { error: string },
+  Partial<Omit<Recipe, 'id'>>
+> = async (req, res) => {
   const recipeId = Number(req.params.recipeId)
   if (isNaN(recipeId) || recipeId <= 0) {
     res.sendStatus(StatusCode.NOT_FOUND_404)
@@ -133,7 +149,11 @@ export const updateRecipe: RequestHandler = async (req, res) => {
  *
  * Note that it returns 204 'No Content' if the recipe doesn't exist.
  */
-export const deleteRecipe: RequestHandler = async (req, res) => {
+export const deleteRecipe: RequestHandler<
+  { recipeId: string },
+  undefined,
+  undefined
+> = async (req, res) => {
   const recipeId = Number(req.params.recipeId)
   if (isNaN(recipeId) || recipeId <= 0) {
     res.sendStatus(StatusCode.NO_CONTENT_204)
