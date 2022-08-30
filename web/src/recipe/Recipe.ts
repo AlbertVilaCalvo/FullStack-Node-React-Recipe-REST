@@ -1,7 +1,7 @@
 import { RecipeJson } from './RecipeJson'
 
 export class Recipe {
-  id: number
+  readonly id: number
   title: string
   cookingTimeMinutes: number
 

@@ -1,5 +1,5 @@
 export type User = {
-  id: number
+  readonly id: number
   email: string
   /** The hashed password. */
   password: string

@@ -1,5 +1,5 @@
 export type Recipe = {
-  id: number
+  readonly id: number
   title: string
   cooking_time_minutes: number
 }
