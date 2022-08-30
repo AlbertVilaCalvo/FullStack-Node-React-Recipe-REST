@@ -26,26 +26,35 @@ export class ApiError {
   }
 
   static titleRequired(): ApiError {
-    return makeApiError('title_required', 'The title field is required')
+    return makeApiError(
+      'title_required',
+      "The required field 'title' is missing"
+    )
   }
 
   static cookingTimeRequired(): ApiError {
     return makeApiError(
       'cooking_time_minutes_required',
-      'The cooking_time_minutes field is required'
+      "The required field 'cooking_time_minutes' is missing"
     )
   }
 
   static nameRequired(): ApiError {
-    return makeApiError('name_required', 'The name field is required')
+    return makeApiError('name_required', "The required field 'name' is missing")
   }
 
   static emailRequired(): ApiError {
-    return makeApiError('email_required', 'The email field is required')
+    return makeApiError(
+      'email_required',
+      "The required field 'email' is missing"
+    )
   }
 
   static passwordRequired(): ApiError {
-    return makeApiError('password_required', 'The password field is required')
+    return makeApiError(
+      'password_required',
+      "The required field 'password' is missing"
+    )
   }
 
   static duplicateEmail(): ApiError {
