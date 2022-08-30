@@ -1,14 +1,6 @@
 import { Recipe } from './Recipe'
 import { database } from '../database'
-
-function toError(error: unknown): Error {
-  if (error instanceof Error) {
-    return error
-  } else {
-    console.error('RecipeDatabase - Not an instanceof error', error)
-    return Error('Unknown error')
-  }
-}
+import { toError } from '../misc/util'
 
 export async function getAllRecipes(): Promise<Recipe[] | Error> {
   try {
@@ -20,7 +12,7 @@ export async function getAllRecipes(): Promise<Recipe[] | Error> {
       `RecipeDatabase - getAllRecipes 'SELECT * FROM recipe' error`,
       error
     )
-    return toError(error)
+    return toError(error, 'RecipeDatabase - getAllRecipes')
   }
 }
 
@@ -46,7 +38,7 @@ export async function getRecipeById(
       `RecipeDatabase - getRecipeById with id = ${recipeId} error`,
       error
     )
-    return toError(error)
+    return toError(error, 'RecipeDatabase - getRecipeById')
   }
 }
 
@@ -65,7 +57,7 @@ export async function insertNewRecipe(
     })
     .catch((error) => {
       console.error(`RecipeDatabase - insertNewRecipe error`, error)
-      return toError(error)
+      return toError(error, 'RecipeDatabase - insertNewRecipe')
     })
 }
 
@@ -77,7 +69,7 @@ export async function updateRecipe(recipe: Recipe): Promise<void | Error> {
     )
   } catch (error) {
     console.error(`RecipeDatabase - updateRecipe error`, error)
-    return toError(error)
+    return toError(error, 'RecipeDatabase - updateRecipe')
   }
 }
 
@@ -89,6 +81,6 @@ export async function deleteRecipe(recipeId: number): Promise<void | Error> {
       `RecipeDatabase - deleteRecipe 'DELETE FROM recipe WHERE id = ${recipeId}' error`,
       error
     )
-    return toError(error)
+    return toError(error, 'RecipeDatabase - deleteRecipe')
   }
 }

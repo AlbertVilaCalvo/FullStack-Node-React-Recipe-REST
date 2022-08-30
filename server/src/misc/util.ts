@@ -13,3 +13,15 @@ export function requestFullUrl(req: Request): string {
 export function isNumber(n: string): boolean {
   return !isNaN(parseFloat(n))
 }
+
+/**
+ * For try-catch, to convert the error (which has type unknown) to an Error.
+ */
+export function toError(error: unknown, source: string): Error {
+  if (error instanceof Error) {
+    return error
+  } else {
+    console.error(`${source} - Not an instanceof error`, error)
+    return Error('Unknown error')
+  }
+}

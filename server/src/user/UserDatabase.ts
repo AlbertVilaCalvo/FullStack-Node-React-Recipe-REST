@@ -1,15 +1,7 @@
 import { User } from './User'
 import { database, PostgreErrorCode } from '../database'
 import { DatabaseError } from 'pg'
-
-function toError(error: unknown): Error {
-  if (error instanceof Error) {
-    return error
-  } else {
-    console.error('UserDatabase - Not an instanceof error', error)
-    return Error('Unknown error')
-  }
-}
+import { toError } from '../misc/util'
 
 export async function getUserByEmail(
   email: string
@@ -33,7 +25,7 @@ export async function getUserByEmail(
       `UserDatabase - getUserByEmail with email = ${email} error`,
       error
     )
-    return toError(error)
+    return toError(error, 'UserDatabase - getUserByEmail')
   }
 }
 
@@ -60,6 +52,6 @@ export async function insertNewUser(
       ) {
         return 'duplicate-email-error'
       }
-      return toError(error)
+      return toError(error, 'UserDatabase - insertNewUser')
     })
 }
