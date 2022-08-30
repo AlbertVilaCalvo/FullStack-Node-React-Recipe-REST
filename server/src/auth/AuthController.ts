@@ -13,7 +13,8 @@ import { ApiError } from '../misc/ApiError'
  * curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Peter", "email":"a@a.com", "password":"123456"}'
  */
 export const register: RequestHandler<
-  undefined,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
   { id: number } | ApiError,
   { name?: string; email?: string; password?: string }
 > = async (req, res) => {
@@ -69,7 +70,8 @@ export const register: RequestHandler<
  * curl http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d '{"email":"a@a.com", "password":"123456"}' -v
  */
 export const login: RequestHandler<
-  undefined,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
   ApiError,
   { email?: string; password?: string }
 > = async (req, res) => {

@@ -12,7 +12,8 @@ import { isError } from '../misc/result'
  * curl http://localhost:5000/api/recipes
  */
 export const getAllRecipes: RequestHandler<
-  undefined,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
   { recipes: Recipe[] },
   undefined
 > = async (req, res) => {
@@ -60,7 +61,8 @@ export const getRecipe: RequestHandler<
  * curl http://localhost:5000/api/recipes -H "Content-Type: application/json" -d '{"title":"Salad", "cooking_time_minutes":22}'
  */
 export const createRecipe: RequestHandler<
-  undefined,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
   { id: number } | ApiError,
   Partial<Omit<Recipe, 'id'>>
 > = async (req, res) => {
