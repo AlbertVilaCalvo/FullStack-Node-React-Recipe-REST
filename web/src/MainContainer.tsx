@@ -1,7 +1,12 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { CustomNavLink } from './components/CustomNavLink'
+import { useSnapshot } from 'valtio'
+import { userStore } from './user/userStore'
 
 export function MainContainer() {
+  const navigate = useNavigate()
+  const storedUser = useSnapshot(userStore)
+
   return (
     <>
       <header className="main-container">
@@ -17,12 +22,35 @@ export function MainContainer() {
               <CustomNavLink to="/about">About</CustomNavLink>
             </li>
             <li aria-hidden="true" className="nav-spacer"></li>
-            <li>
-              <CustomNavLink to="/register">Register</CustomNavLink>
-            </li>
-            <li>
-              <CustomNavLink to="/login">Login</CustomNavLink>
-            </li>
+            {storedUser.user ? (
+              <>
+                <li>
+                  <CustomNavLink to="/profile">My Profile</CustomNavLink>
+                </li>
+                <li>
+                  <CustomNavLink
+                    to="/logout"
+                    onClick={(event) => {
+                      event.preventDefault() // prevent navigating to /logout
+                      userStore.user = undefined
+                      userStore.authToken = undefined
+                      navigate('/')
+                    }}
+                  >
+                    Logout
+                  </CustomNavLink>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <CustomNavLink to="/register">Register</CustomNavLink>
+                </li>
+                <li>
+                  <CustomNavLink to="/login">Login</CustomNavLink>
+                </li>
+              </>
+            )}
           </ul>
         </nav>
       </header>

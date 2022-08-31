@@ -15,10 +15,14 @@ import {
   USER_NAME_MAX_LENGTH,
 } from '../../misc/validations'
 import * as AuthApi from '../../auth/AuthApi'
+import { useNavigate } from 'react-router-dom'
+import { userStore } from '../../user/userStore'
 import { ErrorMessage } from '../../components/ErrorMessage'
 import { isAipError } from '../../httpClient'
 
 export function RegisterPage() {
+  const navigate = useNavigate()
+
   const [name, setName] = React.useState('')
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
@@ -46,8 +50,10 @@ export function RegisterPage() {
           setLoading(false)
         } else {
           // Success
-          // TODO add redirect and remove next line
-          setLoading(false)
+          const { user, authToken } = response
+          userStore.user = user
+          userStore.authToken = authToken
+          navigate('/profile')
         }
       })
       .catch((error) => {

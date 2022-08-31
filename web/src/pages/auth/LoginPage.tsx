@@ -14,10 +14,14 @@ import {
   PASSWORD_MAX_LENGTH,
 } from '../../misc/validations'
 import * as AuthApi from '../../auth/AuthApi'
+import { useNavigate } from 'react-router-dom'
+import { userStore } from '../../user/userStore'
 import { ErrorMessage } from '../../components/ErrorMessage'
 import { isAipError } from '../../httpClient'
 
 export function LoginPage() {
+  const navigate = useNavigate()
+
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
 
@@ -42,8 +46,10 @@ export function LoginPage() {
           setLoading(false)
         } else {
           // Success
-          // TODO add redirect and remove next line
-          setLoading(false)
+          const { user, authToken } = response
+          userStore.user = user
+          userStore.authToken = authToken
+          navigate('/profile')
         }
       })
       .catch((error) => {

@@ -1,19 +1,32 @@
 import { ApiError, httpClient, isAipError, AnApiError } from '../httpClient'
 import { AxiosResponse } from 'axios'
+import { User } from '../user/User'
+
+// What the API returns
+type RegisterLoginResponseJson = {
+  user: User
+  auth_token: string
+}
+
+// What we use here on the client
+type RegisterLoginResponse = {
+  user: User
+  authToken: string
+}
 
 export function registerNewUser(
   name: string,
   email: string,
   password: string
-): Promise<{ userId: number } | AnApiError<'duplicate_email' | string>> {
+): Promise<RegisterLoginResponse | AnApiError<'duplicate_email' | string>> {
   return httpClient
     .post(`/auth/register`, {
       name,
       email,
       password,
     })
-    .then((response: AxiosResponse<{ id: number }>) => {
-      return { userId: response.data.id }
+    .then((response: AxiosResponse<RegisterLoginResponseJson>) => {
+      return { user: response.data.user, authToken: response.data.auth_token }
     })
     .catch((error) => {
       if (
@@ -30,13 +43,19 @@ export function registerNewUser(
 export function login(
   email: string,
   password: string
-): Promise<void | AnApiError<'invalid_login_credentials' | string>> {
+): Promise<
+  RegisterLoginResponse | AnApiError<'invalid_login_credentials' | string>
+> {
   return httpClient
     .post(`/auth/login`, {
       email,
       password,
     })
-    .then((response: AxiosResponse<void | ApiError>) => {
-      return response.data
+    .then((response: AxiosResponse<RegisterLoginResponseJson | ApiError>) => {
+      if (isAipError(response.data)) {
+        return response.data
+      } else {
+        return { user: response.data.user, authToken: response.data.auth_token }
+      }
     })
 }
