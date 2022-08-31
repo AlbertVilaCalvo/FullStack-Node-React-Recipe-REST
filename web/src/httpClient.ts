@@ -3,6 +3,7 @@ import { userStore } from './user/userStore'
 
 axios.defaults.baseURL = 'http://localhost:5000/api'
 axios.defaults.timeout = 10_000
+axios.defaults.headers.common['Content-Type'] = 'application/json'
 
 export const httpClient = axios.create()
 
