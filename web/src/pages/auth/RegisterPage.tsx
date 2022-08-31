@@ -18,7 +18,7 @@ import * as AuthApi from '../../auth/AuthApi'
 import { useNavigate } from 'react-router-dom'
 import { userStore } from '../../user/userStore'
 import { ErrorMessage } from '../../components/ErrorMessage'
-import { isAipError } from '../../httpClient'
+import { isApiError } from '../../httpClient'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -42,7 +42,7 @@ export function RegisterPage() {
     AuthApi.registerNewUser(name, email, password)
       .then((response) => {
         console.log(`AuthApi.registerNewUser response`, response)
-        if (isAipError(response)) {
+        if (isApiError(response)) {
           if (response.error.code === 'duplicate_email') {
             setEmailError(response.error.message)
           }

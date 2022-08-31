@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
 import { ErrorMessage } from './ErrorMessage'
-import { ApiError, isAipError } from '../httpClient'
+import { ApiError, isApiError } from '../httpClient'
 
 const MAX_COOKING_TIME_MINUTES = 3 * 24 * 60 // 3 days
 
@@ -68,7 +68,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
         if (
           error.response &&
           error.response.data &&
-          isAipError(error.response.data)
+          isApiError(error.response.data)
         ) {
           // Status code not 2XX
           const apiError: ApiError = error.response.data

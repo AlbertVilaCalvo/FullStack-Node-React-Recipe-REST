@@ -1,4 +1,4 @@
-import { ApiError, httpClient, isAipError, AnApiError } from '../httpClient'
+import { ApiError, httpClient, isApiError, AnApiError } from '../httpClient'
 import { AxiosResponse } from 'axios'
 import { User } from '../user/User'
 
@@ -32,7 +32,7 @@ export function registerNewUser(
       if (
         error.response &&
         error.response.data &&
-        isAipError(error.response.data)
+        isApiError(error.response.data)
       ) {
         return error.response.data
       }
@@ -52,7 +52,7 @@ export function login(
       password,
     })
     .then((response: AxiosResponse<RegisterLoginResponseJson | ApiError>) => {
-      if (isAipError(response.data)) {
+      if (isApiError(response.data)) {
         return response.data
       } else {
         return { user: response.data.user, authToken: response.data.auth_token }

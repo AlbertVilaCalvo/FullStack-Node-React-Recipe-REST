@@ -22,7 +22,7 @@ export type ApiError = {
   }
 }
 
-export function isAipError(arg: any): arg is ApiError {
+export function isApiError(arg: any): arg is ApiError {
   return (
     !!arg && // This is necessary because typeof null === 'object' is true
     typeof arg === 'object' &&

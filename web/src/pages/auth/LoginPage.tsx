@@ -17,7 +17,7 @@ import * as AuthApi from '../../auth/AuthApi'
 import { useNavigate } from 'react-router-dom'
 import { userStore } from '../../user/userStore'
 import { ErrorMessage } from '../../components/ErrorMessage'
-import { isAipError } from '../../httpClient'
+import { isApiError } from '../../httpClient'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -41,7 +41,7 @@ export function LoginPage() {
     AuthApi.login(email, password)
       .then((response) => {
         console.log(`AuthApi.login response`, response)
-        if (isAipError(response)) {
+        if (isApiError(response)) {
           setErrorMessage(response.error.message)
           setLoading(false)
         } else {
