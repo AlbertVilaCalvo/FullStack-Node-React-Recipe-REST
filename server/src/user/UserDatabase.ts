@@ -3,6 +3,29 @@ import { database, PostgreErrorCode } from '../database'
 import { DatabaseError } from 'pg'
 import { toError } from '../misc/util'
 
+export async function getUserById(
+  userId: number
+): Promise<User | 'user-not-found' | Error> {
+  try {
+    const result = await database.query<User>(
+      'SELECT * FROM "user" WHERE id = $1',
+      [userId]
+    )
+    if (result.rows[0]) {
+      const user: User = result.rows[0]
+      return user
+    } else {
+      console.info(
+        `UserDatabase - getUserById - User with id ${userId} not found`
+      )
+      return 'user-not-found'
+    }
+  } catch (error) {
+    console.error(`UserDatabase - getUserById with id = ${userId} error`, error)
+    return toError(error, 'UserDatabase - getUserById')
+  }
+}
+
 export async function getUserByEmail(
   email: string
 ): Promise<User | 'user-not-found' | Error> {

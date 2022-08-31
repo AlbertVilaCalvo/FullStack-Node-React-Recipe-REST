@@ -20,6 +20,9 @@ type Config = Readonly<{
   databaseHost: string
   /** DB_PORT */
   databasePort: number
+
+  /** JWT_SECRET */
+  jwtSecret: string
 }>
 
 export const config: Config = {
@@ -32,6 +35,8 @@ export const config: Config = {
   databasePassword: getEnvar('DB_PASSWORD'),
   databaseHost: getEnvar('DB_HOST'),
   databasePort: getEnvarAsNumber('DB_PORT'),
+
+  jwtSecret: getEnvar('JWT_SECRET'),
 }
 
 function getEnvar(environmentVariable: string): string {

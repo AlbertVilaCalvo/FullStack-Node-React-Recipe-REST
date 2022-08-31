@@ -3,9 +3,15 @@ import { StatusCode } from '../misc/StatusCode'
 import * as UserDatabase from '../user/UserDatabase'
 import { checkIfPasswordsMatch, hashPassword } from './password'
 import { isError } from '../misc/result'
-import { User } from '../user/User'
+import { removePassword, User, UserNoPassword } from '../user/User'
 import { requestFullUrl } from '../misc/util'
 import { ApiError } from '../misc/ApiError'
+import { generateAuthToken } from './authtoken'
+
+type RegisterLoginResponse = {
+  user: UserNoPassword
+  auth_token: string
+}
 
 /**
  * POST /api/auth/register
@@ -15,7 +21,7 @@ import { ApiError } from '../misc/ApiError'
 export const register: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
-  { id: number } | ApiError,
+  RegisterLoginResponse | ApiError,
   { name?: string; email?: string; password?: string }
 > = async (req, res) => {
   const name = req.body.name
@@ -53,15 +59,28 @@ export const register: RequestHandler<
 
   if (isError(insertUserResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+    return
   } else if (insertUserResult === 'duplicate-email-error') {
     res.status(StatusCode.CONFLICT_409).json(ApiError.duplicateEmail())
-  } else {
-    const user: User = insertUserResult
-    res
-      .status(StatusCode.CREATED_201)
-      .location(`${requestFullUrl(req)}/users/${user.id}`)
-      .json({ id: user.id })
+    return
   }
+
+  const user: User = insertUserResult
+  const generateAuthTokenResult = await generateAuthToken(user.id)
+
+  if (isError(generateAuthTokenResult)) {
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+    return
+  }
+
+  const registerResponse: RegisterLoginResponse = {
+    user: removePassword(user),
+    auth_token: generateAuthTokenResult,
+  }
+  res
+    .status(StatusCode.CREATED_201)
+    .location(`${requestFullUrl(req as unknown as Request)}/users/${user.id}`)
+    .json(registerResponse)
 }
 
 /**
@@ -72,7 +91,7 @@ export const register: RequestHandler<
 export const login: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
-  ApiError,
+  RegisterLoginResponse | ApiError,
   { email?: string; password?: string }
 > = async (req, res) => {
   const email = req.body.email
@@ -108,9 +127,24 @@ export const login: RequestHandler<
     return
   }
 
-  if (passwordsMatch) {
-    res.sendStatus(StatusCode.OK_200)
-  } else {
+  if (!passwordsMatch) {
     res.status(StatusCode.OK_200).json(ApiError.invalidLoginCredentials())
+    return
   }
+
+  const generateAuthTokenResult = await generateAuthToken(user.id)
+
+  if (isError(generateAuthTokenResult)) {
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+    return
+  }
+
+  const loginResponse: RegisterLoginResponse = {
+    user: removePassword(user),
+    auth_token: generateAuthTokenResult,
+  }
+  res
+    .status(StatusCode.OK_200)
+    .location(`${requestFullUrl(req as unknown as Request)}/users/${user.id}`)
+    .json(loginResponse)
 }

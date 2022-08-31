@@ -7,6 +7,7 @@ type ApiErrorCode =
   | 'password_required'
   | 'duplicate_email'
   | 'invalid_login_credentials'
+  | 'valid_auth_token_required'
 
 export class ApiError {
   error: {
@@ -65,6 +66,13 @@ export class ApiError {
     return makeApiError(
       'invalid_login_credentials',
       'The credentials are not valid'
+    )
+  }
+
+  static validAuthTokenRequired(): ApiError {
+    return makeApiError(
+      'valid_auth_token_required',
+      "An 'Authorization' header containing 'Bearer ${token}' with a valid token is required"
     )
   }
 }
