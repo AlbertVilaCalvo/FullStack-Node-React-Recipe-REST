@@ -58,7 +58,8 @@ export const getRecipe: RequestHandler<
 /**
  * POST /api/recipes
  *
- * curl http://localhost:5000/api/recipes -H "Content-Type: application/json" -d '{"title":"Salad", "cooking_time_minutes":22}'
+ * curl http://localhost:5000/api/recipes -H "Content-Type: application/json"
+ * -H "Authorization: Bearer auth_token" -d '{"title":"Salad", "cooking_time_minutes":22}'
  */
 export const createRecipe: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -97,7 +98,8 @@ export const createRecipe: RequestHandler<
 /**
  * PATCH /api/recipes/:recipeId
  *
- * curl http://localhost:5000/api/recipes/1 -X PATCH -H "Content-Type: application/json" -d '{"title":"Something"}'
+ * curl http://localhost:5000/api/recipes/1 -X PATCH -H "Content-Type: application/json"
+ * -H "Authorization: Bearer auth_token" -d '{"title":"Something"}'
  */
 export const updateRecipe: RequestHandler<
   { recipeId: string },
@@ -142,7 +144,7 @@ export const updateRecipe: RequestHandler<
 /**
  * DELETE /api/recipes/:recipeId
  *
- * curl http://localhost:5000/api/recipes/1 -X DELETE -v
+ * curl http://localhost:5000/api/recipes/1 -X DELETE -H "Authorization: Bearer auth_token" -v
  *
  * Note that it returns 204 'No Content' if the recipe doesn't exist.
  */
