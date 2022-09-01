@@ -10,9 +10,9 @@ type ApiErrorCode =
   | 'valid_auth_token_required'
 
 export class ApiError {
-  error: {
-    code: ApiErrorCode
-    message: string
+  readonly error: {
+    readonly code: ApiErrorCode
+    readonly message: string
   }
 
   constructor(error: { code: ApiErrorCode; message: string }) {
