@@ -14,13 +14,15 @@ import {
   PASSWORD_MAX_LENGTH,
 } from '../../misc/validations'
 import * as AuthApi from '../../auth/AuthApi'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../user/userStore'
 import { ErrorMessage } from '../../components/ErrorMessage'
 import { isApiError } from '../../httpClient'
+import { getFromLocation } from '../../components/navigation/RequireLogin'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
@@ -49,7 +51,8 @@ export function LoginPage() {
           const { user, authToken } = response
           userStore.user = user
           userStore.authToken = authToken
-          navigate('/profile')
+          const navigateTo = getFromLocation(location) ?? '/profile'
+          navigate(navigateTo, { replace: true })
         }
       })
       .catch((error) => {

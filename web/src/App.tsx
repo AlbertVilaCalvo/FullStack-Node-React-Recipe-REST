@@ -12,6 +12,7 @@ import { MyProfilePage } from './pages/user/MyProfilePage'
 import { CreateRecipePage } from './pages/recipe/CreateRecipePage'
 import { RecipeDetailPage } from './pages/recipe/RecipeDetailPage'
 import { EditRecipePage } from './pages/recipe/EditRecipePage'
+import { RequireLogin } from './components/navigation/RequireLogin'
 
 function App() {
   return (
@@ -23,11 +24,20 @@ function App() {
             <Route path="about" element={<AboutPage />} />
             <Route path="register" element={<RegisterPage />} />
             <Route path="login" element={<LoginPage />} />
-            <Route path="profile" element={<MyProfilePage />} />
+            <Route
+              path="profile"
+              element={<RequireLogin Page={MyProfilePage} />}
+            />
 
-            <Route path="recipes/new" element={<CreateRecipePage />} />
+            <Route
+              path="recipes/new"
+              element={<RequireLogin Page={CreateRecipePage} />}
+            />
             <Route path="recipes/:recipeId" element={<RecipeDetailPage />} />
-            <Route path="recipes/:recipeId/edit" element={<EditRecipePage />} />
+            <Route
+              path="recipes/:recipeId/edit"
+              element={<RequireLogin Page={EditRecipePage} />}
+            />
 
             <Route path="*" element={<NotFound404Page />} />
           </Route>
