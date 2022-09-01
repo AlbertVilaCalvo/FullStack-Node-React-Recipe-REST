@@ -19,17 +19,19 @@ Finally, seed data into the database by doing `psql reciperest` and `\i server/d
 
 ## Develop
 
-```
+```shell
 cd server
+npm install
 npm run dev
 ```
 
-```
+```shell
 cd web
+npm install
 npm start
 ```
 
-## Git hook to run Prettier, ESLint and TypeScript checks on every commit
+## Git pre-commit hook to run Prettier, ESLint and TypeScript checks on every commit
 
 To run Prettier and ESLint on every commit, run `cp pre-commit .git/hooks`.
 
