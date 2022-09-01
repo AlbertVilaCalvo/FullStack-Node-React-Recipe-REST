@@ -1,5 +1,5 @@
 import { Outlet, useNavigate } from 'react-router-dom'
-import { CustomNavLink } from './components/CustomNavLink'
+import { CustomNavLink } from './components/navigation/CustomNavLink'
 import { useSnapshot } from 'valtio'
 import { userStore } from './user/userStore'
 
