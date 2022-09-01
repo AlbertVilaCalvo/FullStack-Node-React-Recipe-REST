@@ -43,13 +43,14 @@ export async function getRecipeById(
 }
 
 export async function insertNewRecipe(
+  userId: number,
   title: string,
   cooking_time_minutes: number
 ): Promise<Recipe | Error> {
   return database
     .query(
-      'INSERT INTO recipe (title, cooking_time_minutes) VALUES($1, $2) RETURNING *',
-      [title, cooking_time_minutes]
+      'INSERT INTO recipe (user_id, title, cooking_time_minutes) VALUES($1, $2, $3) RETURNING *',
+      [userId, title, cooking_time_minutes]
     )
     .then((result) => {
       const recipe: Recipe = result.rows[0]

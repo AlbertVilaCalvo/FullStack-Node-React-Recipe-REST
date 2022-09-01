@@ -6,7 +6,16 @@
 2. Create the database: `createdb reciperest`.
 3. Start psql with `psql reciperest`.
 4. In psql, run the commands in `server/database.sql` by loading it with `\i server/database-setup.sql`.
-5. (Optional) Seed data into the database with `\i server/database-seed.sql` .
+
+## Database seed
+
+Once the database is created, you can automatically fill the database with recipes.
+
+To add recipes you need a user. If you don't have one, start the server (`cd server && npm run dev`) and then do: `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`.
+
+Once you have a user, make sure that its id matches the `user_id` in `server/database-seed.sql`.
+
+Finally, seed data into the database by doing `psql reciperest` and `\i server/database-seed.sql`.
 
 ## Develop
 

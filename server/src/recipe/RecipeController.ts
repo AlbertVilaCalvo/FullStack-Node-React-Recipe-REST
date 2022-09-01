@@ -5,6 +5,7 @@ import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
 import { isError } from '../misc/result'
+import { User } from '../user/User'
 
 /**
  * GET /api/recipes
@@ -80,7 +81,16 @@ export const createRecipe: RequestHandler<
     return
   }
 
+  if (!req.user) {
+    // This should never happen
+    console.error(`Missing req.user at updateRecipe`)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+    return
+  }
+  const user: User = req.user
+
   const insertResult = await RecipeDatabase.insertNewRecipe(
+    user.id,
     title,
     cooking_time_minutes
   )
