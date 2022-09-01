@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Recipe } from '../recipe/Recipe'
+import { Recipe } from '../../recipe/Recipe'
 import {
   Button,
   FormControl,
@@ -14,8 +14,8 @@ import {
   Stack,
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
-import { ErrorMessage } from './ErrorMessage'
-import { ApiError, isApiError } from '../httpClient'
+import { ErrorMessage } from '../ErrorMessage'
+import { ApiError, isApiError } from '../../httpClient'
 
 const MAX_COOKING_TIME_MINUTES = 3 * 24 * 60 // 3 days
 

@@ -1,4 +1,4 @@
-import { RecipeList } from '../components/RecipeList'
+import { RecipeList } from '../components/recipe/RecipeList'
 import { useGetAllRecipes } from '../recipe/useGetAllRecipes'
 import { isLoading, isSuccess } from '../misc/result'
 import { H1 } from '../components/H1'

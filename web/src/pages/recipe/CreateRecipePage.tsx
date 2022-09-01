@@ -1,5 +1,5 @@
 import { H1 } from '../../components/H1'
-import { RecipeForm } from '../../components/RecipeForm'
+import { RecipeForm } from '../../components/recipe/RecipeForm'
 import * as RecipeApi from '../../recipe/RecipeApi'
 
 export function CreateRecipePage() {
