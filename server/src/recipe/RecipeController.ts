@@ -134,6 +134,19 @@ export const updateRecipe: RequestHandler<
     recipe = getRecipeResult
   }
 
+  // Validate that the logged user is the recipe owner
+  if (!req.user) {
+    // This should never happen
+    console.error(`Missing req.user at updateRecipe`)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+    return
+  }
+  const user: User = req.user
+  if (user.id !== recipe.user_id) {
+    res.sendStatus(StatusCode.FORBIDDEN_403)
+    return
+  }
+
   // TODO validate title type string and length <= 255
   // TODO validate cooking_time_minutes type number and length 0 > 0 and <= 3*24*60
   if (req.body.title) {
@@ -169,9 +182,30 @@ export const deleteRecipe: RequestHandler<
     return
   }
 
-  const deleteRecipeResult = await RecipeDatabase.deleteRecipe(recipeId)
+  // Validate that the logged user is the recipe owner
+  if (!req.user) {
+    // This should never happen
+    console.error(`Missing req.user at updateRecipe`)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+    return
+  }
+  const user: User = req.user
+
+  // Here we could grab the recipe from the database with
+  // RecipeDatabase.getRecipeById (like we do above in updateRecipe()) and then
+  // validate that the user is the owner of the recipe, but this would mean
+  // hitting the database twice (one time to get the recipe and another to
+  // delete it). Instead, we do a DELETE with the user id, which will fail to
+  // delete the recipe if the user is not the owner.
+
+  const deleteRecipeResult = await RecipeDatabase.deleteRecipe(
+    recipeId,
+    user.id
+  )
   if (isError(deleteRecipeResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  } else if (deleteRecipeResult === 'user-not-owner') {
+    res.sendStatus(StatusCode.FORBIDDEN_403)
   } else {
     res.sendStatus(StatusCode.NO_CONTENT_204)
   }

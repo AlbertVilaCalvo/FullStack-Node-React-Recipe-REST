@@ -74,9 +74,29 @@ export async function updateRecipe(recipe: Recipe): Promise<void | Error> {
   }
 }
 
-export async function deleteRecipe(recipeId: number): Promise<void | Error> {
+/**
+ * Will fail to delete the recipe if the user is not the recipe owner, returning
+ * 'user-not-owner'.
+ *
+ * @param recipeId the id of the recipe.
+ * @param userId the id of the user owner of the recipe.
+ */
+export async function deleteRecipe(
+  recipeId: number,
+  userId: number
+): Promise<void | 'user-not-owner' | Error> {
   try {
-    await database.query('DELETE FROM recipe WHERE id = $1', [recipeId])
+    const result = await database.query(
+      'DELETE FROM recipe WHERE id = $1 AND user_id = $2',
+      [recipeId, userId]
+    )
+    console.log(`RecipeDatabase - deleteRecipe result`, result)
+    if (result.rowCount === 0) {
+      // No recipe was deleted because the given userId does not match the
+      // recipe's user_id. In other words, the user is not the owner of the
+      // recipe that we tried to delete, thus no recipe was deleted.
+      return 'user-not-owner'
+    }
   } catch (error) {
     console.error(
       `RecipeDatabase - deleteRecipe 'DELETE FROM recipe WHERE id = ${recipeId}' error`,
