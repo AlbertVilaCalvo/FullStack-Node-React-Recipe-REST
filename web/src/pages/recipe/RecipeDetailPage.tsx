@@ -40,38 +40,42 @@ export function RecipeDetailPage() {
         <H1>{recipe.title}</H1>
         <p>{`ID: ${recipeId}`}</p>
         <p>{`Cooking time: ${recipe.cookingTimeMinutes} minutes`}</p>
-        <Button
-          onClick={() => {
-            navigate(`/recipes/${recipeId}/edit`)
-          }}
-          colorScheme="teal"
-        >
-          Edit
-        </Button>
-        <Button
-          colorScheme="red"
-          isLoading={loading}
-          onClick={() => {
-            setLoading(true)
-            RecipeApi.deleteRecipe(recipeId)
-              .then(() => {
-                navigate(`/`)
-              })
-              .catch((error) => {
-                setLoading(false)
-                toast({
-                  title: 'An error occurred',
-                  description: error.message,
-                  status: 'error',
-                  position: 'top',
-                  duration: 7000,
-                  isClosable: true,
-                })
-              })
-          }}
-        >
-          Delete
-        </Button>
+        {recipe.userIsOwner && (
+          <>
+            <Button
+              onClick={() => {
+                navigate(`/recipes/${recipeId}/edit`)
+              }}
+              colorScheme="teal"
+            >
+              Edit
+            </Button>
+            <Button
+              colorScheme="red"
+              isLoading={loading}
+              onClick={() => {
+                setLoading(true)
+                RecipeApi.deleteRecipe(recipeId)
+                  .then(() => {
+                    navigate(`/`)
+                  })
+                  .catch((error) => {
+                    setLoading(false)
+                    toast({
+                      title: 'An error occurred',
+                      description: error.message,
+                      status: 'error',
+                      position: 'top',
+                      duration: 7000,
+                      isClosable: true,
+                    })
+                  })
+              }}
+            >
+              Delete
+            </Button>
+          </>
+        )}
       </div>
     </div>
   )

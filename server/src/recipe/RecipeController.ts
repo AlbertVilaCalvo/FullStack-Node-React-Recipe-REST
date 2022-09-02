@@ -1,11 +1,12 @@
 import { Request, RequestHandler } from 'express'
-import { Recipe } from './Recipe'
+import { Recipe, RecipeWithOwner } from './Recipe'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
 import { isError } from '../misc/result'
 import { User } from '../user/User'
+import { getAuthTokenPayloadFromHeader } from '../auth/authtoken'
 
 /**
  * GET /api/recipes
@@ -35,7 +36,7 @@ export const getAllRecipes: RequestHandler<
  */
 export const getRecipe: RequestHandler<
   { recipeId: string },
-  { recipe: Recipe } | ApiError,
+  { recipe: RecipeWithOwner } | ApiError,
   undefined
 > = async (req, res) => {
   const recipeId = Number(req.params.recipeId)
@@ -50,8 +51,17 @@ export const getRecipe: RequestHandler<
   } else if (isError(getRecipeResult)) {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   } else {
+    const recipe: Recipe = getRecipeResult
+    const getPayloadResult = getAuthTokenPayloadFromHeader(req.headers)
+    const userIsOwner = isError(getPayloadResult)
+      ? false
+      : getPayloadResult.uid === recipe.user_id
+    const recipeWithOwner: RecipeWithOwner = {
+      ...recipe,
+      user_is_owner: userIsOwner,
+    }
     res.json({
-      recipe: getRecipeResult,
+      recipe: recipeWithOwner,
     })
   }
 }

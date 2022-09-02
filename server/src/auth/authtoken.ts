@@ -2,6 +2,7 @@ import { IncomingHttpHeaders } from 'http'
 import * as jwt from 'jsonwebtoken'
 import { config } from '../config'
 import { toError } from '../misc/util'
+import { isError } from '../misc/result'
 
 const TOKEN_VALIDITY_TIME = '1h'
 
@@ -81,6 +82,26 @@ export function getPayloadFromAuthToken(
   } catch (error) {
     console.error(`jwt.verify error:`, error)
     return toError(error, 'getAuthTokenPayload')
+  }
+}
+
+/**
+ * A combination of `getAuthTokenFromHeader` and `getPayloadFromAuthToken` in a
+ * single function.
+ */
+export function getAuthTokenPayloadFromHeader(
+  headers: IncomingHttpHeaders
+): AuthTokenPayload | Error {
+  try {
+    const getAuthTokenResult = getAuthTokenFromHeader(headers)
+    if (isError(getAuthTokenResult)) {
+      return getAuthTokenResult
+    }
+    const authToken: string = getAuthTokenResult
+    return getPayloadFromAuthToken(authToken)
+  } catch (error) {
+    console.error(`getPayloadFromHeader error:`, error)
+    return toError(error, 'getPayloadFromHeader')
   }
 }
 

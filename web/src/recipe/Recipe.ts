@@ -4,15 +4,27 @@ export class Recipe {
   readonly id: number
   title: string
   cookingTimeMinutes: number
+  userIsOwner?: boolean
 
-  constructor(id: number, title: string, cookingTimeMinutes: number) {
+  constructor(
+    id: number,
+    title: string,
+    cookingTimeMinutes: number,
+    userIsOwner?: boolean
+  ) {
     this.id = id
     this.title = title
     this.cookingTimeMinutes = cookingTimeMinutes
+    this.userIsOwner = userIsOwner
   }
 
   static fromJson(json: RecipeJson): Recipe {
-    return new Recipe(json.id, json.title, json.cooking_time_minutes)
+    return new Recipe(
+      json.id,
+      json.title,
+      json.cooking_time_minutes,
+      json.user_is_owner
+    )
   }
 
   static toJson(recipe: Recipe): RecipeJson {
