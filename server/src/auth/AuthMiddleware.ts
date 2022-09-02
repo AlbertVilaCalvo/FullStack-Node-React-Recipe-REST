@@ -25,41 +25,48 @@ declare module 'express-serve-static-core' {
  * 401 Unauthorized.
  */
 export const requireLoggedUser: RequestHandler = async (req, res, next) => {
-  const getAuthTokenResult = getAuthTokenFromHeader(req.headers)
+  try {
+    const getAuthTokenResult = getAuthTokenFromHeader(req.headers)
 
-  if (isError(getAuthTokenResult)) {
-    res
-      .status(StatusCode.UNAUTHORIZED_401)
-      .json(ApiError.validAuthTokenRequired())
-    return
-  }
-
-  const authToken: string = getAuthTokenResult
-  const getPayloadResult = getPayloadFromAuthToken(authToken)
-
-  if (isError(getPayloadResult)) {
-    res
-      .status(StatusCode.UNAUTHORIZED_401)
-      .json(ApiError.validAuthTokenRequired())
-    return
-  }
-
-  const payload: AuthTokenPayload = getPayloadResult
-  const getUserResult = await UserDatabase.getUserById(payload.uid)
-
-  if (isError(getUserResult) || getUserResult === 'user-not-found') {
-    if (getUserResult === 'user-not-found') {
-      // Either the user has been deleted, or the JWT has been tampered with
-      console.error(`requireLoggedUser - user not found - payload: ${payload}`)
+    if (isError(getAuthTokenResult)) {
+      res
+        .status(StatusCode.UNAUTHORIZED_401)
+        .json(ApiError.validAuthTokenRequired())
+      return
     }
-    res
-      .status(StatusCode.UNAUTHORIZED_401)
-      .json(ApiError.validAuthTokenRequired())
-    return
+
+    const authToken: string = getAuthTokenResult
+    const getPayloadResult = getPayloadFromAuthToken(authToken)
+
+    if (isError(getPayloadResult)) {
+      res
+        .status(StatusCode.UNAUTHORIZED_401)
+        .json(ApiError.validAuthTokenRequired())
+      return
+    }
+
+    const payload: AuthTokenPayload = getPayloadResult
+    const getUserResult = await UserDatabase.getUserById(payload.uid)
+
+    if (isError(getUserResult) || getUserResult === 'user-not-found') {
+      if (getUserResult === 'user-not-found') {
+        // Either the user has been deleted, or the JWT has been tampered with
+        console.error(
+          `requireLoggedUser - user not found - payload: ${payload}`
+        )
+      }
+      res
+        .status(StatusCode.UNAUTHORIZED_401)
+        .json(ApiError.validAuthTokenRequired())
+      return
+    }
+
+    const user: User = getUserResult
+    req.user = user
+
+    next()
+  } catch (e) {
+    console.error('Unexpected error at AuthMiddleware.requireLoggedUser:', e)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   }
-
-  const user: User = getUserResult
-  req.user = user
-
-  next()
 }
