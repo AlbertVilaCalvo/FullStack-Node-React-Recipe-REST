@@ -2,6 +2,7 @@ import { Router } from 'express'
 import * as AuthController from './auth/AuthController'
 import * as RecipeController from './recipe/RecipeController'
 import * as AuthMiddleware from './auth/AuthMiddleware'
+import { unexpectedErrorHandler } from './misc/unexpectedErrorHandler'
 
 export const router = Router()
 
@@ -25,3 +26,5 @@ router.delete(
   AuthMiddleware.requireLoggedUser,
   RecipeController.deleteRecipe
 )
+
+router.use(unexpectedErrorHandler)
