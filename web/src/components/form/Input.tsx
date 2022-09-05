@@ -5,7 +5,10 @@ import {
   USER_NAME_MAX_LENGTH,
 } from '../../misc/validations'
 
-type Props = Omit<InputProps, 'onChange'> & {
+type Props = Omit<
+  InputProps,
+  'placeholder' | 'type' | 'maxLength' | 'onChange'
+> & {
   onChange: (value: string) => void
 }
 
