@@ -16,6 +16,8 @@ httpClient.interceptors.request.use((requestConfig) => {
   return requestConfig
 })
 
+// ApiError
+
 export type ApiError = {
   error: {
     code: string
@@ -33,6 +35,21 @@ export function isApiError(arg: any): arg is ApiError {
     arg.error.message &&
     typeof arg.error.message === 'string'
   )
+}
+
+/**
+ * @param error the error of an axios request catch.
+ */
+export function extractApiError(error?: any): ApiError | undefined {
+  if (
+    error &&
+    error.response &&
+    error.response.data &&
+    isApiError(error.response.data)
+  ) {
+    return error.response.data
+  }
+  return undefined
 }
 
 /**

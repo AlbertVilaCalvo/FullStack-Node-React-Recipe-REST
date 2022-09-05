@@ -1,4 +1,10 @@
-import { ApiError, httpClient, isApiError, AnApiError } from '../httpClient'
+import {
+  ApiError,
+  httpClient,
+  isApiError,
+  AnApiError,
+  extractApiError,
+} from '../httpClient'
 import { AxiosResponse } from 'axios'
 import { User } from '../user/User'
 
@@ -29,12 +35,9 @@ export function registerNewUser(
       return { user: response.data.user, authToken: response.data.auth_token }
     })
     .catch((error) => {
-      if (
-        error.response &&
-        error.response.data &&
-        isApiError(error.response.data)
-      ) {
-        return error.response.data
+      const apiError = extractApiError(error)
+      if (apiError) {
+        return apiError
       }
       throw error
     })
