@@ -20,6 +20,7 @@ import { userStore } from '../../user/userStore'
 import { ErrorMessage } from '../../components/ErrorMessage'
 import { isApiError } from '../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
+import { StyledLink } from '../../components/navigation/StyledLink'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -130,6 +131,10 @@ export function RegisterPage() {
             </ErrorMessage>
           )}
         </Stack>
+
+        <StyledLink to="/login" className="center" marginTop={10}>
+          Already have an account? Log In
+        </StyledLink>
       </div>
     </div>
   )
