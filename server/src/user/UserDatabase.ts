@@ -78,3 +78,18 @@ export async function insertNewUser(
       return toError(error, 'UserDatabase - insertNewUser')
     })
 }
+
+export async function updateUserProfile(
+  userId: number,
+  name: string
+): Promise<void | Error> {
+  try {
+    await database.query('UPDATE "user" SET name = $1 WHERE id = $2', [
+      name,
+      userId,
+    ])
+  } catch (error) {
+    console.error(`UserDatabase - updateUserProfile error`, error)
+    return toError(error, 'UserDatabase - updateUserProfile')
+  }
+}

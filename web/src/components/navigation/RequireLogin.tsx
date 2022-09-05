@@ -16,16 +16,19 @@ import { userStore } from '../../user/userStore'
  * Adapted from https://github.com/remix-run/react-router/tree/main/examples/auth
  */
 export function RequireLogin({ Page }: { Page: React.ComponentType<any> }) {
-  const location = useLocation()
-
   if (userStore.user) {
     return <Page />
   } else {
     // Redirect them to the /login page, but save the current location they were
     // trying to go to when they were redirected. This allows us to send them
     // along to that page after they login, which is a nicer user experience.
-    return <Navigate to="/login" state={{ from: location }} replace />
+    return <NavigateToLogin />
   }
+}
+
+export function NavigateToLogin() {
+  const location = useLocation()
+  return <Navigate to="/login" state={{ from: location }} replace />
 }
 
 /**

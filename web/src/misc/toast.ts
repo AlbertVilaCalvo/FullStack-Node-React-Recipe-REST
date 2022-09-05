@@ -19,7 +19,7 @@ export function useSuccessToast(): ShowToast {
   const toast = useToast({
     status: 'success',
     position: POSITION,
-    duration: 3500,
+    duration: 3000,
     isClosable: true,
   })
   return (title: string, description?: string) => {
