@@ -6,7 +6,7 @@ import { Progress } from '../../components/Progress'
 import { NotFound404Page } from '../NotFound404Page'
 import { ErrorMessagePage } from '../../components/ErrorMessage'
 import { H1 } from '../../components/H1'
-import { Button } from '@chakra-ui/react'
+import { Button, Stack } from '@chakra-ui/react'
 import * as RecipeApi from '../../recipe/RecipeApi'
 import { useErrorToast } from '../../misc/toast'
 
@@ -42,7 +42,7 @@ export function RecipeDetailPage() {
         <p>{`ID: ${recipeId}`}</p>
         <p>{`Cooking time: ${recipe.cookingTimeMinutes} minutes`}</p>
         {recipe.userIsOwner && (
-          <>
+          <Stack direction="row" spacing="20px" marginTop="30px">
             <Button
               onClick={() => {
                 navigate(`/recipes/${recipeId}/edit`)
@@ -68,7 +68,7 @@ export function RecipeDetailPage() {
             >
               Delete
             </Button>
-          </>
+          </Stack>
         )}
       </div>
     </div>
