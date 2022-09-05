@@ -7,12 +7,7 @@ import {
   FormLabel,
   Input,
 } from '@chakra-ui/react'
-import {
-  EMAIL_MAX_LENGTH,
-  isValidEmail,
-  PASSWORD_MAX_LENGTH,
-  USER_NAME_MAX_LENGTH,
-} from '../../misc/validations'
+import { isValidEmail, USER_NAME_MAX_LENGTH } from '../../misc/validations'
 import * as AuthApi from '../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../user/userStore'
@@ -21,6 +16,8 @@ import { isApiError } from '../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Form } from '../../components/form/Form'
+import { EmailInput } from '../../components/form/EmailInput'
+import { PasswordInput } from '../../components/form/PasswordInput'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -88,31 +85,25 @@ export function RegisterPage() {
 
           <FormControl isRequired isInvalid={!!emailError}>
             <FormLabel>Email</FormLabel>
-            <Input
-              placeholder="Email"
-              type="email"
+            <EmailInput
               value={email}
-              onChange={(event) => {
-                setEmail(event.target.value)
+              onChange={(value) => {
+                setEmail(value)
                 setEmailError('')
                 setErrorMessage('')
               }}
-              maxLength={EMAIL_MAX_LENGTH}
             />
             {emailError && <FormErrorMessage>{emailError}</FormErrorMessage>}
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>Password</FormLabel>
-            <Input
-              placeholder="Password"
-              type="password"
+            <PasswordInput
               value={password}
-              onChange={(event) => {
-                setPassword(event.target.value)
+              onChange={(value) => {
+                setPassword(value)
                 setErrorMessage('')
               }}
-              maxLength={PASSWORD_MAX_LENGTH}
             />
           </FormControl>
 

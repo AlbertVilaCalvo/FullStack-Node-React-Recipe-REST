@@ -5,13 +5,8 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Input,
 } from '@chakra-ui/react'
-import {
-  EMAIL_MAX_LENGTH,
-  isValidEmail,
-  PASSWORD_MAX_LENGTH,
-} from '../../misc/validations'
+import { isValidEmail } from '../../misc/validations'
 import * as AuthApi from '../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../user/userStore'
@@ -20,6 +15,8 @@ import { isApiError } from '../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Form } from '../../components/form/Form'
+import { EmailInput } from '../../components/form/EmailInput'
+import { PasswordInput } from '../../components/form/PasswordInput'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -69,16 +66,13 @@ export function LoginPage() {
         <Form onSubmit={onSubmit}>
           <FormControl isRequired isInvalid={showEmailNotValidError}>
             <FormLabel>Email</FormLabel>
-            <Input
-              placeholder="Email"
-              type="email"
+            <EmailInput
               value={email}
-              onChange={(event) => {
-                setEmail(event.target.value)
+              onChange={(value) => {
+                setEmail(value)
                 setShowEmailNotValidError(false)
                 setErrorMessage('')
               }}
-              maxLength={EMAIL_MAX_LENGTH}
             />
             {showEmailNotValidError && (
               <FormErrorMessage>This email is not valid</FormErrorMessage>
@@ -87,15 +81,12 @@ export function LoginPage() {
 
           <FormControl isRequired>
             <FormLabel>Password</FormLabel>
-            <Input
-              placeholder="Password"
-              type="password"
+            <PasswordInput
               value={password}
-              onChange={(event) => {
-                setPassword(event.target.value)
+              onChange={(value) => {
+                setPassword(value)
                 setErrorMessage('')
               }}
-              maxLength={PASSWORD_MAX_LENGTH}
             />
           </FormControl>
 
