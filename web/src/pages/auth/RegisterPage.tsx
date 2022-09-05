@@ -6,7 +6,6 @@ import {
   FormErrorMessage,
   FormLabel,
   Input,
-  Stack,
 } from '@chakra-ui/react'
 import {
   EMAIL_MAX_LENGTH,
@@ -21,6 +20,7 @@ import { ErrorMessage } from '../../components/ErrorMessage'
 import { isApiError } from '../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
+import { Form } from '../../components/form/Form'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -71,7 +71,7 @@ export function RegisterPage() {
     <div className="main-container page">
       <div className="main-container-child-centered">
         <H1>Register</H1>
-        <Stack as="form" onSubmit={onSubmit} spacing={6}>
+        <Form onSubmit={onSubmit}>
           <FormControl isRequired>
             <FormLabel>Name</FormLabel>
             <Input
@@ -130,7 +130,7 @@ export function RegisterPage() {
               An error occurred: {errorMessage}. Please try again.
             </ErrorMessage>
           )}
-        </Stack>
+        </Form>
 
         <StyledLink to="/login" className="center" marginTop={10}>
           Already have an account? Log In
