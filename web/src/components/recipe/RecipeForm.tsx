@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Recipe } from '../../recipe/Recipe'
 import {
-  Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -16,6 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { ErrorMessage } from '../ErrorMessage'
 import { ApiError, isApiError } from '../../httpClient'
+import { SubmitButton } from '../form/SubmitButton'
 
 const MAX_COOKING_TIME_MINUTES = 3 * 24 * 60 // 3 days
 
@@ -121,14 +121,9 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
         )}
       </FormControl>
 
-      <Button
-        type="submit"
-        isLoading={loading}
-        alignSelf="flex-start"
-        colorScheme="teal"
-      >
+      <SubmitButton isLoading={loading} alignSelf="flex-start">
         {recipe ? 'Update Recipe' : 'Publish Recipe'}
-      </Button>
+      </SubmitButton>
 
       {errorMessage && (
         <ErrorMessage>

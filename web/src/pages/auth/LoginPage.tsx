@@ -1,11 +1,6 @@
 import { H1 } from '../../components/H1'
 import * as React from 'react'
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-} from '@chakra-ui/react'
+import { FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/react'
 import { isValidEmail } from '../../misc/validations'
 import * as AuthApi from '../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -16,6 +11,7 @@ import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Form } from '../../components/form/Form'
 import { EmailInput, PasswordInput } from '../../components/form/Input'
+import { SubmitButton } from '../../components/form/SubmitButton'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -89,14 +85,9 @@ export function LoginPage() {
             />
           </FormControl>
 
-          <Button
-            type="submit"
-            isLoading={loading}
-            alignSelf="flex-start"
-            colorScheme="teal"
-          >
+          <SubmitButton isLoading={loading} alignSelf="flex-start">
             Login
-          </Button>
+          </SubmitButton>
 
           {errorMessage && (
             <ErrorMessage>

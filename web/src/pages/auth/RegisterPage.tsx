@@ -1,11 +1,6 @@
 import { H1 } from '../../components/H1'
 import * as React from 'react'
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-} from '@chakra-ui/react'
+import { FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/react'
 import { isValidEmail } from '../../misc/validations'
 import * as AuthApi from '../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -20,6 +15,7 @@ import {
   PasswordInput,
   UserNameInput,
 } from '../../components/form/Input'
+import { SubmitButton } from '../../components/form/SubmitButton'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -106,14 +102,9 @@ export function RegisterPage() {
             />
           </FormControl>
 
-          <Button
-            type="submit"
-            isLoading={loading}
-            alignSelf="flex-start"
-            colorScheme="teal"
-          >
+          <SubmitButton isLoading={loading} alignSelf="flex-start">
             Register
-          </Button>
+          </SubmitButton>
 
           {errorMessage && (
             <ErrorMessage>
