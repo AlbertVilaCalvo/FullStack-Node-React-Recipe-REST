@@ -1,5 +1,5 @@
 import { Outlet, useNavigate } from 'react-router-dom'
-import { CustomNavLink } from './components/navigation/CustomNavLink'
+import { NavBarLink } from './components/navigation/NavBarLink'
 import { useSnapshot } from 'valtio'
 import { userStore } from './user/userStore'
 
@@ -13,22 +13,22 @@ export function MainContainer() {
         <nav className="main-container-child-centered">
           <ul className="list-style-type-none">
             <li>
-              <CustomNavLink to="/">Home</CustomNavLink>
+              <NavBarLink to="/">Home</NavBarLink>
             </li>
             <li>
-              <CustomNavLink to="/recipes/new">Create Recipe</CustomNavLink>
+              <NavBarLink to="/recipes/new">Create Recipe</NavBarLink>
             </li>
             <li>
-              <CustomNavLink to="/about">About</CustomNavLink>
+              <NavBarLink to="/about">About</NavBarLink>
             </li>
             <li aria-hidden="true" className="nav-spacer"></li>
             {storedUser.user ? (
               <>
                 <li>
-                  <CustomNavLink to="/profile">My Profile</CustomNavLink>
+                  <NavBarLink to="/profile">My Profile</NavBarLink>
                 </li>
                 <li>
-                  <CustomNavLink
+                  <NavBarLink
                     to="/logout"
                     onClick={(event) => {
                       event.preventDefault() // prevent navigating to /logout
@@ -38,16 +38,16 @@ export function MainContainer() {
                     }}
                   >
                     Logout
-                  </CustomNavLink>
+                  </NavBarLink>
                 </li>
               </>
             ) : (
               <>
                 <li>
-                  <CustomNavLink to="/register">Register</CustomNavLink>
+                  <NavBarLink to="/register">Register</NavBarLink>
                 </li>
                 <li>
-                  <CustomNavLink to="/login">Login</CustomNavLink>
+                  <NavBarLink to="/login">Login</NavBarLink>
                 </li>
               </>
             )}
