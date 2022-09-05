@@ -5,9 +5,8 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Input,
 } from '@chakra-ui/react'
-import { isValidEmail, USER_NAME_MAX_LENGTH } from '../../misc/validations'
+import { isValidEmail } from '../../misc/validations'
 import * as AuthApi from '../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../user/userStore'
@@ -16,8 +15,11 @@ import { isApiError } from '../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Form } from '../../components/form/Form'
-import { EmailInput } from '../../components/form/EmailInput'
-import { PasswordInput } from '../../components/form/PasswordInput'
+import {
+  EmailInput,
+  PasswordInput,
+  UserNameInput,
+} from '../../components/form/Input'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -71,15 +73,12 @@ export function RegisterPage() {
         <Form onSubmit={onSubmit}>
           <FormControl isRequired>
             <FormLabel>Name</FormLabel>
-            <Input
-              placeholder="Name"
-              type="text"
+            <UserNameInput
               value={name}
-              onChange={(event) => {
-                setName(event.target.value)
+              onChange={(value) => {
+                setName(value)
                 setErrorMessage('')
               }}
-              maxLength={USER_NAME_MAX_LENGTH}
             />
           </FormControl>
 

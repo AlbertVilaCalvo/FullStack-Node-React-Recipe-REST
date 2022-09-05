@@ -15,8 +15,7 @@ import { isApiError } from '../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Form } from '../../components/form/Form'
-import { EmailInput } from '../../components/form/EmailInput'
-import { PasswordInput } from '../../components/form/PasswordInput'
+import { EmailInput, PasswordInput } from '../../components/form/Input'
 
 export function LoginPage() {
   const navigate = useNavigate()
