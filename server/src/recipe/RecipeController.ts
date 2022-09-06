@@ -5,6 +5,7 @@ import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
 import * as UserDatabase from '../user/UserDatabase'
+import { isValidId } from '../misc/validations'
 import { isError } from '../misc/result'
 import { User } from '../user/User'
 
@@ -46,7 +47,7 @@ export const getRecipe: RequestHandler<
 > = async (req, res) => {
   try {
     const recipeId = Number(req.params.recipeId)
-    if (isNaN(recipeId) || recipeId <= 0) {
+    if (!isValidId(recipeId)) {
       res
         .status(StatusCode.NOT_FOUND_404)
         .json(ApiError.recipeNotFound(req.params.recipeId))
@@ -166,7 +167,7 @@ export const updateRecipe: RequestHandler<
 > = async (req, res) => {
   try {
     const recipeId = Number(req.params.recipeId)
-    if (isNaN(recipeId) || recipeId <= 0) {
+    if (!isValidId(recipeId)) {
       res
         .status(StatusCode.NOT_FOUND_404)
         .json(ApiError.recipeNotFound(req.params.recipeId))
@@ -235,7 +236,7 @@ export const deleteRecipe: RequestHandler<
 > = async (req, res) => {
   try {
     const recipeId = Number(req.params.recipeId)
-    if (isNaN(recipeId) || recipeId <= 0) {
+    if (!isValidId(recipeId)) {
       res.sendStatus(StatusCode.NO_CONTENT_204)
       return
     }

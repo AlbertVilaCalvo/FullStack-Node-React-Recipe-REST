@@ -3,6 +3,7 @@ import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import { removeEmailPassword, User, PublicUser } from './User'
 import * as UserDatabase from './UserDatabase'
+import { isValidId } from '../misc/validations'
 import { isError } from '../misc/result'
 
 /**
@@ -17,7 +18,7 @@ export const getUser: RequestHandler<
 > = async (req, res) => {
   try {
     const userId = Number(req.params.userId)
-    if (isNaN(userId) || userId <= 0) {
+    if (!isValidId(userId)) {
       res
         .status(StatusCode.NOT_FOUND_404)
         .json(ApiError.userNotFound(req.params.userId))
