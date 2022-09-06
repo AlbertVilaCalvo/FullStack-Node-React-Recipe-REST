@@ -1,15 +1,15 @@
 import * as React from 'react'
 import { H1 } from '../../components/H1'
 import { useSnapshot } from 'valtio'
-import { userStore } from '../../user/userStore'
+import { userStore } from '../../../user/userStore'
 import { Form } from '../../components/form/Form'
 import { FormControl, FormLabel } from '@chakra-ui/react'
 import { UserNameInput } from '../../components/form/Input'
 import { SubmitButton } from '../../components/form/SubmitButton'
 import { NavigateToLogin } from '../../components/navigation/RequireLogin'
-import * as UserApi from '../../user/UserApi'
-import { useErrorToast, useSuccessToast } from '../../misc/toast'
-import { extractApiError } from '../../httpClient'
+import * as UserApi from '../../../user/UserApi'
+import { useErrorToast, useSuccessToast } from '../../../misc/toast'
+import { extractApiError } from '../../../httpClient'
 
 export function MyProfilePage() {
   const showSuccessToast = useSuccessToast()

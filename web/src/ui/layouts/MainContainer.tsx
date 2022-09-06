@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom'
-import { NavBarLink } from './components/navigation/NavBarLink'
+import { NavBarLink } from '../components/navigation/NavBarLink'
 import { useSnapshot } from 'valtio'
-import { userStore } from './user/userStore'
+import { userStore } from '../../user/userStore'
 
 export function MainContainer() {
   const navigate = useNavigate()

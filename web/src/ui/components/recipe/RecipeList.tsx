@@ -1,4 +1,4 @@
-import { Recipe } from '../../recipe/Recipe'
+import { Recipe } from '../../../recipe/Recipe'
 import { Link } from 'react-router-dom'
 
 type Props = {

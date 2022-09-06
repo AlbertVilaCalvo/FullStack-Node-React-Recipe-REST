@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Location, Navigate, useLocation } from 'react-router-dom'
-import { userStore } from '../../user/userStore'
+import { userStore } from '../../../user/userStore'
 
 /**
  * Use it to protect pages that require login:

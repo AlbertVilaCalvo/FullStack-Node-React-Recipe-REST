@@ -1,6 +1,6 @@
 import { RecipeList } from '../components/recipe/RecipeList'
-import { useGetAllRecipes } from '../recipe/useGetAllRecipes'
-import { isLoading, isSuccess } from '../misc/result'
+import { useGetAllRecipes } from '../../recipe/useGetAllRecipes'
+import { isLoading, isSuccess } from '../../misc/result'
 import { H1 } from '../components/H1'
 import { ErrorMessage } from '../components/ErrorMessage'
 

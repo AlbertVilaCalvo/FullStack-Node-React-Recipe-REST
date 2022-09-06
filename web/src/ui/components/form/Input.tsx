@@ -3,7 +3,7 @@ import {
   EMAIL_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
   USER_NAME_MAX_LENGTH,
-} from '../../misc/validations'
+} from '../../../misc/validations'
 
 type Props = Omit<
   InputProps,

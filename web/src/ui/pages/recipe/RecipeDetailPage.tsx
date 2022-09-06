@@ -1,16 +1,16 @@
 import * as React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useGetRecipe } from '../../recipe/useGetRecipe'
-import { isError, isLoading } from '../../misc/result'
+import { useGetRecipe } from '../../../recipe/useGetRecipe'
+import { isError, isLoading } from '../../../misc/result'
 import { Progress } from '../../components/Progress'
 import { NotFound404Page } from '../NotFound404Page'
 import { ErrorMessagePage } from '../../components/ErrorMessage'
 import { H1 } from '../../components/H1'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Button, Stack } from '@chakra-ui/react'
-import * as RecipeApi from '../../recipe/RecipeApi'
-import { useErrorToast } from '../../misc/toast'
-import { RecipeWithUserUtil } from '../../recipe/RecipeUtil'
+import * as RecipeApi from '../../../recipe/RecipeApi'
+import { useErrorToast } from '../../../misc/toast'
+import { RecipeWithUserUtil } from '../../../recipe/RecipeUtil'
 
 export function RecipeDetailPage() {
   const navigate = useNavigate()
