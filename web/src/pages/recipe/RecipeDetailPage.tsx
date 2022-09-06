@@ -6,9 +6,11 @@ import { Progress } from '../../components/Progress'
 import { NotFound404Page } from '../NotFound404Page'
 import { ErrorMessagePage } from '../../components/ErrorMessage'
 import { H1 } from '../../components/H1'
+import { StyledLink } from '../../components/navigation/StyledLink'
 import { Button, Stack } from '@chakra-ui/react'
 import * as RecipeApi from '../../recipe/RecipeApi'
 import { useErrorToast } from '../../misc/toast'
+import { RecipeWithUserUtil } from '../../recipe/RecipeUtil'
 
 export function RecipeDetailPage() {
   const navigate = useNavigate()
@@ -39,9 +41,15 @@ export function RecipeDetailPage() {
     <div className="main-container page">
       <div className="main-container-child-centered">
         <H1>{recipe.title}</H1>
+        <p>
+          By{' '}
+          <StyledLink to={`/users/${recipe.user.id}`}>
+            {recipe.user.name}
+          </StyledLink>
+        </p>
         <p>{`ID: ${recipeId}`}</p>
         <p>{`Cooking time: ${recipe.cookingTimeMinutes} minutes`}</p>
-        {recipe.userIsOwner && (
+        {RecipeWithUserUtil.isRecipeOwner(recipe) && (
           <Stack direction="row" spacing="20px" marginTop="30px">
             <Button
               onClick={() => {

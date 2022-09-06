@@ -1,12 +1,12 @@
 import { Request, RequestHandler } from 'express'
-import { Recipe, RecipeWithOwner } from './Recipe'
+import { Recipe, RecipeWithUser } from './Recipe'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
+import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
 import { User } from '../user/User'
-import { getAuthTokenPayloadFromHeader } from '../auth/authtoken'
 
 /**
  * GET /api/recipes
@@ -41,7 +41,7 @@ export const getAllRecipes: RequestHandler<
  */
 export const getRecipe: RequestHandler<
   { recipeId: string },
-  { recipe: RecipeWithOwner } | ApiError,
+  { recipe: RecipeWithUser } | ApiError,
   undefined
 > = async (req, res) => {
   try {
@@ -56,22 +56,39 @@ export const getRecipe: RequestHandler<
       res
         .status(StatusCode.NOT_FOUND_404)
         .json(ApiError.recipeNotFound(recipeId))
+      return
     } else if (isError(getRecipeResult)) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-    } else {
-      const recipe: Recipe = getRecipeResult
-      const getPayloadResult = getAuthTokenPayloadFromHeader(req.headers)
-      const userIsOwner = isError(getPayloadResult)
-        ? false
-        : getPayloadResult.uid === recipe.user_id
-      const recipeWithOwner: RecipeWithOwner = {
-        ...recipe,
-        user_is_owner: userIsOwner,
-      }
-      res.json({
-        recipe: recipeWithOwner,
-      })
+      return
     }
+
+    const recipe: Recipe = getRecipeResult
+    const getUserResult = await UserDatabase.getUserById(recipe.user_id)
+    if (isError(getUserResult)) {
+      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+      return
+    } else if (getUserResult === 'user-not-found') {
+      // This should never happen. If it happens then there's a recipe with a
+      // user_id of a user that does not exist!
+      console.error(
+        `RecipeController.getRecipe - found recipe owned by a user that does not exist`,
+        recipe
+      )
+      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+      return
+    }
+
+    const recipeOwner: User = getUserResult
+    const recipeWithUser: RecipeWithUser = {
+      ...recipe,
+      user: {
+        id: recipeOwner.id,
+        name: recipeOwner.name,
+      },
+    }
+    res.json({
+      recipe: recipeWithUser,
+    })
   } catch (e) {
     console.error('Unexpected error at RecipeController.getRecipe:', e)
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)

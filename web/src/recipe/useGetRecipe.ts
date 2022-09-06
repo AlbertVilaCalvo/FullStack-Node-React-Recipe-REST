@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { Recipe } from './Recipe'
+import { RecipeWithUser } from './Recipe'
 import * as RecipeApi from './RecipeApi'
 
 export function useGetRecipe(
   recipeId: number
-): 'loading' | Recipe | '404-not-found' | Error {
+): 'loading' | RecipeWithUser | '404-not-found' | Error {
   const [result, setResult] =
     React.useState<ReturnType<typeof useGetRecipe>>('loading')
 

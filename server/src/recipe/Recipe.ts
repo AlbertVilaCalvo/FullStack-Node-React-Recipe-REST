@@ -5,6 +5,11 @@ export type Recipe = {
   cooking_time_minutes: number
 }
 
-export type RecipeWithOwner = Recipe & {
-  user_is_owner: boolean
-}
+type RecipeUser = Readonly<{
+  user: {
+    id: number
+    name: string
+  }
+}>
+
+export type RecipeWithUser = Recipe & RecipeUser

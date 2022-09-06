@@ -1,5 +1,10 @@
-import { Recipe } from './Recipe'
-import { RecipeJson } from './RecipeJson'
+import {
+  Recipe,
+  RecipeJson,
+  RecipeWithUser,
+  RecipeWithUserJson,
+} from './Recipe'
+import { RecipeUtil, RecipeWithUserUtil } from './RecipeUtil'
 import { httpClient } from '../httpClient'
 import { AxiosResponse } from 'axios'
 
@@ -8,16 +13,16 @@ export function getAllRecipes(): Promise<Recipe[]> {
     .get(`/recipes`)
     .then((response: AxiosResponse<{ recipes: RecipeJson[] }>) => {
       return response.data.recipes.map((recipeJson) =>
-        Recipe.fromJson(recipeJson)
+        RecipeUtil.fromJson(recipeJson)
       )
     })
 }
 
-export function getRecipe(recipeId: number): Promise<Recipe> {
+export function getRecipe(recipeId: number): Promise<RecipeWithUser> {
   return httpClient
     .get(`/recipes/${recipeId}`)
-    .then((response: AxiosResponse<{ recipe: RecipeJson }>) => {
-      return Recipe.fromJson(response.data.recipe)
+    .then((response: AxiosResponse<{ recipe: RecipeWithUserJson }>) => {
+      return RecipeWithUserUtil.fromJson(response.data.recipe)
     })
 }
 
@@ -36,7 +41,7 @@ export function createRecipe(
 }
 
 export function updateRecipe(recipe: Recipe): Promise<{ recipeId: number }> {
-  const recipeJson = Recipe.toJson(recipe)
+  const recipeJson = RecipeUtil.toJson(recipe)
   return httpClient
     .patch(`/recipes/${recipe.id}`, recipeJson)
     .then((response: AxiosResponse<{ recipe: RecipeJson }>) => {
