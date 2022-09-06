@@ -1,4 +1,5 @@
 type ApiErrorCode =
+  | 'user_not_found'
   | 'recipe_not_found'
   | 'title_required'
   | 'cooking_time_minutes_required'
@@ -17,6 +18,10 @@ export class ApiError {
 
   constructor(error: { code: ApiErrorCode; message: string }) {
     this.error = error
+  }
+
+  static userNotFound(userId: number): ApiError {
+    return makeApiError('user_not_found', `User with id ${userId} not found`)
   }
 
   static recipeNotFound(recipeId: number): ApiError {

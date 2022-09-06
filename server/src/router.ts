@@ -16,6 +16,8 @@ router.put(
   UserController.updateProfile
 )
 
+router.get('/users/:userId', UserController.getUser)
+
 router.get('/recipes', RecipeController.getAllRecipes)
 router.get('/recipes/:recipeId', RecipeController.getRecipe)
 router.post(

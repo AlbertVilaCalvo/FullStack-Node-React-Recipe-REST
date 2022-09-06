@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { RecipeWithUser } from './Recipe'
 import * as RecipeApi from './RecipeApi'
+import { is404NotFound } from '../httpClient'
 
 export function useGetRecipe(
   recipeId: number
@@ -16,7 +17,7 @@ export function useGetRecipe(
       })
       .catch((error) => {
         console.log(`useGetRecipe error`, error)
-        if (error.response && error.response.status === 404) {
+        if (is404NotFound(error)) {
           setResult('404-not-found')
         } else {
           setResult(error)

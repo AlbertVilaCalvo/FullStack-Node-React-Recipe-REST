@@ -13,3 +13,11 @@ export function removePassword(user: User): UserNoPassword {
   const { password, ...rest } = user
   return rest
 }
+
+export type PublicUser = Omit<User, 'email' | 'password'>
+
+export function removeEmailPassword(user: User): PublicUser {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { email, password, ...rest } = user
+  return rest
+}

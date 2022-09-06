@@ -61,3 +61,12 @@ export type AnApiError<ErrorCode extends string> = {
     message: string
   }
 }
+
+// Utils
+
+/**
+ * @param error the error of an axios request catch.
+ */
+export function is404NotFound(error?: any): boolean {
+  return error && error.response && error.response.status === 404
+}

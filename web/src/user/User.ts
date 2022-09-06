@@ -3,3 +3,5 @@ export type User = {
   name: string
   email: string
 }
+
+export type PublicUser = Omit<User, 'email' | 'password'>

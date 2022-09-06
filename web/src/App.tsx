@@ -8,6 +8,7 @@ import { AboutPage } from './pages/AboutPage'
 import { NotFound404Page } from './pages/NotFound404Page'
 import { RegisterPage } from './pages/auth/RegisterPage'
 import { LoginPage } from './pages/auth/LoginPage'
+import { UserDetailPage } from './pages/user/UserDetailPage'
 import { MyProfilePage } from './pages/user/MyProfilePage'
 import { CreateRecipePage } from './pages/recipe/CreateRecipePage'
 import { RecipeDetailPage } from './pages/recipe/RecipeDetailPage'
@@ -28,6 +29,8 @@ function App() {
               path="profile"
               element={<RequireLogin Page={MyProfilePage} />}
             />
+
+            <Route path="users/:userId" element={<UserDetailPage />} />
 
             <Route
               path="recipes/new"
