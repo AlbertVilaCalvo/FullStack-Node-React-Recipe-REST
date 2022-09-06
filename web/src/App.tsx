@@ -2,7 +2,7 @@ import * as React from 'react'
 import './App.css'
 import { ChakraProvider } from '@chakra-ui/react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { MainContainer } from './ui/layouts/MainContainer'
+import { MainLayout } from './ui/layouts/MainLayout'
 import { HomePage } from './ui/pages/HomePage'
 import { AboutPage } from './ui/pages/AboutPage'
 import { NotFound404Page } from './ui/pages/NotFound404Page'
@@ -20,7 +20,7 @@ function App() {
     <ChakraProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<MainContainer />}>
+          <Route path="/" element={<MainLayout />}>
             <Route path="" element={<HomePage />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="register" element={<RegisterPage />} />

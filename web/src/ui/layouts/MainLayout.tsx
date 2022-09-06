@@ -3,7 +3,7 @@ import { NavBarLink } from '../components/navigation/NavBarLink'
 import { useSnapshot } from 'valtio'
 import { userStore } from '../../user/userStore'
 
-export function MainContainer() {
+export function MainLayout() {
   const navigate = useNavigate()
   const storedUser = useSnapshot(userStore)
 
