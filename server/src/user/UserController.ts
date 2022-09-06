@@ -18,7 +18,9 @@ export const getUser: RequestHandler<
   try {
     const userId = Number(req.params.userId)
     if (isNaN(userId) || userId <= 0) {
-      res.sendStatus(StatusCode.NOT_FOUND_404)
+      res
+        .status(StatusCode.NOT_FOUND_404)
+        .json(ApiError.userNotFound(req.params.userId))
       return
     }
 

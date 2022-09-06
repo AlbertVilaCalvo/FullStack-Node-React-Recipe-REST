@@ -20,11 +20,11 @@ export class ApiError {
     this.error = error
   }
 
-  static userNotFound(userId: number): ApiError {
+  static userNotFound(userId: number | string): ApiError {
     return makeApiError('user_not_found', `User with id ${userId} not found`)
   }
 
-  static recipeNotFound(recipeId: number): ApiError {
+  static recipeNotFound(recipeId: number | string): ApiError {
     return makeApiError(
       'recipe_not_found',
       `Recipe with id ${recipeId} not found`

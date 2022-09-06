@@ -47,7 +47,9 @@ export const getRecipe: RequestHandler<
   try {
     const recipeId = Number(req.params.recipeId)
     if (isNaN(recipeId) || recipeId <= 0) {
-      res.sendStatus(StatusCode.NOT_FOUND_404)
+      res
+        .status(StatusCode.NOT_FOUND_404)
+        .json(ApiError.recipeNotFound(req.params.recipeId))
       return
     }
 
@@ -165,7 +167,9 @@ export const updateRecipe: RequestHandler<
   try {
     const recipeId = Number(req.params.recipeId)
     if (isNaN(recipeId) || recipeId <= 0) {
-      res.sendStatus(StatusCode.NOT_FOUND_404)
+      res
+        .status(StatusCode.NOT_FOUND_404)
+        .json(ApiError.recipeNotFound(req.params.recipeId))
       return
     }
 
