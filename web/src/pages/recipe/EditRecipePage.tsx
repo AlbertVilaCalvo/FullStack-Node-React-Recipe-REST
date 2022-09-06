@@ -19,7 +19,11 @@ export function EditRecipePage() {
   }
 
   if (getRecipeResult === '404-not-found') {
-    return <NotFound404Page />
+    return (
+      <NotFound404Page
+        message={`Recipe with id ${params.recipeId} not found.`}
+      />
+    )
   }
 
   if (isError(getRecipeResult)) {

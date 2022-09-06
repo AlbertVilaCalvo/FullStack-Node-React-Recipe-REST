@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { RecipeWithUser } from './Recipe'
 import * as RecipeApi from './RecipeApi'
+import { isValidId } from '../misc/validations'
 import { is404NotFound } from '../httpClient'
 
 export function useGetRecipe(
@@ -10,6 +11,10 @@ export function useGetRecipe(
     React.useState<ReturnType<typeof useGetRecipe>>('loading')
 
   React.useEffect(() => {
+    if (!isValidId(recipeId)) {
+      setResult('404-not-found')
+      return
+    }
     setResult('loading')
     RecipeApi.getRecipe(recipeId)
       .then((recipe) => {

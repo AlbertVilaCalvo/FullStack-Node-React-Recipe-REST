@@ -18,7 +18,9 @@ export function UserDetailPage() {
   }
 
   if (getUserResult === '404-not-found') {
-    return <NotFound404Page />
+    return (
+      <NotFound404Page message={`User with id ${params.userId} not found.`} />
+    )
   }
 
   if (isError(getUserResult)) {
