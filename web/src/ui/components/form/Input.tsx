@@ -5,14 +5,14 @@ import {
   USER_NAME_MAX_LENGTH,
 } from '../../../misc/validations'
 
-type Props = Omit<
+export type CustomInputProps = Omit<
   InputProps,
   'placeholder' | 'type' | 'maxLength' | 'onChange'
 > & {
   onChange: (value: string) => void
 }
 
-export function UserNameInput({ onChange, ...props }: Props) {
+export function UserNameInput({ onChange, ...props }: CustomInputProps) {
   return (
     <Input
       placeholder="Name"
@@ -26,7 +26,7 @@ export function UserNameInput({ onChange, ...props }: Props) {
   )
 }
 
-export function EmailInput({ onChange, ...props }: Props) {
+export function EmailInput({ onChange, ...props }: CustomInputProps) {
   return (
     <Input
       placeholder="Email"
@@ -40,7 +40,7 @@ export function EmailInput({ onChange, ...props }: Props) {
   )
 }
 
-export function PasswordInput({ onChange, ...props }: Props) {
+export function PasswordInput({ onChange, ...props }: CustomInputProps) {
   return (
     <Input
       placeholder="Password"
