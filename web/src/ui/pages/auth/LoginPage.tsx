@@ -1,6 +1,6 @@
 import { H1 } from '../../components/Headers'
 import * as React from 'react'
-import { FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/react'
+import { FormErrorMessage } from '@chakra-ui/react'
 import { isValidEmail } from '../../../misc/validations'
 import * as AuthApi from '../../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -10,7 +10,10 @@ import { isApiError } from '../../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Form } from '../../components/form/Form'
-import { EmailInput, PasswordInput } from '../../components/form/Input'
+import {
+  EmailFormControl,
+  PasswordFormControl,
+} from '../../components/form/FormControl'
 import { SubmitButton } from '../../components/form/SubmitButton'
 
 export function LoginPage() {
@@ -59,31 +62,27 @@ export function LoginPage() {
       <div className="main-container-child-centered">
         <H1>Login</H1>
         <Form onSubmit={onSubmit}>
-          <FormControl isRequired isInvalid={showEmailNotValidError}>
-            <FormLabel>Email</FormLabel>
-            <EmailInput
-              value={email}
-              onChange={(value) => {
-                setEmail(value)
-                setShowEmailNotValidError(false)
-                setErrorMessage('')
-              }}
-            />
+          <EmailFormControl
+            isInvalid={showEmailNotValidError}
+            value={email}
+            onChange={(value) => {
+              setEmail(value)
+              setShowEmailNotValidError(false)
+              setErrorMessage('')
+            }}
+          >
             {showEmailNotValidError && (
               <FormErrorMessage>This email is not valid</FormErrorMessage>
             )}
-          </FormControl>
+          </EmailFormControl>
 
-          <FormControl isRequired>
-            <FormLabel>Password</FormLabel>
-            <PasswordInput
-              value={password}
-              onChange={(value) => {
-                setPassword(value)
-                setErrorMessage('')
-              }}
-            />
-          </FormControl>
+          <PasswordFormControl
+            value={password}
+            onChange={(value) => {
+              setPassword(value)
+              setErrorMessage('')
+            }}
+          />
 
           <SubmitButton isLoading={loading} alignSelf="flex-start">
             Login

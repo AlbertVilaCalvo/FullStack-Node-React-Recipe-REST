@@ -3,8 +3,7 @@ import { H2 } from '../../components/Headers'
 import { useSnapshot } from 'valtio'
 import { userStore } from '../../../user/userStore'
 import { Form } from '../../components/form/Form'
-import { FormControl, FormLabel } from '@chakra-ui/react'
-import { UserNameInput } from '../../components/form/Input'
+import { UserNameFormControl } from '../../components/form/FormControl'
 import { SubmitButton } from '../../components/form/SubmitButton'
 import { NavigateToLogin } from '../../components/navigation/RequireLogin'
 import * as UserApi from '../../../user/UserApi'
@@ -60,15 +59,12 @@ export function MyProfilePage() {
       </p>
 
       <Form onSubmit={onSubmit} marginTop={15}>
-        <FormControl isRequired>
-          <FormLabel>Name</FormLabel>
-          <UserNameInput
-            value={name}
-            onChange={(value) => {
-              setName(value)
-            }}
-          />
-        </FormControl>
+        <UserNameFormControl
+          value={name}
+          onChange={(value) => {
+            setName(value)
+          }}
+        />
         <SubmitButton
           isDisabled={snapshotUser.name === name.trim()}
           isLoading={loading}

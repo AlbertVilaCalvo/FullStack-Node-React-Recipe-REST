@@ -1,6 +1,6 @@
 import { H1 } from '../../components/Headers'
 import * as React from 'react'
-import { FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/react'
+import { FormErrorMessage } from '@chakra-ui/react'
 import { isValidEmail } from '../../../misc/validations'
 import * as AuthApi from '../../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -11,10 +11,10 @@ import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Form } from '../../components/form/Form'
 import {
-  EmailInput,
-  PasswordInput,
-  UserNameInput,
-} from '../../components/form/Input'
+  EmailFormControl,
+  PasswordFormControl,
+  UserNameFormControl,
+} from '../../components/form/FormControl'
 import { SubmitButton } from '../../components/form/SubmitButton'
 
 export function RegisterPage() {
@@ -67,40 +67,33 @@ export function RegisterPage() {
       <div className="main-container-child-centered">
         <H1>Register</H1>
         <Form onSubmit={onSubmit}>
-          <FormControl isRequired>
-            <FormLabel>Name</FormLabel>
-            <UserNameInput
-              value={name}
-              onChange={(value) => {
-                setName(value)
-                setErrorMessage('')
-              }}
-            />
-          </FormControl>
+          <UserNameFormControl
+            value={name}
+            onChange={(value) => {
+              setName(value)
+              setErrorMessage('')
+            }}
+          />
 
-          <FormControl isRequired isInvalid={!!emailError}>
-            <FormLabel>Email</FormLabel>
-            <EmailInput
-              value={email}
-              onChange={(value) => {
-                setEmail(value)
-                setEmailError('')
-                setErrorMessage('')
-              }}
-            />
+          <EmailFormControl
+            isInvalid={!!emailError}
+            value={email}
+            onChange={(value) => {
+              setEmail(value)
+              setEmailError('')
+              setErrorMessage('')
+            }}
+          >
             {emailError && <FormErrorMessage>{emailError}</FormErrorMessage>}
-          </FormControl>
+          </EmailFormControl>
 
-          <FormControl isRequired>
-            <FormLabel>Password</FormLabel>
-            <PasswordInput
-              value={password}
-              onChange={(value) => {
-                setPassword(value)
-                setErrorMessage('')
-              }}
-            />
-          </FormControl>
+          <PasswordFormControl
+            value={password}
+            onChange={(value) => {
+              setPassword(value)
+              setErrorMessage('')
+            }}
+          />
 
           <SubmitButton isLoading={loading} alignSelf="flex-start">
             Register
