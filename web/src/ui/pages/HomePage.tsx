@@ -10,7 +10,7 @@ export function HomePage() {
   return (
     <div className="main-container page">
       <div className="main-container-child-centered">
-        <H1>Home Page</H1>
+        <H1>Home</H1>
         {isLoading(getRecipesResult) ? (
           <p>Loading...</p>
         ) : isSuccess(getRecipesResult) ? (
