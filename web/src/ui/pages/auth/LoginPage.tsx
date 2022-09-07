@@ -1,6 +1,6 @@
 import { H1 } from '../../components/Headers'
 import * as React from 'react'
-import { isValidEmail } from '../../../misc/validations'
+import { isValidEmail, ValidationError } from '../../../misc/validations'
 import * as AuthApi from '../../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../../user/userStore'
@@ -23,16 +23,13 @@ export function LoginPage() {
 
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
-
-  const [showEmailNotValidError, setShowEmailNotValidError] =
-    React.useState(false)
-
+  const [emailNotValid, setEmailNotValid] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
 
   const onSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault()
     if (!isValidEmail(email)) {
-      setShowEmailNotValidError(true)
+      setEmailNotValid(true)
       return
     }
     setLoading(true)
@@ -66,10 +63,10 @@ export function LoginPage() {
             value={email}
             onChange={(value) => {
               setEmail(value)
-              setShowEmailNotValidError(false)
+              setEmailNotValid(false)
             }}
-            isInvalid={showEmailNotValidError}
-            errorMessage="This email is not valid"
+            isInvalid={emailNotValid}
+            errorMessage={ValidationError.EMAIL_FORMAT}
           />
 
           <PasswordFormControl

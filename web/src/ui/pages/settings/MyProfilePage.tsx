@@ -21,8 +21,8 @@ export function MyProfilePage() {
   const [name, setName] = React.useState(storeUser?.name ?? '')
   const [loading, setLoading] = React.useState(false)
 
-  // This will never happen (since we wrap MyProfilePage with RequireLogin at
-  // App) but it gets rid of user being undefined.
+  // This will never happen (since we use RequireLogin at App) but it gets rid
+  // of user being undefined.
   if (!storeUser || !snapshotUser) {
     return <NavigateToLogin />
   }
@@ -39,9 +39,9 @@ export function MyProfilePage() {
         console.error(`UserApi.updateUserProfile error`, error)
         const apiError = extractApiError(error)
         if (apiError) {
-          showErrorToast('An error occurred', apiError.error.message)
+          showErrorToast(apiError.error.message)
         } else {
-          showErrorToast('An error occurred', error.message)
+          showErrorToast(error.message)
         }
       })
       .finally(() => {

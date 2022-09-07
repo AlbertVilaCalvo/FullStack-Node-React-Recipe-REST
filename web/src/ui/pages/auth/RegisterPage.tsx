@@ -1,6 +1,6 @@
 import { H1 } from '../../components/Headers'
 import * as React from 'react'
-import { isValidEmail } from '../../../misc/validations'
+import { isValidEmail, ValidationError } from '../../../misc/validations'
 import * as AuthApi from '../../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../../user/userStore'
@@ -33,7 +33,7 @@ export function RegisterPage() {
   const onSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault()
     if (!isValidEmail(email)) {
-      setEmailError('This email is not valid')
+      setEmailError(ValidationError.EMAIL_FORMAT)
       return
     }
     setLoading(true)

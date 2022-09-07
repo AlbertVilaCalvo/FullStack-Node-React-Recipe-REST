@@ -13,3 +13,7 @@ export function isValidEmail(email: string): boolean {
 export function isValidId(id: number): boolean {
   return !isNaN(id) && id > 0
 }
+
+export const ValidationError = {
+  EMAIL_FORMAT: 'This is not a valid email.',
+}
