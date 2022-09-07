@@ -11,7 +11,8 @@
 
 Once the database is created, you can automatically fill the database with recipes.
 
-To add recipes you need a user. If you don't have one, start the server (`cd server && npm run dev`) and then do: `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`.
+To add recipes you need a user. If you don't have one, start the server (`cd server && npm run dev`) and then in another terminal do:
+`curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`.
 
 Once you have a user, make sure that its id matches the `user_id` in `server/database-seed.sql`.
 
@@ -22,7 +23,7 @@ Finally, seed data into the database by doing `psql reciperest` and `\i server/d
 ```shell
 cd server
 npm install
-npm run dev
+npm start
 ```
 
 ```shell
