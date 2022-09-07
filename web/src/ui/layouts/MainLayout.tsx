@@ -25,7 +25,7 @@ export function MainLayout() {
             {storedUser.user ? (
               <>
                 <li>
-                  <NavBarLink to="/profile">My Profile</NavBarLink>
+                  <NavBarLink to="/settings/profile">Settings</NavBarLink>
                 </li>
                 <li>
                   <NavBarLink

@@ -92,3 +92,25 @@ h1 {
   margin: 0 auto;
   text-align: center;
 }
+
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+}
+
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media all and (min-width: 520px) {
+  .settings-container {
+    flex-direction: row;
+    gap: 10px;
+  }
+}
+
+.settings-container > :first-child {
+  width: 150px;
+  flex-shrink: 0;
+}

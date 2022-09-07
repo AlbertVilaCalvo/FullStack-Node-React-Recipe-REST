@@ -8,3 +8,11 @@ export function H1({ children }: { children: React.ReactNode }) {
     </Heading>
   )
 }
+
+export function H2({ children }: { children: React.ReactNode }) {
+  return (
+    <Heading as="h2" size="xl">
+      {children}
+    </Heading>
+  )
+}

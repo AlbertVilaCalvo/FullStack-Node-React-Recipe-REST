@@ -44,7 +44,7 @@ export function LoginPage() {
           const { user, authToken } = response
           userStore.user = user
           userStore.authToken = authToken
-          const navigateTo = getFromLocation(location) ?? '/profile'
+          const navigateTo = getFromLocation(location) ?? '/settings/profile'
           navigate(navigateTo, { replace: true })
         }
       })
