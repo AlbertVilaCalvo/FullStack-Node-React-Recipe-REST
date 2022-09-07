@@ -1,4 +1,4 @@
-import { H1 } from '../../components/H1'
+import { H1 } from '../../components/Headers'
 import * as React from 'react'
 import { FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/react'
 import { isValidEmail } from '../../../misc/validations'

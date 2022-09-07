@@ -1,4 +1,4 @@
-import { H1 } from '../../components/H1'
+import { H1 } from '../../components/Headers'
 import { RecipeForm } from '../../components/recipe/RecipeForm'
 import * as RecipeApi from '../../../recipe/RecipeApi'
 

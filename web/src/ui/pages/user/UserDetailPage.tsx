@@ -5,7 +5,7 @@ import { isError, isLoading } from '../../../misc/result'
 import { Progress } from '../../components/Progress'
 import { NotFound404Page } from '../NotFound404Page'
 import { ErrorMessagePage } from '../../components/ErrorMessage'
-import { H1 } from '../../components/H1'
+import { H1 } from '../../components/Headers'
 
 export function UserDetailPage() {
   const params = useParams()

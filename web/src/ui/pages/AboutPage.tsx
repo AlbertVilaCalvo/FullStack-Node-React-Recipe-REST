@@ -1,4 +1,4 @@
-import { H1 } from '../components/H1'
+import { H1 } from '../components/Headers'
 
 export function AboutPage() {
   return (

@@ -1,4 +1,4 @@
-import { H1 } from '../components/H1'
+import { H1 } from '../components/Headers'
 import { ErrorMessage } from '../components/ErrorMessage'
 
 export function NotFound404Page({ message }: { message?: string }) {

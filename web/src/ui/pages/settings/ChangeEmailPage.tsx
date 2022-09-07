@@ -1,4 +1,4 @@
-import { H2 } from '../../components/H1'
+import { H2 } from '../../components/Headers'
 
 export function ChangeEmailPage() {
   return (

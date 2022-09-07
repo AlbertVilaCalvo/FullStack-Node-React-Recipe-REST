@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { H2 } from '../../components/H1'
+import { H2 } from '../../components/Headers'
 import { useSnapshot } from 'valtio'
 import { userStore } from '../../../user/userStore'
 import { Form } from '../../components/form/Form'
