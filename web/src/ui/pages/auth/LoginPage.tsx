@@ -1,6 +1,5 @@
 import { H1 } from '../../components/Headers'
 import * as React from 'react'
-import { FormErrorMessage } from '@chakra-ui/react'
 import { isValidEmail } from '../../../misc/validations'
 import * as AuthApi from '../../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -63,18 +62,15 @@ export function LoginPage() {
         <H1>Login</H1>
         <Form onSubmit={onSubmit}>
           <EmailFormControl
-            isInvalid={showEmailNotValidError}
             value={email}
             onChange={(value) => {
               setEmail(value)
               setShowEmailNotValidError(false)
               setErrorMessage('')
             }}
-          >
-            {showEmailNotValidError && (
-              <FormErrorMessage>This email is not valid</FormErrorMessage>
-            )}
-          </EmailFormControl>
+            isInvalid={showEmailNotValidError}
+            errorMessage="This email is not valid"
+          />
 
           <PasswordFormControl
             value={password}
