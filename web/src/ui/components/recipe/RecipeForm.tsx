@@ -2,7 +2,6 @@ import * as React from 'react'
 import { Recipe } from '../../../recipe/Recipe'
 import {
   FormControl,
-  FormErrorMessage,
   FormLabel,
   Input,
   NumberDecrementStepper,
@@ -13,7 +12,7 @@ import {
   Stack,
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
-import { ErrorMessage } from '../ErrorMessage'
+import { useErrorToast } from '../../../misc/toast'
 import { extractApiError } from '../../../httpClient'
 import { SubmitButton } from '../form/SubmitButton'
 
@@ -25,38 +24,21 @@ type Props = {
 }
 
 export function RecipeForm({ recipe, onSubmit }: Props) {
+  const navigate = useNavigate()
+  const showErrorToast = useErrorToast()
+
   const [title, setTitle] = React.useState(recipe ? recipe.title : '')
   const [cookingTimeMinutes, setCookingTimeMinutes] = React.useState(
     recipe ? recipe.cookingTimeMinutes.toString(10) : '10'
   )
 
-  const [showTitleEmptyError, setShowTitleEmptyError] = React.useState(false)
-  const [showCookingTimeEmptyError, setShowCokingTimeEmptyError] =
-    React.useState(false)
-
   const [loading, setLoading] = React.useState(false)
-
-  const [errorMessage, setErrorMessage] = React.useState('')
-
-  const navigate = useNavigate()
 
   const onSubmitInternal = (event: React.SyntheticEvent) => {
     event.preventDefault()
-    setErrorMessage('')
-    const titleEmpty = title.trim() === ''
-    if (titleEmpty) {
-      setShowTitleEmptyError(true)
-    }
-    const cookingTimeEmpty = cookingTimeMinutes.trim() === ''
-    if (cookingTimeEmpty) {
-      setShowCokingTimeEmptyError(true)
-    }
-    if (titleEmpty || cookingTimeEmpty) {
-      return
-    }
     setLoading(true)
     onSubmit({
-      title,
+      title: title.trim(),
       cookingTimeMinutes: Number(cookingTimeMinutes),
     })
       .then((response) => {
@@ -67,9 +49,9 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
         console.error(`RecipeApi error`, error)
         const apiError = extractApiError(error)
         if (apiError) {
-          setErrorMessage(apiError.error.message)
+          showErrorToast(apiError.error.message)
         } else {
-          setErrorMessage(error.message)
+          showErrorToast(error.message)
         }
         setLoading(false)
       })
@@ -77,7 +59,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
 
   return (
     <Stack as="form" onSubmit={onSubmitInternal} spacing={6}>
-      <FormControl isRequired isInvalid={showTitleEmptyError}>
+      <FormControl isRequired>
         <FormLabel>Title</FormLabel>
         <Input
           placeholder="Title"
@@ -85,15 +67,11 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           value={title}
           onChange={(event) => {
             setTitle(event.target.value)
-            setShowTitleEmptyError(false)
           }}
         />
-        {showTitleEmptyError && (
-          <FormErrorMessage>Title is required</FormErrorMessage>
-        )}
       </FormControl>
 
-      <FormControl isRequired isInvalid={showCookingTimeEmptyError}>
+      <FormControl isRequired>
         <FormLabel>Cooking Time (minutes)</FormLabel>
         <NumberInput
           min={1}
@@ -102,7 +80,6 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           value={cookingTimeMinutes}
           onChange={(valueAsString, valueAsNumber) => {
             setCookingTimeMinutes(valueAsString)
-            setShowCokingTimeEmptyError(false)
           }}
         >
           <NumberInputField />
@@ -111,20 +88,11 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
             <NumberDecrementStepper />
           </NumberInputStepper>
         </NumberInput>
-        {showCookingTimeEmptyError && (
-          <FormErrorMessage>Cooking time is required</FormErrorMessage>
-        )}
       </FormControl>
 
       <SubmitButton isLoading={loading} alignSelf="flex-start">
         {recipe ? 'Update Recipe' : 'Publish Recipe'}
       </SubmitButton>
-
-      {errorMessage && (
-        <ErrorMessage>
-          An error occurred: {errorMessage}. Please try again.
-        </ErrorMessage>
-      )}
     </Stack>
   )
 }
