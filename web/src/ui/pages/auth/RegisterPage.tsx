@@ -67,12 +67,7 @@ export function RegisterPage() {
       <div className="main-container-child-centered">
         <H1>Register</H1>
         <Form onSubmit={onSubmit}>
-          <UserNameFormControl
-            value={name}
-            onChange={(value) => {
-              setName(value)
-            }}
-          />
+          <UserNameFormControl value={name} onChange={setName} />
 
           <EmailFormControl
             value={email}
@@ -84,12 +79,7 @@ export function RegisterPage() {
             errorMessage={emailError}
           />
 
-          <PasswordFormControl
-            value={password}
-            onChange={(value) => {
-              setPassword(value)
-            }}
-          />
+          <PasswordFormControl value={password} onChange={setPassword} />
 
           <SubmitButton isLoading={loading} alignSelf="flex-start">
             Register

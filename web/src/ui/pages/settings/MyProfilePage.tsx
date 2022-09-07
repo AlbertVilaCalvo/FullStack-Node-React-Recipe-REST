@@ -59,12 +59,7 @@ export function MyProfilePage() {
       </p>
 
       <Form onSubmit={onSubmit} marginTop={15}>
-        <UserNameFormControl
-          value={name}
-          onChange={(value) => {
-            setName(value)
-          }}
-        />
+        <UserNameFormControl value={name} onChange={setName} />
         <SubmitButton
           isDisabled={snapshotUser.name === name.trim()}
           isLoading={loading}

@@ -69,12 +69,7 @@ export function LoginPage() {
             errorMessage={ValidationError.EMAIL_FORMAT}
           />
 
-          <PasswordFormControl
-            value={password}
-            onChange={(value) => {
-              setPassword(value)
-            }}
-          />
+          <PasswordFormControl value={password} onChange={setPassword} />
 
           <SubmitButton isLoading={loading} alignSelf="flex-start">
             Login
