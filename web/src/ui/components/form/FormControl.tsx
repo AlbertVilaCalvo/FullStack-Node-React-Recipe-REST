@@ -30,13 +30,15 @@ function BaseFormControl({
   errorMessage,
   helperText,
   children,
+  label,
   Input,
 }: {
+  label: string
   Input: React.ComponentType<CustomInputProps>
 } & Props) {
   return (
     <FormControl isRequired isInvalid={isInvalid}>
-      <FormLabel>Name</FormLabel>
+      <FormLabel>{label}</FormLabel>
       <Input value={value} onChange={onChange} />
       {isInvalid && errorMessage ? (
         <FormErrorMessage>{errorMessage}</FormErrorMessage>
@@ -49,13 +51,13 @@ function BaseFormControl({
 }
 
 export function UserNameFormControl(props: Props) {
-  return <BaseFormControl Input={UserNameInput} {...props} />
+  return <BaseFormControl label="Name" Input={UserNameInput} {...props} />
 }
 
 export function EmailFormControl(props: Props) {
-  return <BaseFormControl Input={EmailInput} {...props} />
+  return <BaseFormControl label="Email" Input={EmailInput} {...props} />
 }
 
 export function PasswordFormControl(props: Props) {
-  return <BaseFormControl Input={PasswordInput} {...props} />
+  return <BaseFormControl label="Password" Input={PasswordInput} {...props} />
 }
