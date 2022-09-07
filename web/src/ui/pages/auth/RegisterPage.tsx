@@ -4,7 +4,7 @@ import { isValidEmail } from '../../../misc/validations'
 import * as AuthApi from '../../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../../user/userStore'
-import { ErrorMessage } from '../../components/ErrorMessage'
+import { useErrorToast } from '../../../misc/toast'
 import { isApiError } from '../../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
@@ -17,6 +17,8 @@ import {
 import { SubmitButton } from '../../components/form/SubmitButton'
 
 export function RegisterPage() {
+  const showErrorToast = useErrorToast()
+
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -25,7 +27,6 @@ export function RegisterPage() {
   const [password, setPassword] = React.useState('')
 
   const [emailError, setEmailError] = React.useState('')
-  const [errorMessage, setErrorMessage] = React.useState('')
 
   const [loading, setLoading] = React.useState(false)
 
@@ -43,7 +44,7 @@ export function RegisterPage() {
           if (response.error.code === 'duplicate_email') {
             setEmailError(response.error.message)
           }
-          setErrorMessage(response.error.message)
+          showErrorToast(response.error.message)
           setLoading(false)
         } else {
           // Success
@@ -57,7 +58,7 @@ export function RegisterPage() {
       .catch((error) => {
         // An unexpected error
         setLoading(false)
-        setErrorMessage(error.message)
+        showErrorToast(error.message)
       })
   }
 
@@ -70,7 +71,6 @@ export function RegisterPage() {
             value={name}
             onChange={(value) => {
               setName(value)
-              setErrorMessage('')
             }}
           />
 
@@ -79,7 +79,6 @@ export function RegisterPage() {
             onChange={(value) => {
               setEmail(value)
               setEmailError('')
-              setErrorMessage('')
             }}
             isInvalid={!!emailError}
             errorMessage={emailError}
@@ -89,19 +88,12 @@ export function RegisterPage() {
             value={password}
             onChange={(value) => {
               setPassword(value)
-              setErrorMessage('')
             }}
           />
 
           <SubmitButton isLoading={loading} alignSelf="flex-start">
             Register
           </SubmitButton>
-
-          {errorMessage && (
-            <ErrorMessage>
-              An error occurred: {errorMessage}. Please try again.
-            </ErrorMessage>
-          )}
         </Form>
 
         <StyledLink to="/login" className="center" marginTop={10}>

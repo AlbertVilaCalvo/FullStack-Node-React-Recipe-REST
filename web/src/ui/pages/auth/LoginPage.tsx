@@ -4,7 +4,7 @@ import { isValidEmail } from '../../../misc/validations'
 import * as AuthApi from '../../../auth/AuthApi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../../user/userStore'
-import { ErrorMessage } from '../../components/ErrorMessage'
+import { useErrorToast } from '../../../misc/toast'
 import { isApiError } from '../../../httpClient'
 import { getFromLocation } from '../../components/navigation/RequireLogin'
 import { StyledLink } from '../../components/navigation/StyledLink'
@@ -16,6 +16,8 @@ import {
 import { SubmitButton } from '../../components/form/SubmitButton'
 
 export function LoginPage() {
+  const showErrorToast = useErrorToast()
+
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -24,7 +26,6 @@ export function LoginPage() {
 
   const [showEmailNotValidError, setShowEmailNotValidError] =
     React.useState(false)
-  const [errorMessage, setErrorMessage] = React.useState('')
 
   const [loading, setLoading] = React.useState(false)
 
@@ -39,7 +40,7 @@ export function LoginPage() {
       .then((response) => {
         console.log(`AuthApi.login response`, response)
         if (isApiError(response)) {
-          setErrorMessage(response.error.message)
+          showErrorToast(response.error.message)
           setLoading(false)
         } else {
           // Success
@@ -52,7 +53,7 @@ export function LoginPage() {
       })
       .catch((error) => {
         setLoading(false)
-        setErrorMessage(error.message)
+        showErrorToast(error.message)
       })
   }
 
@@ -66,7 +67,6 @@ export function LoginPage() {
             onChange={(value) => {
               setEmail(value)
               setShowEmailNotValidError(false)
-              setErrorMessage('')
             }}
             isInvalid={showEmailNotValidError}
             errorMessage="This email is not valid"
@@ -76,19 +76,12 @@ export function LoginPage() {
             value={password}
             onChange={(value) => {
               setPassword(value)
-              setErrorMessage('')
             }}
           />
 
           <SubmitButton isLoading={loading} alignSelf="flex-start">
             Login
           </SubmitButton>
-
-          {errorMessage && (
-            <ErrorMessage>
-              An error occurred: {errorMessage}. Please try again.
-            </ErrorMessage>
-          )}
         </Form>
 
         <StyledLink to="/register" className="center" marginTop={10}>
