@@ -13,7 +13,7 @@ import {
   PasswordInput,
   UserNameInput,
 } from './Input'
-import { OptionalChildren } from '../../../misc/Children'
+import { OptionalChildren } from '../../misc/Children'
 
 type Props = Pick<InputProps, 'value'> &
   Pick<CustomInputProps, 'onChange'> &

@@ -7,7 +7,7 @@ import { UserNameFormControl } from '../../components/form/FormControl'
 import { SubmitButton } from '../../components/form/SubmitButton'
 import { NavigateToLogin } from '../../components/navigation/RequireLogin'
 import * as UserApi from '../../../user/UserApi'
-import { useErrorToast, useSuccessToast } from '../../../misc/toast'
+import { useErrorToast, useSuccessToast } from '../../misc/toast'
 import { extractApiError } from '../../../httpClient'
 
 export function MyProfilePage() {

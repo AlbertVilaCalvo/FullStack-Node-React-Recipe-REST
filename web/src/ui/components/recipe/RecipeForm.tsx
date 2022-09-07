@@ -12,7 +12,7 @@ import {
   Stack,
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
-import { useErrorToast } from '../../../misc/toast'
+import { useErrorToast } from '../../misc/toast'
 import { extractApiError } from '../../../httpClient'
 import { SubmitButton } from '../form/SubmitButton'
 

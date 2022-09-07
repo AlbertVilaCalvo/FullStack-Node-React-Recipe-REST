@@ -9,7 +9,7 @@ import { H1 } from '../../components/Headers'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Button, Stack } from '@chakra-ui/react'
 import * as RecipeApi from '../../../recipe/RecipeApi'
-import { useErrorToast } from '../../../misc/toast'
+import { useErrorToast } from '../../misc/toast'
 import { RecipeWithUserUtil } from '../../../recipe/RecipeUtil'
 
 export function RecipeDetailPage() {
