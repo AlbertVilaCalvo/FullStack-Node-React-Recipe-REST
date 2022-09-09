@@ -2,7 +2,7 @@ import { Router } from 'express'
 import * as AuthController from './auth/AuthController'
 import * as UserController from './user/UserController'
 import * as RecipeController from './recipe/RecipeController'
-import * as AuthMiddleware from './auth/AuthMiddleware'
+import { AuthMiddleware } from './auth/AuthMiddleware'
 import { unexpectedErrorHandler } from './misc/unexpectedErrorHandler'
 
 export const router = Router()

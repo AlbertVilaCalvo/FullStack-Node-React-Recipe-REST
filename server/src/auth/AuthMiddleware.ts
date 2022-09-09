@@ -70,3 +70,5 @@ export const requireLoggedUser: RequestHandler = async (req, res, next) => {
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   }
 }
+
+export * as AuthMiddleware from './AuthMiddleware'
