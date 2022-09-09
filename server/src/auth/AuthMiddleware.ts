@@ -1,4 +1,3 @@
-// https://stackoverflow.com/q/37377731/4034572
 import { RequestHandler } from 'express'
 import {
   AuthTokenPayload,
@@ -11,6 +10,7 @@ import { ApiError } from '../misc/ApiError'
 import * as UserDatabase from '../user/UserDatabase'
 import { User } from '../user/User'
 
+// https://stackoverflow.com/q/37377731/4034572
 declare module 'express-serve-static-core' {
   interface Request {
     user?: User
