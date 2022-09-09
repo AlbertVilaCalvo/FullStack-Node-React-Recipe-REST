@@ -6,6 +6,7 @@
  * https://kulshekhar.github.io/ts-jest/docs/getting-started/options/
  */
 
+// eslint-disable-next-line import/no-default-export
 export default {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
