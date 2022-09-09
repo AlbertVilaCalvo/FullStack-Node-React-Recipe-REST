@@ -73,7 +73,6 @@ export function getPayloadFromAuthToken(
       // This is redundant since we also set 'expiresIn' when create the token
       maxAge: TOKEN_VALIDITY_TIME,
     })
-    console.log(`jwt.verify result:`, decodedPayload)
     if (isAuthTokenPayload(decodedPayload)) {
       return decodedPayload
     } else {
