@@ -6,7 +6,7 @@ import { StatusCode } from '../misc/StatusCode'
 
 describe('RecipeController', () => {
   describe('createRecipe', () => {
-    test('should return 400 and ApiError if title is missing/empty', () => {
+    test('should return 400 and ApiError if title is missing/empty', async () => {
       const req = HttpMocks.createRequest({
         method: 'POST',
         url: '/recipes',
@@ -17,7 +17,7 @@ describe('RecipeController', () => {
       })
       const res = HttpMocks.createResponse()
 
-      RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, () => {})
 
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.BAD_REQUEST_400)
@@ -26,7 +26,7 @@ describe('RecipeController', () => {
       expect(res._getJSONData().error.message).toContain('title')
     })
 
-    test('should return 400 and ApiError if cooking_time_minutes is missing/empty', () => {
+    test('should return 400 and ApiError if cooking_time_minutes is missing/empty', async () => {
       const req = HttpMocks.createRequest({
         method: 'POST',
         url: '/recipes',
@@ -36,7 +36,7 @@ describe('RecipeController', () => {
       })
       const res = HttpMocks.createResponse()
 
-      RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, () => {})
 
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.BAD_REQUEST_400)
@@ -47,7 +47,7 @@ describe('RecipeController', () => {
       expect(res._getJSONData().error.message).toContain('cooking_time_minutes')
     })
 
-    test('should return 500 if req.user is not set', () => {
+    test('should return 500 if req.user is not set', async () => {
       const req = HttpMocks.createRequest({
         method: 'POST',
         url: '/recipes',
@@ -58,7 +58,7 @@ describe('RecipeController', () => {
       })
       const res = HttpMocks.createResponse()
 
-      RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, () => {})
 
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.INTERNAL_SERVER_ERROR_500)
