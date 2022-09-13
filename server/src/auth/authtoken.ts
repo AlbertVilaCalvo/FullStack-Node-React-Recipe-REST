@@ -58,7 +58,13 @@ export function getAuthTokenFromHeader(
     return Error('Authorization header format is not correct')
   }
 
-  return parts[1]
+  const authToken = parts[1]
+
+  if (!authToken) {
+    return Error('Authorization token is empty')
+  }
+
+  return authToken
 }
 
 /**
