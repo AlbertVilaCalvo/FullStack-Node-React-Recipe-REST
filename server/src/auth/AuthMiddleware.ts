@@ -48,13 +48,12 @@ export const requireLoggedUser: RequestHandler = async (req, res, next) => {
     const payload: AuthTokenPayload = getPayloadResult
     const getUserResult = await UserDatabase.getUserById(payload.uid)
 
-    if (isError(getUserResult) || getUserResult === 'user-not-found') {
-      if (getUserResult === 'user-not-found') {
-        // Either the user has been deleted, or the JWT has been tampered with
-        console.error(
-          `requireLoggedUser - user not found - payload: ${payload}`
-        )
-      }
+    if (isError(getUserResult)) {
+      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+      return
+    } else if (getUserResult === 'user-not-found') {
+      // Either the user has been deleted, or the JWT has been tampered with
+      console.error(`requireLoggedUser - user not found - payload: ${payload}`)
       res
         .status(StatusCode.UNAUTHORIZED_401)
         .json(ApiError.validAuthTokenRequired())

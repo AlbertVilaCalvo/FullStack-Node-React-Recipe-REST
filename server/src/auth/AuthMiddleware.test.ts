@@ -76,6 +76,27 @@ describe('AuthMiddleware.requireLoggedUser', () => {
     expect401(res)
   })
 
+  test('should return 500 if the database query for user throws Error', async () => {
+    const authToken = await generateAuthToken(USER.id)
+    const req = HttpMocks.createRequest({
+      method: 'POST',
+      url: '/recipes',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+    const res = HttpMocks.createResponse()
+
+    const getUserByIdMock = jest.mocked(getUserById)
+    getUserByIdMock.mockResolvedValueOnce(Error('Test'))
+
+    await requireLoggedUser(req, res, next)
+
+    expect(res._isEndCalled()).toBe(true)
+    expect(res.statusCode).toBe(StatusCode.INTERNAL_SERVER_ERROR_500)
+    expect(next.mock.calls.length).toBe(0)
+  })
+
   test('should call the next middleware if the auth token is valid', async () => {
     const authToken = await generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
