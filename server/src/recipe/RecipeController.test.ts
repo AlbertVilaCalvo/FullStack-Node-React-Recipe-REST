@@ -20,7 +20,8 @@ const RECIPE: Recipe = {
   user_id: USER.id,
 }
 
-/* eslint-disable @typescript-eslint/no-empty-function */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const next = () => {}
 
 describe('RecipeController', () => {
   describe('createRecipe', () => {
@@ -35,7 +36,7 @@ describe('RecipeController', () => {
       })
       const res = HttpMocks.createResponse()
 
-      await RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, next)
 
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.BAD_REQUEST_400)
@@ -54,7 +55,7 @@ describe('RecipeController', () => {
       })
       const res = HttpMocks.createResponse()
 
-      await RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, next)
 
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.BAD_REQUEST_400)
@@ -76,7 +77,7 @@ describe('RecipeController', () => {
       })
       const res = HttpMocks.createResponse()
 
-      await RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, next)
 
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.INTERNAL_SERVER_ERROR_500)
@@ -97,7 +98,7 @@ describe('RecipeController', () => {
       const insertNewRecipeMock = jest.mocked(insertNewRecipe)
       insertNewRecipeMock.mockResolvedValueOnce(RECIPE)
 
-      await RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, next)
 
       expect(insertNewRecipeMock).toHaveBeenCalledTimes(1)
       expect(insertNewRecipeMock).toHaveBeenCalledWith(
@@ -131,7 +132,7 @@ describe('RecipeController', () => {
       const insertNewRecipeMock = jest.mocked(insertNewRecipe)
       insertNewRecipeMock.mockResolvedValueOnce(RECIPE)
 
-      await RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, next)
 
       expect(res._isJSON()).toBe(true)
       expect(res._isEndCalled()).toBe(true)
@@ -155,7 +156,7 @@ describe('RecipeController', () => {
       const insertNewRecipeMock = jest.mocked(insertNewRecipe)
       insertNewRecipeMock.mockResolvedValueOnce(Error('Test'))
 
-      await RecipeController.createRecipe(req, res, () => {})
+      await RecipeController.createRecipe(req, res, next)
 
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.INTERNAL_SERVER_ERROR_500)
