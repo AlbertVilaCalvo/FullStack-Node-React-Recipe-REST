@@ -1,5 +1,13 @@
 # Recipe Manager - A Full Stack app built with Node, React, PostgreSQL, REST API
 
+## Features
+
+- Express Backend and React Frontend
+- Database with PostgreSQL
+- Unit tests for functions with Jest
+- Unit tests for route handlers and middleware with [node-mocks-http](https://github.com/howardabrams/node-mocks-http)
+- Integration tests for routes with [supertest](https://github.com/visionmedia/supertest)
+
 ## Database setup
 
 1. Start PostgreSQL with `brew services start postgresql`.
