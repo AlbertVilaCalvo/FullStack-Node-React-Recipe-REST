@@ -24,7 +24,7 @@ function expect401(res: HttpMocks.MockResponse<any>) {
   expect(res._isJSON()).toBe(true)
   expect(res._getJSONData().error.code).toBe('valid_auth_token_required')
   expect(res._getJSONData().error.message).toContain('Authorization')
-  expect(next.mock.calls.length).toBe(0)
+  expect(next).toHaveBeenCalledTimes(0)
 }
 
 describe('AuthMiddleware.requireLoggedUser', () => {
@@ -94,7 +94,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
 
     expect(res._isEndCalled()).toBe(true)
     expect(res.statusCode).toBe(StatusCode.INTERNAL_SERVER_ERROR_500)
-    expect(next.mock.calls.length).toBe(0)
+    expect(next).toHaveBeenCalledTimes(0)
   })
 
   test('should call the next middleware if the auth token is valid', async () => {
@@ -113,7 +113,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
 
     await requireLoggedUser(req, res, next)
 
-    expect(next.mock.calls.length).toBe(1)
+    expect(next).toHaveBeenCalledTimes(1)
     expect(res._isEndCalled()).toBe(false)
     expect(res.statusCode).not.toBe(StatusCode.UNAUTHORIZED_401)
   })
