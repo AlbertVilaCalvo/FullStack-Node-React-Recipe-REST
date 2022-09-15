@@ -75,7 +75,7 @@ type ChangeEmailBody = z.infer<typeof ChangeEmailBodySchema>
  * curl http://localhost:5000/api/my-account/email -H "Content-Type: application/json"
  * -H "Authorization: Bearer auth_token" -d '{"new_email":"a@a.com", "password":"123456"}' -v
  */
-export const changeEmail: RequestHandler<
+export const updateEmail: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   void | ApiError,
@@ -98,7 +98,7 @@ export const changeEmail: RequestHandler<
     if (!req.user) {
       // This should never happen since we set req.user at
       // AuthMiddleware.requireLoggedUser
-      console.error(`Missing req.user at AuthController.changeEmail`)
+      console.error(`Missing req.user at AuthController.updateEmail`)
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
       return
     }

@@ -110,7 +110,7 @@ export async function updateUserEmail(
       return 'user-not-found'
     }
   } catch (error) {
-    console.error(`UserDatabase - changeUserEmail error`, error)
-    return toError(error, 'UserDatabase - changeUserEmail')
+    console.error(`UserDatabase - updateUserEmail error`, error)
+    return toError(error, 'UserDatabase - updateUserEmail')
   }
 }

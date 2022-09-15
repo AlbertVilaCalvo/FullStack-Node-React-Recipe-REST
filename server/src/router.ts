@@ -19,7 +19,7 @@ router.put(
 router.post(
   '/my-account/email',
   AuthMiddleware.requireLoggedUser,
-  MyAccountController.changeEmail
+  MyAccountController.updateEmail
 )
 
 router.get('/users/:userId', UserController.getUser)

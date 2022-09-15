@@ -40,7 +40,7 @@ export function ChangeEmailPage() {
       return
     }
     setLoading(true)
-    MyAccountApi.changeEmail(email, password)
+    MyAccountApi.updateEmail(email, password)
       .then((response) => {
         if (isApiError(response)) {
           showErrorToast(response.error.message)

@@ -16,7 +16,7 @@ export function updateProfile(name: string): Promise<void> {
     })
 }
 
-export function changeEmail(
+export function updateEmail(
   newEmail: string,
   password: string
 ): Promise<void | ApiError> {
