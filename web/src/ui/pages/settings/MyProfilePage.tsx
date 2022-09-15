@@ -6,7 +6,7 @@ import { Form } from '../../components/form/Form'
 import { UserNameFormControl } from '../../components/form/FormControl'
 import { SubmitButton } from '../../components/form/SubmitButton'
 import { NavigateToLogin } from '../../components/navigation/RequireLogin'
-import * as UserApi from '../../../user/UserApi'
+import * as MyAccountApi from '../../../myaccount/MyAccountApi'
 import { useErrorToast, useSuccessToast } from '../../misc/toast'
 import { extractApiError } from '../../../httpClient'
 
@@ -30,7 +30,7 @@ export function MyProfilePage() {
   const onSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault()
     setLoading(true)
-    UserApi.updateUserProfile(name)
+    MyAccountApi.updateProfile(name)
       .then((response) => {
         storeUser.name = name
         showSuccessToast('Profile updated')

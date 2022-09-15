@@ -12,9 +12,9 @@ router.post('/auth/register', AuthController.register)
 router.post('/auth/login', AuthController.login)
 
 router.put(
-  '/me/profile',
+  '/my-account/profile',
   AuthMiddleware.requireLoggedUser,
-  UserController.updateProfile
+  MyAccountController.updateProfile
 )
 router.post(
   '/my-account/email',

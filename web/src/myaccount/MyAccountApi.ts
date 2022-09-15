@@ -6,6 +6,16 @@ import {
 } from '../httpClient'
 import { AxiosResponse } from 'axios'
 
+export function updateProfile(name: string): Promise<void> {
+  return httpClient
+    .put(`/my-account/profile`, {
+      name,
+    })
+    .then((response: AxiosResponse<void>) => {
+      return response.data
+    })
+}
+
 export function changeEmail(
   newEmail: string,
   password: string

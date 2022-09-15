@@ -9,13 +9,3 @@ export function getUser(userId: number): Promise<PublicUser> {
       return response.data.user
     })
 }
-
-export function updateUserProfile(name: string): Promise<void> {
-  return httpClient
-    .put(`/me/profile`, {
-      name,
-    })
-    .then((response: AxiosResponse<void>) => {
-      return response.data
-    })
-}
