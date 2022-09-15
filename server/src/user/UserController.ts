@@ -3,7 +3,7 @@ import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import { PublicUser, removeEmailPassword } from './User'
 import * as UserDatabase from './UserDatabase'
-import { isValidId } from '../misc/validations'
+import { isValidId } from '../validation/validations'
 import { isError } from '../misc/result'
 
 /**

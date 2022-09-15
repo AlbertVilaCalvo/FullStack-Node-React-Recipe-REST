@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express'
 import { StatusCode } from '../misc/StatusCode'
 import { ApiError } from '../misc/ApiError'
-import { isValidId } from '../misc/validations'
+import { isValidId } from './validations'
 
 /**
  * Middleware that ensures that the param recipeId is valid.

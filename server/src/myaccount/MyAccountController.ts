@@ -4,7 +4,7 @@ import {
   isValidData,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-} from '../misc/validations'
+} from '../validation/validations'
 import { RequestHandler } from 'express'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'

@@ -5,7 +5,7 @@ import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
 import * as UserDatabase from '../user/UserDatabase'
-import { isValidId } from '../misc/validations'
+import { isValidId } from '../validation/validations'
 import { isError } from '../misc/result'
 import { User } from '../user/User'
 
