@@ -1,3 +1,5 @@
+import { ZodIssueCode } from 'zod'
+
 type ApiErrorCode =
   | 'user_not_found'
   | 'recipe_not_found'
@@ -9,6 +11,8 @@ type ApiErrorCode =
   | 'duplicate_email'
   | 'invalid_login_credentials'
   | 'valid_auth_token_required'
+  | 'invalid_password'
+  | ZodIssueCode
 
 export class ApiError {
   readonly error: {
@@ -16,8 +20,11 @@ export class ApiError {
     readonly message: string
   }
 
-  constructor(error: { code: ApiErrorCode; message: string }) {
-    this.error = error
+  constructor(code: ApiErrorCode, message: string) {
+    this.error = {
+      code,
+      message,
+    }
   }
 
   static userNotFound(userId: number | string): ApiError {
@@ -78,6 +85,13 @@ export class ApiError {
     return makeApiError(
       'valid_auth_token_required',
       "An 'Authorization' header containing 'Bearer ${token}' with a valid token is required"
+    )
+  }
+
+  static invalidPassword(): ApiError {
+    return makeApiError(
+      'invalid_password',
+      'The provided password is not valid'
     )
   }
 }

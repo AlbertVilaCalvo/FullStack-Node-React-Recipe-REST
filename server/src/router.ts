@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import * as AuthController from './auth/AuthController'
 import * as UserController from './user/UserController'
+import * as MyAccountController from './user/MyAccountController'
 import * as RecipeController from './recipe/RecipeController'
 import { AuthMiddleware } from './auth/AuthMiddleware'
 import { unexpectedErrorHandler } from './misc/unexpectedErrorHandler'
@@ -14,6 +15,11 @@ router.put(
   '/me/profile',
   AuthMiddleware.requireLoggedUser,
   UserController.updateProfile
+)
+router.post(
+  '/my-account/email',
+  AuthMiddleware.requireLoggedUser,
+  MyAccountController.changeEmail
 )
 
 router.get('/users/:userId', UserController.getUser)

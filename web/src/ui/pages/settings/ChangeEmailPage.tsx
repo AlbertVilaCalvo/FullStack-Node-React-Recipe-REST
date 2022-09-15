@@ -10,8 +10,14 @@ import {
 import { SubmitButton } from '../../components/form/SubmitButton'
 import { NavigateToLogin } from '../../components/navigation/RequireLogin'
 import { ValidationError, isValidEmail } from '../../../misc/validations'
+import * as MyAccountApi from '../../../myaccount/MyAccountApi'
+import { isApiError } from '../../../httpClient'
+import { useErrorToast, useSuccessToast } from '../../misc/toast'
 
 export function ChangeEmailPage() {
+  const showErrorToast = useErrorToast()
+  const showSuccessToast = useSuccessToast()
+
   const loggedUserStore = useSnapshot(userStore)
   const snapshotUser = loggedUserStore.user
   const storeUser = userStore.user
@@ -34,6 +40,20 @@ export function ChangeEmailPage() {
       return
     }
     setLoading(true)
+    MyAccountApi.changeEmail(email, password)
+      .then((response) => {
+        if (isApiError(response)) {
+          showErrorToast(response.error.message)
+        } else {
+          showSuccessToast('Email changed')
+          storeUser.email = email
+        }
+        setLoading(false)
+      })
+      .catch((error) => {
+        showErrorToast(error.message)
+        setLoading(false)
+      })
   }
 
   return (

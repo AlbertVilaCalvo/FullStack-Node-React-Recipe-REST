@@ -2,6 +2,7 @@ import { Input, InputProps } from '@chakra-ui/react'
 import {
   EMAIL_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
   USER_NAME_MAX_LENGTH,
 } from '../../../misc/validations'
 
@@ -45,6 +46,7 @@ export function PasswordInput({ onChange, ...props }: CustomInputProps) {
     <Input
       placeholder="Password"
       type="password"
+      minLength={PASSWORD_MIN_LENGTH}
       maxLength={PASSWORD_MAX_LENGTH}
       onChange={(event) => {
         onChange(event.target.value)

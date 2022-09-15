@@ -93,3 +93,21 @@ export async function updateUserProfile(
     return toError(error, 'UserDatabase - updateUserProfile')
   }
 }
+
+export async function updateUserEmail(
+  userId: number,
+  newEmail: string
+): Promise<void | 'user-not-found' | Error> {
+  try {
+    const result = await database.query(
+      'UPDATE "user" SET email = $1 WHERE id = $2',
+      [newEmail, userId]
+    )
+    if (result.rowCount === 0) {
+      return 'user-not-found'
+    }
+  } catch (error) {
+    console.error(`UserDatabase - changeUserEmail error`, error)
+    return toError(error, 'UserDatabase - changeUserEmail')
+  }
+}

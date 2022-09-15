@@ -1,4 +1,5 @@
 export const USER_NAME_MAX_LENGTH = 100
+export const PASSWORD_MIN_LENGTH = 6
 export const PASSWORD_MAX_LENGTH = 60
 export const EMAIL_MAX_LENGTH = 254
 
