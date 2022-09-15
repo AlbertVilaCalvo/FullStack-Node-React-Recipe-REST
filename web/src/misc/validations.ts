@@ -5,6 +5,8 @@ export const PASSWORD_MAX_LENGTH = 60
 export const EMAIL_MAX_LENGTH = 254
 
 // Recipe
+export const TITLE_MIN_LENGTH = 2
+export const TITLE_MAX_LENGTH = 250
 export const MIN_COOKING_TIME_MINUTES = 1
 export const MAX_COOKING_TIME_MINUTES = 3 * 24 * 60 // 3 days
 

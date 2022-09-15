@@ -18,6 +18,8 @@ import { SubmitButton } from '../form/SubmitButton'
 import {
   MAX_COOKING_TIME_MINUTES,
   MIN_COOKING_TIME_MINUTES,
+  TITLE_MAX_LENGTH,
+  TITLE_MIN_LENGTH,
 } from '../../../misc/validations'
 
 type Props = {
@@ -66,6 +68,8 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
         <Input
           placeholder="Title"
           type="text"
+          minLength={TITLE_MIN_LENGTH}
+          maxLength={TITLE_MAX_LENGTH}
           value={title}
           onChange={(event) => {
             setTitle(event.target.value)
