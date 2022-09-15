@@ -15,8 +15,10 @@ import { useNavigate } from 'react-router-dom'
 import { useErrorToast } from '../../misc/toast'
 import { extractApiError } from '../../../httpClient'
 import { SubmitButton } from '../form/SubmitButton'
-
-const MAX_COOKING_TIME_MINUTES = 3 * 24 * 60 // 3 days
+import {
+  MAX_COOKING_TIME_MINUTES,
+  MIN_COOKING_TIME_MINUTES,
+} from '../../../misc/validations'
 
 type Props = {
   recipe?: Recipe
@@ -74,7 +76,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
       <FormControl isRequired>
         <FormLabel>Cooking Time (minutes)</FormLabel>
         <NumberInput
-          min={1}
+          min={MIN_COOKING_TIME_MINUTES}
           max={MAX_COOKING_TIME_MINUTES}
           allowMouseWheel
           value={cookingTimeMinutes}

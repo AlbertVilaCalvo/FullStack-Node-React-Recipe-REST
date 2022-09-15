@@ -1,7 +1,12 @@
+// User
 export const USER_NAME_MAX_LENGTH = 100
 export const PASSWORD_MIN_LENGTH = 6
 export const PASSWORD_MAX_LENGTH = 60
 export const EMAIL_MAX_LENGTH = 254
+
+// Recipe
+export const MIN_COOKING_TIME_MINUTES = 1
+export const MAX_COOKING_TIME_MINUTES = 3 * 24 * 60 // 3 days
 
 // Regex from https://stackoverflow.com/a/9204568/4034572.
 // This is just a simple check. To truly verify the email, send an email to the
