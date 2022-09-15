@@ -1,11 +1,11 @@
 import { Request, RequestHandler } from 'express'
-import { Recipe, RecipeWithUser } from './Recipe'
+import { Recipe, RecipeSchema, RecipeWithUser } from './Recipe'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
 import * as UserDatabase from '../user/UserDatabase'
-import { isValidId } from '../validation/validations'
+import { isValidData, isValidId, toApiError } from '../validation/validations'
 import { isError } from '../misc/result'
 import { User } from '../user/User'
 import { assertUser } from '../auth/AuthMiddleware'
@@ -93,6 +93,14 @@ export const getRecipe: RequestHandler<
   }
 }
 
+const CreateRecipeReqBodySchema = RecipeSchema.omit({
+  id: true,
+  user_id: true,
+})
+type CreateRecipeReqBody = Omit<Recipe, 'id' | 'user_id'>
+// We could also do:
+// type CreateRecipeReqBody = z.infer<typeof CreateRecipeReqBodySchema>
+
 /**
  * POST /api/recipes
  *
@@ -103,31 +111,25 @@ export const createRecipe: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   { id: number } | ApiError,
-  Partial<Omit<Recipe, 'id'>>
+  CreateRecipeReqBody
 > = async (req, res) => {
   try {
-    // TODO validate title type string and length <= 255
-    // TODO validate cooking_time_minutes type number and length 0 > 0 and <= 3*24*60
-    const title = req.body.title
-    if (!title) {
-      res.status(StatusCode.BAD_REQUEST_400).json(ApiError.titleRequired())
+    const validateBodyResult = CreateRecipeReqBodySchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      console.log(`parsedBody.error`, validateBodyResult.error)
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const cooking_time_minutes = req.body.cooking_time_minutes
-    if (!cooking_time_minutes) {
-      res
-        .status(StatusCode.BAD_REQUEST_400)
-        .json(ApiError.cookingTimeRequired())
-      return
-    }
+    const reqBody: CreateRecipeReqBody = validateBodyResult.data
 
     assertUser(req.user, 'RecipeController.createRecipe')
     const user: User = req.user
 
     const insertResult = await RecipeDatabase.insertNewRecipe(
       user.id,
-      title,
-      cooking_time_minutes
+      reqBody.title,
+      reqBody.cooking_time_minutes
     )
     if (isError(insertResult)) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
@@ -144,6 +146,9 @@ export const createRecipe: RequestHandler<
   }
 }
 
+const UpdateRecipeReqBodySchema = CreateRecipeReqBodySchema.partial()
+type UpdateRecipeReqBody = Partial<CreateRecipeReqBody>
+
 /**
  * PATCH /api/recipes/:recipeId
  *
@@ -153,9 +158,17 @@ export const createRecipe: RequestHandler<
 export const updateRecipe: RequestHandler<
   { recipeId: string },
   { recipe: Recipe } | ApiError,
-  Partial<Omit<Recipe, 'id'>>
+  UpdateRecipeReqBody
 > = async (req, res) => {
   try {
+    const validateBodyResult = UpdateRecipeReqBodySchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
+      return
+    }
+    const reqBody: UpdateRecipeReqBody = validateBodyResult.data
+
     const recipeId = Number(req.params.recipeId)
 
     let recipe: Recipe
@@ -181,13 +194,11 @@ export const updateRecipe: RequestHandler<
       return
     }
 
-    // TODO validate title type string and length <= 255
-    // TODO validate cooking_time_minutes type number and length 0 > 0 and <= 3*24*60
-    if (req.body.title) {
-      recipe.title = req.body.title
+    if (reqBody.title) {
+      recipe.title = reqBody.title
     }
-    if (req.body.cooking_time_minutes) {
-      recipe.cooking_time_minutes = req.body.cooking_time_minutes
+    if (reqBody.cooking_time_minutes) {
+      recipe.cooking_time_minutes = reqBody.cooking_time_minutes
     }
 
     const updateRecipeResult = await RecipeDatabase.updateRecipe(recipe)

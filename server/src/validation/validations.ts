@@ -1,4 +1,10 @@
-import { SafeParseError, SafeParseReturnType, SafeParseSuccess } from 'zod'
+import {
+  SafeParseError,
+  SafeParseReturnType,
+  SafeParseSuccess,
+  ZodError,
+} from 'zod'
+import { ApiError } from '../misc/ApiError'
 
 export const USER_NAME_MAX_LENGTH = 100
 export const PASSWORD_MIN_LENGTH = 6
@@ -27,4 +33,11 @@ export function invalidData<Input, Output>(
   arg: SafeParseReturnType<Input, Output>
 ): arg is SafeParseError<Input> {
   return !arg.success
+}
+
+export function toApiError(zodError: ZodError): ApiError {
+  const firstIssue = zodError.issues[0]
+  const code = firstIssue.code
+  const message = `${firstIssue.path[0]} - ${firstIssue.message}`
+  return new ApiError(code, message)
 }

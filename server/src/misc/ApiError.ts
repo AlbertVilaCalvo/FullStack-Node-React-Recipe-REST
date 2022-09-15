@@ -3,8 +3,6 @@ import { ZodIssueCode } from 'zod'
 type ApiErrorCode =
   | 'user_not_found'
   | 'recipe_not_found'
-  | 'title_required'
-  | 'cooking_time_minutes_required'
   | 'name_required'
   | 'email_required'
   | 'password_required'
@@ -14,6 +12,17 @@ type ApiErrorCode =
   | 'invalid_password'
   | ZodIssueCode
 
+/**
+ * The JSON body of an unsuccessful request, with this shape:
+ * ```json
+ * {
+ *   error: {
+ *     code: ApiErrorCode
+ *     message: string
+ *   }
+ * }
+ * ```
+ */
 export class ApiError {
   readonly error: {
     readonly code: ApiErrorCode
@@ -35,20 +44,6 @@ export class ApiError {
     return makeApiError(
       'recipe_not_found',
       `Recipe with id ${recipeId} not found`
-    )
-  }
-
-  static titleRequired(): ApiError {
-    return makeApiError(
-      'title_required',
-      "The required field 'title' is missing"
-    )
-  }
-
-  static cookingTimeRequired(): ApiError {
-    return makeApiError(
-      'cooking_time_minutes_required',
-      "The required field 'cooking_time_minutes' is missing"
     )
   }
 

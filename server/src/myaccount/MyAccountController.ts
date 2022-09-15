@@ -4,6 +4,7 @@ import {
   isValidData,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
+  toApiError,
 } from '../validation/validations'
 import { RequestHandler } from 'express'
 import { ApiError } from '../misc/ApiError'
@@ -62,12 +63,11 @@ export const updateProfile: RequestHandler<
   }
 }
 
-const ChangeEmailBodySchema = z.object({
+const ChangeEmailReqBodySchema = z.object({
   new_email: z.string().email().max(EMAIL_MAX_LENGTH),
   password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
 })
-
-type ChangeEmailBody = z.infer<typeof ChangeEmailBodySchema>
+type ChangeEmailReqBody = z.infer<typeof ChangeEmailReqBodySchema>
 
 /**
  * PUT /api/my-account/email
@@ -79,21 +79,16 @@ export const updateEmail: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   void | ApiError,
-  ChangeEmailBody
+  ChangeEmailReqBody
 > = async (req, res) => {
   try {
-    const parsedBody = ChangeEmailBodySchema.safeParse(req.body)
-
-    if (!isValidData(parsedBody)) {
-      console.log(`parsedBody.error`, parsedBody.error)
-      const firstIssue = parsedBody.error.issues[0]
-      const code = firstIssue.code
-      const message = `${firstIssue.path[0]} - ${firstIssue.message}`
-      res.status(StatusCode.BAD_REQUEST_400).json(new ApiError(code, message))
+    const validateBodyResult = ChangeEmailReqBodySchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-
-    const body = parsedBody.data
+    const reqBody: ChangeEmailReqBody = validateBodyResult.data
 
     if (!req.user) {
       // This should never happen since we set req.user at
@@ -106,7 +101,10 @@ export const updateEmail: RequestHandler<
 
     let passwordsMatch: boolean
     try {
-      passwordsMatch = await checkIfPasswordsMatch(body.password, user.password)
+      passwordsMatch = await checkIfPasswordsMatch(
+        reqBody.password,
+        user.password
+      )
     } catch (error) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
       return
@@ -119,7 +117,7 @@ export const updateEmail: RequestHandler<
 
     const updateEmailResult = await UserDatabase.updateUserEmail(
       user.id,
-      body.new_email
+      reqBody.new_email
     )
     if (updateEmailResult === 'user-not-found' || isError(updateEmailResult)) {
       // 'user-not-found' should never happen since we grab the user from the
