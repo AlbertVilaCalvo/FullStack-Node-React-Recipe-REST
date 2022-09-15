@@ -14,7 +14,8 @@
 - Forgot/recover password
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/services/auth.service.js#L37-L54
-- Refresh token
+- If the JWT token expires, do a logout on the client
+- Refresh token. We need an axios interceptor to handle 401 and refresh the token
   - https://javascript.plainenglish.io/expressjs-api-with-secure-jwt-access-and-refresh-token-64c5478be2c0
   - https://medium.com/swlh/authentication-using-jwt-and-refresh-token-part-1-aca5522c14c8
 
@@ -40,13 +41,13 @@
   - Curso de Node.js: Autenticación, Microservicios y Redis - https://platzi.com/cursos/nodejs-microservicios - https://github.com/CodingCarlos/proyecto-backend-node-platzi
   - https://github.com/guardian/gateway/search?q=redis
 - JWT blacklist: https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/expirejwt.md
-- HelmetJS: https://www.freecodecamp.org/learn/information-security/#information-security-with-helmetjs
+- HelmetJS
+  - https://www.freecodecamp.org/learn/information-security/#information-security-with-helmetjs
+  - https://nemethgergely.com/blog/nodejs-security-overview#using-the-helmet-module
+  - https://blog.risingstack.com/node-js-security-checklist/
 - Paginate GET /recipe
-- Validation of incoming data
+- Validation middleware?
   - https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/validation.md
-  - https://github.com/express-validator/express-validator
-  - https://github.com/colinhacks/zod
-  - https://github.com/hapijs/joi
   - https://github.com/platzi/curso-nodejs-postgres/blob/main/middlewares/validator.handler.js (utilitza joi)
 - Swagger:
   - https://github.com/danielkhan/todolist-backend/blob/master/utils/swagger.js
@@ -54,6 +55,7 @@
   - Use PostgreSQL's full-text search functionality to perform natural-language searches of your data. https://lets-go-further.alexedwards.net/
 - Rate limit:
   - https://github.com/nfriedly/express-rate-limit
+  - https://github.com/tj/node-ratelimiter
   - https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/login-rate-limit.md
   - https://github.com/guardian/gateway/tree/main/src/server/lib/rate-limit
 
@@ -65,6 +67,8 @@
   - Setup requires many extra steps for Create React App :/
 
 ## Deploy AWS
+
+https://stackoverflow.com/questions/41250087/how-to-deploy-a-react-nodejs-express-application-to-aws
 
 ### Docker
 
