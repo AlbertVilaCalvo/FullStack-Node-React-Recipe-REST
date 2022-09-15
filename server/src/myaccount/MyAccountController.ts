@@ -8,9 +8,9 @@ import {
 import { RequestHandler } from 'express'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
-import { User } from './User'
+import { User } from '../user/User'
 import { checkIfPasswordsMatch } from '../auth/password'
-import * as UserDatabase from './UserDatabase'
+import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
 
 const ChangeEmailBodySchema = z.object({
