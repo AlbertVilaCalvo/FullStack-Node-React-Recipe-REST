@@ -75,7 +75,12 @@ export const updateProfile: RequestHandler<
       user.id,
       name
     )
-    if (isError(updateProfileResult)) {
+    if (
+      updateProfileResult === 'user-not-found' ||
+      isError(updateProfileResult)
+    ) {
+      // 'user-not-found' should never happen since we grab the user from the
+      // database in AuthMiddleware.requireLoggedUser.
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
     } else {
       res.sendStatus(StatusCode.NO_CONTENT_204)

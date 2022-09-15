@@ -82,12 +82,15 @@ export async function insertNewUser(
 export async function updateUserProfile(
   userId: number,
   name: string
-): Promise<void | Error> {
+): Promise<void | 'user-not-found' | Error> {
   try {
-    await database.query('UPDATE "user" SET name = $1 WHERE id = $2', [
-      name,
-      userId,
-    ])
+    const result = await database.query(
+      'UPDATE "user" SET name = $1 WHERE id = $2',
+      [name, userId]
+    )
+    if (result.rowCount === 0) {
+      return 'user-not-found'
+    }
   } catch (error) {
     console.error(`UserDatabase - updateUserProfile error`, error)
     return toError(error, 'UserDatabase - updateUserProfile')
