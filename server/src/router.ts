@@ -5,6 +5,7 @@ import * as MyAccountController from './myaccount/MyAccountController'
 import * as RecipeController from './recipe/RecipeController'
 import { AuthMiddleware } from './auth/AuthMiddleware'
 import { unexpectedErrorHandler } from './misc/unexpectedErrorHandler'
+import { validateParamRecipeId } from './validation/validateParamMiddleware'
 
 export const router = Router()
 
@@ -25,7 +26,11 @@ router.put(
 router.get('/users/:userId', UserController.getUser)
 
 router.get('/recipes', RecipeController.getAllRecipes)
-router.get('/recipes/:recipeId', RecipeController.getRecipe)
+router.get(
+  '/recipes/:recipeId',
+  validateParamRecipeId,
+  RecipeController.getRecipe
+)
 router.post(
   '/recipes',
   AuthMiddleware.requireLoggedUser,
@@ -33,6 +38,7 @@ router.post(
 )
 router.patch(
   '/recipes/:recipeId',
+  validateParamRecipeId,
   AuthMiddleware.requireLoggedUser,
   RecipeController.updateRecipe
 )

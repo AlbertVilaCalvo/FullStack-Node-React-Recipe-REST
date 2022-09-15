@@ -47,12 +47,6 @@ export const getRecipe: RequestHandler<
 > = async (req, res) => {
   try {
     const recipeId = Number(req.params.recipeId)
-    if (!isValidId(recipeId)) {
-      res
-        .status(StatusCode.NOT_FOUND_404)
-        .json(ApiError.recipeNotFound(req.params.recipeId))
-      return
-    }
 
     const getRecipeResult = await RecipeDatabase.getRecipeById(recipeId)
     if (getRecipeResult === 'recipe-not-found') {
@@ -167,12 +161,6 @@ export const updateRecipe: RequestHandler<
 > = async (req, res) => {
   try {
     const recipeId = Number(req.params.recipeId)
-    if (!isValidId(recipeId)) {
-      res
-        .status(StatusCode.NOT_FOUND_404)
-        .json(ApiError.recipeNotFound(req.params.recipeId))
-      return
-    }
 
     let recipe: Recipe
     const getRecipeResult = await RecipeDatabase.getRecipeById(recipeId)
