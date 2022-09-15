@@ -70,9 +70,9 @@ const ChangeEmailBodySchema = z.object({
 type ChangeEmailBody = z.infer<typeof ChangeEmailBodySchema>
 
 /**
- * POST /api/my-account/email
+ * PUT /api/my-account/email
  *
- * curl http://localhost:5000/api/my-account/email -H "Content-Type: application/json"
+ * curl http://localhost:5000/api/my-account/email -X PUT -H "Content-Type: application/json"
  * -H "Authorization: Bearer auth_token" -d '{"new_email":"a@a.com", "password":"123456"}' -v
  */
 export const updateEmail: RequestHandler<

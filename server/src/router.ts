@@ -16,7 +16,7 @@ router.put(
   AuthMiddleware.requireLoggedUser,
   MyAccountController.updateProfile
 )
-router.post(
+router.put(
   '/my-account/email',
   AuthMiddleware.requireLoggedUser,
   MyAccountController.updateEmail

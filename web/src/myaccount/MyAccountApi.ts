@@ -21,7 +21,7 @@ export function updateEmail(
   password: string
 ): Promise<void | ApiError> {
   return httpClient
-    .post(`/my-account/email`, {
+    .put(`/my-account/email`, {
       new_email: newEmail,
       password,
     })
