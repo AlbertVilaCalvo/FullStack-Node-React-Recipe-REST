@@ -13,6 +13,7 @@ import { User } from '../user/User'
 import { checkIfPasswordsMatch } from '../auth/password'
 import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
+import { assertUser } from '../auth/AuthMiddleware'
 
 /**
  * PUT /api/my-account/profile
@@ -35,12 +36,7 @@ export const updateProfile: RequestHandler<
       return
     }
 
-    if (!req.user) {
-      // This should never happen
-      console.error(`Missing req.user at UserController.updateProfile`)
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
+    assertUser(req.user, 'MyAccountController.updateProfile')
     const user: User = req.user
 
     const updateProfileResult = await UserDatabase.updateUserProfile(
@@ -90,13 +86,7 @@ export const updateEmail: RequestHandler<
     }
     const reqBody: ChangeEmailReqBody = validateBodyResult.data
 
-    if (!req.user) {
-      // This should never happen since we set req.user at
-      // AuthMiddleware.requireLoggedUser
-      console.error(`Missing req.user at AuthController.updateEmail`)
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
+    assertUser(req.user, 'MyAccountController.updateEmail')
     const user: User = req.user
 
     let passwordsMatch: boolean
