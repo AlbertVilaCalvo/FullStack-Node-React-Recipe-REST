@@ -8,6 +8,7 @@ import * as UserDatabase from '../user/UserDatabase'
 import { isValidId } from '../validation/validations'
 import { isError } from '../misc/result'
 import { User } from '../user/User'
+import { assertUser } from '../auth/AuthMiddleware'
 
 /**
  * GET /api/recipes
@@ -120,12 +121,7 @@ export const createRecipe: RequestHandler<
       return
     }
 
-    if (!req.user) {
-      // This should never happen
-      console.error(`Missing req.user at updateRecipe`)
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
+    assertUser(req.user, 'RecipeController.createRecipe')
     const user: User = req.user
 
     const insertResult = await RecipeDatabase.insertNewRecipe(
@@ -176,14 +172,10 @@ export const updateRecipe: RequestHandler<
       recipe = getRecipeResult
     }
 
-    // Validate that the logged user is the recipe owner
-    if (!req.user) {
-      // This should never happen
-      console.error(`Missing req.user at updateRecipe`)
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
+    assertUser(req.user, 'RecipeController.updateRecipe')
     const user: User = req.user
+
+    // Validate that the logged user is the recipe owner
     if (user.id !== recipe.user_id) {
       res.sendStatus(StatusCode.FORBIDDEN_403)
       return
@@ -229,21 +221,15 @@ export const deleteRecipe: RequestHandler<
       return
     }
 
-    // Validate that the logged user is the recipe owner
-    if (!req.user) {
-      // This should never happen
-      console.error(`Missing req.user at updateRecipe`)
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
+    assertUser(req.user, 'RecipeController.deleteRecipe')
     const user: User = req.user
 
-    // Here we could grab the recipe from the database with
-    // RecipeDatabase.getRecipeById (like we do above in updateRecipe()) and then
-    // validate that the user is the owner of the recipe, but this would mean
-    // hitting the database twice (one time to get the recipe and another to
-    // delete it). Instead, we do a DELETE with the user id, which will fail to
-    // delete the recipe if the user is not the owner.
+    // To validate that the logged user is the recipe owner we could grab the
+    // recipe from the database with RecipeDatabase.getRecipeById (like we do
+    // above in updateRecipe()) and then check user.id === recipe.user_id,
+    // but this requires hitting the database twice (one time to get the
+    // recipe and another to delete it). Instead, we do a DELETE with the user
+    // id, which will fail to delete the recipe if the user is not the owner.
 
     const deleteRecipeResult = await RecipeDatabase.deleteRecipe(
       recipeId,

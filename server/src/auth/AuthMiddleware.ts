@@ -70,4 +70,27 @@ export const requireLoggedUser: RequestHandler = async (req, res, next) => {
   }
 }
 
+/**
+ * Since `req.user` is defined as `User | undefined`, every time you want to get
+ * the user on a request handler you need to assert that is not `undefined`,
+ * which is cumbersome. This assertion function allows you to get rid of
+ * `undefined` quickly.
+ *
+ * Obviously, it should only be used on route handlers that have the middleware
+ * `requireLoggedUser`.
+ *
+ * @param user `req.user`
+ * @param where name of the function where `assertUser` is called
+ */
+export function assertUser(
+  user: User | undefined,
+  where: string
+): asserts user is User {
+  if (!user) {
+    const message = `req.user is undefined at ${where}`
+    console.error(message)
+    throw new Error(message)
+  }
+}
+
 export * as AuthMiddleware from './AuthMiddleware'

@@ -17,11 +17,11 @@ export function isNumber(n: string): boolean {
 /**
  * For try-catch, to convert the error (which has type unknown) to an Error.
  */
-export function toError(error: unknown, source: string): Error {
+export function toError(error: unknown, where: string): Error {
   if (error instanceof Error) {
     return error
   } else {
-    console.error(`${source} - Not an instanceof error`, error)
+    console.error(`${where} - Not an instanceof error`, error)
     return Error('Unknown error')
   }
 }
