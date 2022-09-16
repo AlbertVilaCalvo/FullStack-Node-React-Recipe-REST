@@ -116,7 +116,6 @@ export const createRecipe: RequestHandler<
   try {
     const validateBodyResult = CreateRecipeReqBodySchema.safeParse(req.body)
     if (!isValidData(validateBodyResult)) {
-      console.log(`parsedBody.error`, validateBodyResult.error)
       const apiError = toApiError(validateBodyResult.error)
       res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
@@ -202,7 +201,11 @@ export const updateRecipe: RequestHandler<
     }
 
     const updateRecipeResult = await RecipeDatabase.updateRecipe(recipe)
-    if (isError(updateRecipeResult)) {
+    if (updateRecipeResult === 'recipe-not-found') {
+      res
+        .status(StatusCode.NOT_FOUND_404)
+        .json(ApiError.recipeNotFound(recipeId))
+    } else if (isError(updateRecipeResult)) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
     } else {
       res.status(StatusCode.OK_200).json({ recipe: recipe })
@@ -248,7 +251,7 @@ export const deleteRecipe: RequestHandler<
     )
     if (isError(deleteRecipeResult)) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-    } else if (deleteRecipeResult === 'user-not-owner') {
+    } else if (deleteRecipeResult === 'user-not-owner-or-recipe-not-found') {
       res.sendStatus(StatusCode.FORBIDDEN_403)
     } else {
       res.sendStatus(StatusCode.NO_CONTENT_204)

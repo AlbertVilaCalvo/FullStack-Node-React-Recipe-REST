@@ -62,12 +62,18 @@ export async function insertNewRecipe(
     })
 }
 
-export async function updateRecipe(recipe: Recipe): Promise<void | Error> {
+export async function updateRecipe(
+  recipe: Recipe
+): Promise<'success' | 'recipe-not-found' | Error> {
   try {
-    await database.query(
+    const result = await database.query(
       'UPDATE recipe SET title = $1, cooking_time_minutes = $2 WHERE id = $3',
       [recipe.title, recipe.cooking_time_minutes, recipe.id]
     )
+    if (result.rowCount === 0) {
+      return 'recipe-not-found'
+    }
+    return 'success'
   } catch (error) {
     console.error(`RecipeDatabase - updateRecipe error`, error)
     return toError(error, 'RecipeDatabase - updateRecipe')
@@ -84,19 +90,20 @@ export async function updateRecipe(recipe: Recipe): Promise<void | Error> {
 export async function deleteRecipe(
   recipeId: number,
   userId: number
-): Promise<void | 'user-not-owner' | Error> {
+): Promise<'success' | 'user-not-owner-or-recipe-not-found' | Error> {
   try {
     const result = await database.query(
       'DELETE FROM recipe WHERE id = $1 AND user_id = $2',
       [recipeId, userId]
     )
-    console.log(`RecipeDatabase - deleteRecipe result`, result)
     if (result.rowCount === 0) {
       // No recipe was deleted because the given userId does not match the
       // recipe's user_id. In other words, the user is not the owner of the
       // recipe that we tried to delete, thus no recipe was deleted.
-      return 'user-not-owner'
+      // Another possibility is that the recipe does not exist.
+      return 'user-not-owner-or-recipe-not-found'
     }
+    return 'success'
   } catch (error) {
     console.error(
       `RecipeDatabase - deleteRecipe 'DELETE FROM recipe WHERE id = ${recipeId}' error`,
