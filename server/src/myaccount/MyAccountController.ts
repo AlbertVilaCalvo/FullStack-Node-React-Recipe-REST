@@ -10,10 +10,11 @@ import { RequestHandler } from 'express'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import { User } from '../user/User'
-import { checkIfPasswordsMatch } from '../auth/password'
+import * as UserService from '../user/UserService'
 import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
 import { assertUser } from '../auth/AuthMiddleware'
+import { assertUnreachable } from '../misc/assertUnreachable'
 
 /**
  * PUT /api/my-account/profile
@@ -89,32 +90,29 @@ export const updateEmail: RequestHandler<
     assertUser(req.user, 'MyAccountController.updateEmail')
     const user: User = req.user
 
-    let passwordsMatch: boolean
-    try {
-      passwordsMatch = await checkIfPasswordsMatch(
-        reqBody.password,
-        user.password
-      )
-    } catch (error) {
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
-
-    if (!passwordsMatch) {
-      res.status(StatusCode.OK_200).json(ApiError.invalidPassword())
-      return
-    }
-
-    const updateEmailResult = await UserDatabase.updateUserEmail(
-      user.id,
+    const updateUserEmailResult = await UserService.updateUserEmail(
+      user,
+      reqBody.password,
       reqBody.new_email
     )
-    if (updateEmailResult === 'user-not-found' || isError(updateEmailResult)) {
-      // 'user-not-found' should never happen since we grab the user from the
-      // database in AuthMiddleware.requireLoggedUser.
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-    } else {
-      res.sendStatus(StatusCode.NO_CONTENT_204)
+
+    switch (updateUserEmailResult) {
+      case 'success':
+        res.sendStatus(StatusCode.NO_CONTENT_204)
+        return
+      case 'invalid-password':
+        res.status(StatusCode.OK_200).json(ApiError.invalidPassword())
+        return
+      case 'user-not-found':
+        // 'user-not-found' should never happen since we grab the user from the
+        // database in AuthMiddleware.requireLoggedUser.
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      case 'unrecoverable-error':
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      default:
+        assertUnreachable(updateUserEmailResult)
     }
   } catch (e) {
     console.error('Unexpected error at AuthController.changePassword:', e)
