@@ -65,7 +65,7 @@ describe('UserService.updateUserEmail', () => {
     checkIfPasswordsMatchMock.mockResolvedValueOnce(true)
 
     const updateUserEmailDatabaseMock = jest.mocked(updateUserEmailDatabase)
-    updateUserEmailDatabaseMock.mockResolvedValueOnce()
+    updateUserEmailDatabaseMock.mockResolvedValueOnce('success')
 
     const result = await updateUserEmailService(USER, 'pwd', 'x@y.z')
 

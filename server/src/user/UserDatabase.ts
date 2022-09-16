@@ -82,7 +82,7 @@ export async function insertNewUser(
 export async function updateUserProfile(
   userId: number,
   name: string
-): Promise<void | 'user-not-found' | Error> {
+): Promise<'success' | 'user-not-found' | Error> {
   try {
     const result = await database.query(
       'UPDATE "user" SET name = $1 WHERE id = $2',
@@ -91,6 +91,7 @@ export async function updateUserProfile(
     if (result.rowCount === 0) {
       return 'user-not-found'
     }
+    return 'success'
   } catch (error) {
     console.error(`UserDatabase - updateUserProfile error`, error)
     return toError(error, 'UserDatabase - updateUserProfile')
@@ -100,7 +101,7 @@ export async function updateUserProfile(
 export async function updateUserEmail(
   userId: number,
   newEmail: string
-): Promise<void | 'user-not-found' | Error> {
+): Promise<'success' | 'user-not-found' | Error> {
   try {
     const result = await database.query(
       'UPDATE "user" SET email = $1 WHERE id = $2',
@@ -109,6 +110,7 @@ export async function updateUserEmail(
     if (result.rowCount === 0) {
       return 'user-not-found'
     }
+    return 'success'
   } catch (error) {
     console.error(`UserDatabase - updateUserEmail error`, error)
     return toError(error, 'UserDatabase - updateUserEmail')
