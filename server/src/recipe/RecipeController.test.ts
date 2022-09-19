@@ -41,7 +41,7 @@ describe('RecipeController', () => {
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.BAD_REQUEST_400)
       expect(res._isJSON()).toBe(true)
-      expect(res._getJSONData().error.code).toBe('title_required')
+      expect(res._getJSONData().error.code).toBe('too_small')
       expect(res._getJSONData().error.message).toContain('title')
     })
 
@@ -60,9 +60,7 @@ describe('RecipeController', () => {
       expect(res._isEndCalled()).toBe(true)
       expect(res.statusCode).toBe(StatusCode.BAD_REQUEST_400)
       expect(res._isJSON()).toBe(true)
-      expect(res._getJSONData().error.code).toBe(
-        'cooking_time_minutes_required'
-      )
+      expect(res._getJSONData().error.code).toBe('invalid_type')
       expect(res._getJSONData().error.message).toContain('cooking_time_minutes')
     })
 
