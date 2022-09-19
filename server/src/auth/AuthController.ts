@@ -3,15 +3,26 @@ import { StatusCode } from '../misc/StatusCode'
 import * as UserDatabase from '../user/UserDatabase'
 import { checkIfPasswordsMatch, hashPassword } from './password'
 import { isError } from '../misc/result'
-import { removePassword, User, UserNoPassword } from '../user/User'
+import {
+  EmailSchema,
+  PlainPasswordSchema,
+  removePassword,
+  User,
+  UserNameSchema,
+  UserNoPassword,
+} from '../user/User'
 import { requestFullUrl } from '../misc/util'
 import { ApiError } from '../misc/ApiError'
 import { generateAuthToken } from './authtoken'
+import { isValidData, toApiError } from '../validation/validations'
 
 type RegisterLoginResponse = {
   user: UserNoPassword
   auth_token: string
 }
+const RegisterRequestSchema =
+  UserNameSchema.merge(EmailSchema).merge(PlainPasswordSchema)
+type RegisterRequest = { name: string; email: string; password: string }
 
 /**
  * POST /api/auth/register
@@ -22,39 +33,28 @@ export const register: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   RegisterLoginResponse | ApiError,
-  { name?: string; email?: string; password?: string }
+  RegisterRequest
 > = async (req, res) => {
   try {
-    const name = req.body.name
-    if (!name) {
-      res.status(StatusCode.BAD_REQUEST_400).json(ApiError.nameRequired())
+    const validateBodyResult = RegisterRequestSchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const email = req.body.email
-    if (!email) {
-      res.status(StatusCode.BAD_REQUEST_400).json(ApiError.emailRequired())
-      return
-    }
-    const password = req.body.password
-    if (!password) {
-      res.status(StatusCode.BAD_REQUEST_400).json(ApiError.passwordRequired())
-      return
-    }
-    // TODO validate name length
-    // TODO validate email format
-    // TODO validate password length
+    const requestBody: RegisterRequest = validateBodyResult.data
 
     let passwordHash: string
     try {
-      passwordHash = await hashPassword(password)
+      passwordHash = await hashPassword(requestBody.password)
     } catch (error) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
       return
     }
 
     const insertUserResult = await UserDatabase.insertNewUser(
-      name,
-      email,
+      requestBody.name,
+      requestBody.email,
       passwordHash
     )
 
@@ -88,6 +88,9 @@ export const register: RequestHandler<
   }
 }
 
+const LoginRequestSchema = EmailSchema.merge(PlainPasswordSchema)
+type LoginRequest = { email: string; password: string }
+
 /**
  * POST /api/auth/login
  *
@@ -97,23 +100,18 @@ export const login: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   RegisterLoginResponse | ApiError,
-  { email?: string; password?: string }
+  LoginRequest
 > = async (req, res) => {
   try {
-    const email = req.body.email
-    if (!email) {
-      res.status(StatusCode.BAD_REQUEST_400).json(ApiError.emailRequired())
+    const validateBodyResult = LoginRequestSchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const password = req.body.password
-    if (!password) {
-      res.status(StatusCode.BAD_REQUEST_400).json(ApiError.passwordRequired())
-      return
-    }
-    // TODO validate email format
-    // TODO validate password length
+    const requestBody: LoginRequest = validateBodyResult.data
 
-    const getUserResult = await UserDatabase.getUserByEmail(email)
+    const getUserResult = await UserDatabase.getUserByEmail(requestBody.email)
 
     if (isError(getUserResult)) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
@@ -127,7 +125,10 @@ export const login: RequestHandler<
 
     let passwordsMatch: boolean
     try {
-      passwordsMatch = await checkIfPasswordsMatch(password, user.password)
+      passwordsMatch = await checkIfPasswordsMatch(
+        requestBody.password,
+        user.password
+      )
     } catch (error) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
       return

@@ -1,20 +1,22 @@
 import { z } from 'zod'
-import {
-  EMAIL_MAX_LENGTH,
-  isValidData,
-  PASSWORD_MAX_LENGTH,
-  PASSWORD_MIN_LENGTH,
-  toApiError,
-} from '../validation/validations'
+import { isValidData, toApiError } from '../validation/validations'
 import { RequestHandler } from 'express'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
-import { User } from '../user/User'
+import {
+  EMAIL_MAX_LENGTH,
+  PlainPasswordSchema,
+  User,
+  UserNameSchema,
+} from '../user/User'
 import * as UserService from '../user/UserService'
 import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
 import { assertUser } from '../auth/AuthMiddleware'
 import { assertUnreachable } from '../misc/assertUnreachable'
+
+const UpdateProfileRequestSchema = UserNameSchema
+type UpdateProfileRequest = { name: string }
 
 /**
  * PUT /api/my-account/profile
@@ -28,21 +30,23 @@ export const updateProfile: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   undefined | ApiError,
-  { name?: string }
+  UpdateProfileRequest
 > = async (req, res) => {
   try {
-    const name = req.body.name
-    if (!name) {
-      res.status(StatusCode.BAD_REQUEST_400).json(ApiError.nameRequired())
+    const validateBodyResult = UpdateProfileRequestSchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
+    const requestBody: UpdateProfileRequest = validateBodyResult.data
 
     assertUser(req.user, 'MyAccountController.updateProfile')
     const user: User = req.user
 
     const updateProfileResult = await UserDatabase.updateUserProfile(
       user.id,
-      name
+      requestBody.name
     )
     if (
       updateProfileResult === 'user-not-found' ||
@@ -60,10 +64,11 @@ export const updateProfile: RequestHandler<
   }
 }
 
-const ChangeEmailReqBodySchema = z.object({
-  new_email: z.string().email().max(EMAIL_MAX_LENGTH),
-  password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
-})
+const ChangeEmailReqBodySchema = z
+  .object({
+    new_email: z.string().email().max(EMAIL_MAX_LENGTH),
+  })
+  .merge(PlainPasswordSchema)
 type ChangeEmailReqBody = z.infer<typeof ChangeEmailReqBodySchema>
 
 /**

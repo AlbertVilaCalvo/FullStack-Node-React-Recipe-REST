@@ -3,9 +3,6 @@ import { ZodIssueCode } from 'zod'
 type ApiErrorCode =
   | 'user_not_found'
   | 'recipe_not_found'
-  | 'name_required'
-  | 'email_required'
-  | 'password_required'
   | 'duplicate_email'
   | 'invalid_login_credentials'
   | 'valid_auth_token_required'
@@ -44,24 +41,6 @@ export class ApiError {
     return makeApiError(
       'recipe_not_found',
       `Recipe with id ${recipeId} not found`
-    )
-  }
-
-  static nameRequired(): ApiError {
-    return makeApiError('name_required', "The required field 'name' is missing")
-  }
-
-  static emailRequired(): ApiError {
-    return makeApiError(
-      'email_required',
-      "The required field 'email' is missing"
-    )
-  }
-
-  static passwordRequired(): ApiError {
-    return makeApiError(
-      'password_required',
-      "The required field 'password' is missing"
     )
   }
 
