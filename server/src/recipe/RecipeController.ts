@@ -120,15 +120,15 @@ export const createRecipe: RequestHandler<
       res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const reqBody: CreateRecipeReqBody = validateBodyResult.data
+    const requestBody: CreateRecipeReqBody = validateBodyResult.data
 
     assertUser(req.user, 'RecipeController.createRecipe')
     const user: User = req.user
 
     const insertResult = await RecipeDatabase.insertNewRecipe(
       user.id,
-      reqBody.title,
-      reqBody.cooking_time_minutes
+      requestBody.title,
+      requestBody.cooking_time_minutes
     )
     if (isError(insertResult)) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
@@ -166,7 +166,7 @@ export const updateRecipe: RequestHandler<
       res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const reqBody: UpdateRecipeReqBody = validateBodyResult.data
+    const requestBody: UpdateRecipeReqBody = validateBodyResult.data
 
     const recipeId = Number(req.params.recipeId)
 
@@ -193,11 +193,11 @@ export const updateRecipe: RequestHandler<
       return
     }
 
-    if (reqBody.title) {
-      recipe.title = reqBody.title
+    if (requestBody.title) {
+      recipe.title = requestBody.title
     }
-    if (reqBody.cooking_time_minutes) {
-      recipe.cooking_time_minutes = reqBody.cooking_time_minutes
+    if (requestBody.cooking_time_minutes) {
+      recipe.cooking_time_minutes = requestBody.cooking_time_minutes
     }
 
     const updateRecipeResult = await RecipeDatabase.updateRecipe(recipe)

@@ -90,15 +90,15 @@ export const updateEmail: RequestHandler<
       res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const reqBody: ChangeEmailReqBody = validateBodyResult.data
+    const requestBody: ChangeEmailReqBody = validateBodyResult.data
 
     assertUser(req.user, 'MyAccountController.updateEmail')
     const user: User = req.user
 
     const updateUserEmailResult = await UserService.updateUserEmail(
       user,
-      reqBody.password,
-      reqBody.new_email
+      requestBody.password,
+      requestBody.new_email
     )
 
     switch (updateUserEmailResult) {
