@@ -69,7 +69,7 @@ const ChangeEmailReqBodySchema = z
     new_email: z.string().email().max(EMAIL_MAX_LENGTH),
   })
   .merge(PlainPasswordSchema)
-type ChangeEmailReqBody = z.infer<typeof ChangeEmailReqBodySchema>
+type ChangeEmailReqBody = { new_email: string; password: string }
 
 /**
  * PUT /api/my-account/email
