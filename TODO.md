@@ -2,7 +2,6 @@
 
 ## Authentication
 
-- Change password
 - Delete account
 - Logout -> expire token at the server. Requires having a token store
 - Verify email

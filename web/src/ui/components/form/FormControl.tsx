@@ -58,6 +58,12 @@ export function EmailFormControl(props: Props) {
   return <BaseFormControl label="Email" Input={EmailInput} {...props} />
 }
 
-export function PasswordFormControl(props: Props) {
-  return <BaseFormControl label="Password" Input={PasswordInput} {...props} />
+export function PasswordFormControl(props: Props & { label?: string }) {
+  return (
+    <BaseFormControl
+      label={props.label ?? 'Password'}
+      Input={PasswordInput}
+      {...props}
+    />
+  )
 }

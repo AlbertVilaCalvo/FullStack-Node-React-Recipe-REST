@@ -5,6 +5,8 @@ import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import {
   EMAIL_MAX_LENGTH,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
   PlainPasswordSchema,
   User,
   UserNameSchema,
@@ -118,6 +120,69 @@ export const updateEmail: RequestHandler<
         return
       default:
         assertUnreachable(updateUserEmailResult)
+    }
+  } catch (e) {
+    console.error('Unexpected error at AuthController.changePassword:', e)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  }
+}
+
+const ChangePasswordRequestSchema = z.object({
+  current_password: z
+    .string()
+    .min(PASSWORD_MIN_LENGTH)
+    .max(PASSWORD_MAX_LENGTH),
+  new_password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
+})
+type ChangePasswordRequest = { current_password: string; new_password: string }
+
+/**
+ * PUT /api/my-account/email
+ *
+ * curl http://localhost:5000/api/my-account/password -X PUT -H "Content-Type: application/json"
+ * -H "Authorization: Bearer auth_token" -d '{"current_password":"123456", "new_password":"abcdef"}' -v
+ */
+export const updatePassword: RequestHandler<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
+  void | ApiError,
+  ChangePasswordRequest
+> = async (req, res) => {
+  try {
+    const validateBodyResult = ChangePasswordRequestSchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
+      return
+    }
+    const requestBody: ChangePasswordRequest = validateBodyResult.data
+
+    assertUser(req.user, 'MyAccountController.updatePassword')
+    const user: User = req.user
+
+    const updateUserPasswordResult = await UserService.updateUserPassword(
+      user,
+      requestBody.current_password,
+      requestBody.new_password
+    )
+
+    switch (updateUserPasswordResult) {
+      case 'success':
+        res.sendStatus(StatusCode.NO_CONTENT_204)
+        return
+      case 'invalid-password':
+        res.status(StatusCode.OK_200).json(ApiError.invalidPassword())
+        return
+      case 'user-not-found':
+        // 'user-not-found' should never happen since we grab the user from the
+        // database in AuthMiddleware.requireLoggedUser.
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      case 'unrecoverable-error':
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      default:
+        assertUnreachable(updateUserPasswordResult)
     }
   } catch (e) {
     console.error('Unexpected error at AuthController.changePassword:', e)

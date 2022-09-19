@@ -38,3 +38,26 @@ export function updateEmail(
       throw error
     })
 }
+
+export function updatePassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<void | ApiError> {
+  return httpClient
+    .put(`/my-account/password`, {
+      current_password: currentPassword,
+      new_password: newPassword,
+    })
+    .then((response: AxiosResponse<void | ApiError>) => {
+      if (isApiError(response.data)) {
+        return response.data
+      }
+    })
+    .catch((error) => {
+      const apiError = extractApiError(error)
+      if (apiError) {
+        return apiError
+      }
+      throw error
+    })
+}

@@ -22,6 +22,11 @@ router.put(
   AuthMiddleware.requireLoggedUser,
   MyAccountController.updateEmail
 )
+router.put(
+  '/my-account/password',
+  AuthMiddleware.requireLoggedUser,
+  MyAccountController.updatePassword
+)
 
 router.get('/users/:userId', UserController.getUser)
 

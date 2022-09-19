@@ -116,3 +116,22 @@ export async function updateUserEmail(
     return toError(error, 'UserDatabase - updateUserEmail')
   }
 }
+
+export async function updateUserPassword(
+  userId: number,
+  newPasswordHash: string
+): Promise<'success' | 'user-not-found' | Error> {
+  try {
+    const result = await database.query(
+      'UPDATE "user" SET password = $1 WHERE id = $2',
+      [newPasswordHash, userId]
+    )
+    if (result.rowCount === 0) {
+      return 'user-not-found'
+    }
+    return 'success'
+  } catch (error) {
+    console.error(`UserDatabase - updateUserPassword error`, error)
+    return toError(error, 'UserDatabase - updateUserPassword')
+  }
+}

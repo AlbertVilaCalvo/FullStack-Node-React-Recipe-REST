@@ -24,4 +24,5 @@ export function isValidId(id: number): boolean {
 
 export const ValidationError = {
   EMAIL_FORMAT: 'This is not a valid email.',
+  PASSWORDS_DONT_MATCH: "Passwords don't match",
 }
