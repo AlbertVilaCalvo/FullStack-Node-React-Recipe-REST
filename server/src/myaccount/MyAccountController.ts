@@ -64,12 +64,12 @@ export const updateProfile: RequestHandler<
   }
 }
 
-const ChangeEmailReqBodySchema = z
+const ChangeEmailRequestSchema = z
   .object({
     new_email: z.string().email().max(EMAIL_MAX_LENGTH),
   })
   .merge(PlainPasswordSchema)
-type ChangeEmailReqBody = { new_email: string; password: string }
+type ChangeEmailRequest = { new_email: string; password: string }
 
 /**
  * PUT /api/my-account/email
@@ -81,16 +81,16 @@ export const updateEmail: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   void | ApiError,
-  ChangeEmailReqBody
+  ChangeEmailRequest
 > = async (req, res) => {
   try {
-    const validateBodyResult = ChangeEmailReqBodySchema.safeParse(req.body)
+    const validateBodyResult = ChangeEmailRequestSchema.safeParse(req.body)
     if (!isValidData(validateBodyResult)) {
       const apiError = toApiError(validateBodyResult.error)
       res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const requestBody: ChangeEmailReqBody = validateBodyResult.data
+    const requestBody: ChangeEmailRequest = validateBodyResult.data
 
     assertUser(req.user, 'MyAccountController.updateEmail')
     const user: User = req.user

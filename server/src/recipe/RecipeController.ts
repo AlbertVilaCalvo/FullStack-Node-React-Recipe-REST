@@ -93,13 +93,13 @@ export const getRecipe: RequestHandler<
   }
 }
 
-const CreateRecipeReqBodySchema = RecipeSchema.omit({
+const CreateRecipeRequestSchema = RecipeSchema.omit({
   id: true,
   user_id: true,
 })
-type CreateRecipeReqBody = Omit<Recipe, 'id' | 'user_id'>
+type CreateRecipeRequest = Omit<Recipe, 'id' | 'user_id'>
 // We could also do:
-// type CreateRecipeReqBody = z.infer<typeof CreateRecipeReqBodySchema>
+// type CreateRecipeRequest = z.infer<typeof CreateRecipeRequestSchema>
 
 /**
  * POST /api/recipes
@@ -111,16 +111,16 @@ export const createRecipe: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   { id: number } | ApiError,
-  CreateRecipeReqBody
+  CreateRecipeRequest
 > = async (req, res) => {
   try {
-    const validateBodyResult = CreateRecipeReqBodySchema.safeParse(req.body)
+    const validateBodyResult = CreateRecipeRequestSchema.safeParse(req.body)
     if (!isValidData(validateBodyResult)) {
       const apiError = toApiError(validateBodyResult.error)
       res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const requestBody: CreateRecipeReqBody = validateBodyResult.data
+    const requestBody: CreateRecipeRequest = validateBodyResult.data
 
     assertUser(req.user, 'RecipeController.createRecipe')
     const user: User = req.user
@@ -145,8 +145,8 @@ export const createRecipe: RequestHandler<
   }
 }
 
-const UpdateRecipeReqBodySchema = CreateRecipeReqBodySchema.partial()
-type UpdateRecipeReqBody = Partial<CreateRecipeReqBody>
+const UpdateRecipeRequestSchema = CreateRecipeRequestSchema.partial()
+type UpdateRecipeRequest = Partial<CreateRecipeRequest>
 
 /**
  * PATCH /api/recipes/:recipeId
@@ -157,16 +157,16 @@ type UpdateRecipeReqBody = Partial<CreateRecipeReqBody>
 export const updateRecipe: RequestHandler<
   { recipeId: string },
   { recipe: Recipe } | ApiError,
-  UpdateRecipeReqBody
+  UpdateRecipeRequest
 > = async (req, res) => {
   try {
-    const validateBodyResult = UpdateRecipeReqBodySchema.safeParse(req.body)
+    const validateBodyResult = UpdateRecipeRequestSchema.safeParse(req.body)
     if (!isValidData(validateBodyResult)) {
       const apiError = toApiError(validateBodyResult.error)
       res.status(StatusCode.BAD_REQUEST_400).json(apiError)
       return
     }
-    const requestBody: UpdateRecipeReqBody = validateBodyResult.data
+    const requestBody: UpdateRecipeRequest = validateBodyResult.data
 
     const recipeId = Number(req.params.recipeId)
 
