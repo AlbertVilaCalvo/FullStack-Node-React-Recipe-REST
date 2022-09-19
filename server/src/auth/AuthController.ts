@@ -27,7 +27,8 @@ type RegisterRequest = { name: string; email: string; password: string }
 /**
  * POST /api/auth/register
  *
- * curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Peter", "email":"a@a.com", "password":"123456"}'
+ * curl http://localhost:5000/api/auth/register -H "Content-Type: application/json"
+ * -d '{"name":"Peter", "email":"a@a.com", "password":"123456"}'
  */
 export const register: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -94,7 +95,8 @@ type LoginRequest = { email: string; password: string }
 /**
  * POST /api/auth/login
  *
- * curl http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d '{"email":"a@a.com", "password":"123456"}' -v
+ * curl http://localhost:5000/api/auth/login -H "Content-Type: application/json"
+ * -d '{"email":"a@a.com", "password":"123456"}' -v
  */
 export const login: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
