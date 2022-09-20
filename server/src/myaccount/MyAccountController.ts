@@ -61,7 +61,7 @@ export const updateProfile: RequestHandler<
       res.sendStatus(StatusCode.NO_CONTENT_204)
     }
   } catch (e) {
-    console.error('Unexpected error at UserController.updateProfile:', e)
+    console.error('Unexpected error at MyAccountController.updateProfile:', e)
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   }
 }
@@ -122,7 +122,7 @@ export const updateEmail: RequestHandler<
         assertUnreachable(updateUserEmailResult)
     }
   } catch (e) {
-    console.error('Unexpected error at AuthController.changePassword:', e)
+    console.error('Unexpected error at MyAccountController.updateEmail:', e)
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   }
 }
@@ -185,7 +185,7 @@ export const updatePassword: RequestHandler<
         assertUnreachable(updateUserPasswordResult)
     }
   } catch (e) {
-    console.error('Unexpected error at AuthController.changePassword:', e)
+    console.error('Unexpected error at MyAccountController.updatePassword:', e)
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   }
 }
