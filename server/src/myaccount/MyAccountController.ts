@@ -189,3 +189,58 @@ export const updatePassword: RequestHandler<
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   }
 }
+
+type DeleteAccountRequest = { password: string }
+
+/**
+ * POST /api/my-account/delete
+ *
+ * curl http://localhost:5000/api/my-account/delete -H "Content-Type: application/json"
+ * -H "Authorization: Bearer auth_token" -d '{"password":"123456"}' -v
+ */
+export const deleteAccount: RequestHandler<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
+  void | ApiError,
+  DeleteAccountRequest
+> = async (req, res) => {
+  try {
+    const validateBodyResult = PlainPasswordSchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
+      return
+    }
+    const requestBody: DeleteAccountRequest = validateBodyResult.data
+
+    assertUser(req.user, 'MyAccountController.deleteAccount')
+    const user: User = req.user
+
+    const deleteUserResult = await UserService.deleteUser(
+      user,
+      requestBody.password
+    )
+
+    switch (deleteUserResult) {
+      case 'success':
+        res.sendStatus(StatusCode.NO_CONTENT_204)
+        return
+      case 'invalid-password':
+        res.status(StatusCode.OK_200).json(ApiError.invalidPassword())
+        return
+      case 'user-not-found':
+        // 'user-not-found' should never happen since we grab the user from the
+        // database in AuthMiddleware.requireLoggedUser.
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      case 'unrecoverable-error':
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      default:
+        assertUnreachable(deleteUserResult)
+    }
+  } catch (e) {
+    console.error('Unexpected error at MyAccountController.deleteAccount:', e)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  }
+}

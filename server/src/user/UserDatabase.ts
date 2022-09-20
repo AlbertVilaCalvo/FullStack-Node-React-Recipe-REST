@@ -135,3 +135,20 @@ export async function updateUserPassword(
     return toError(error, 'UserDatabase - updateUserPassword')
   }
 }
+
+export async function deleteUser(
+  userId: number
+): Promise<'success' | 'user-not-found' | Error> {
+  try {
+    const result = await database.query('DELETE FROM "user" WHERE id = $1', [
+      userId,
+    ])
+    if (result.rowCount === 0) {
+      return 'user-not-found'
+    }
+    return 'success'
+  } catch (error) {
+    console.error(`UserDatabase - deleteUser error`, error)
+    return toError(error, 'UserDatabase - deleteUser')
+  }
+}

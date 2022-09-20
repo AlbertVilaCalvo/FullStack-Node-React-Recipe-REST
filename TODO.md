@@ -2,7 +2,6 @@
 
 ## Authentication
 
-- Delete account
 - Logout -> expire token at the server. Requires having a token store
 - Verify email
   - https://www.simplecode.io/blog/create-a-rest-api-part-4-send-emails-with-amazon-ses/

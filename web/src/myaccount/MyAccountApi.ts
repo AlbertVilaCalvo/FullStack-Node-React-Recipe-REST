@@ -61,3 +61,22 @@ export function updatePassword(
       throw error
     })
 }
+
+export function deleteAccount(password: string): Promise<void | ApiError> {
+  return httpClient
+    .post(`/my-account/delete`, {
+      password: password,
+    })
+    .then((response: AxiosResponse<void | ApiError>) => {
+      if (isApiError(response.data)) {
+        return response.data
+      }
+    })
+    .catch((error) => {
+      const apiError = extractApiError(error)
+      if (apiError) {
+        return apiError
+      }
+      throw error
+    })
+}

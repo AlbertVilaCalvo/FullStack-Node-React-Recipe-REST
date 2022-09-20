@@ -2,12 +2,18 @@ import { User } from './User'
 import {
   updateUserEmail as updateUserEmailService,
   updateUserPassword as updateUserPasswordService,
+  deleteUser as deleteUserService,
 } from './UserService'
 import {
   updateUserEmail as updateUserEmailDatabase,
   updateUserPassword as updateUserPasswordDatabase,
+  deleteUser as deleteUserDatabase,
 } from './UserDatabase'
-import { checkIfPasswordsMatch, hashPassword } from '../auth/password'
+import {
+  checkIfPasswordsMatch,
+  hashPassword,
+  validatePassword,
+} from '../auth/password'
 
 jest.mock('../auth/password')
 jest.mock('./UserDatabase')
@@ -183,6 +189,75 @@ describe('UserService.updateUserPassword', () => {
     updateUserPasswordDatabaseMock.mockResolvedValueOnce('success')
 
     const result = await updateUserPasswordService(USER, 'current', 'new_pass')
+
+    expect(result).toBe('success')
+  })
+})
+
+describe('UserService.deleteUser', () => {
+  test("should return 'invalid-password' if password is not correct", async () => {
+    const validatePasswordMock = jest.mocked(validatePassword)
+    validatePasswordMock.mockResolvedValueOnce('invalid-password')
+
+    const result = await deleteUserService(USER, 'current-password')
+
+    expect(result).toBe('invalid-password')
+  })
+
+  test("should return 'unrecoverable-error' if validate password throws Error", async () => {
+    const validatePasswordMock = jest.mocked(validatePassword)
+    validatePasswordMock.mockResolvedValueOnce(Error('test'))
+
+    const result = await deleteUserService(USER, 'current-password')
+
+    expect(result).toBe('unrecoverable-error')
+  })
+
+  test('should pass the given user ID to database delete', async () => {
+    const validatePasswordMock = jest.mocked(validatePassword)
+    validatePasswordMock.mockResolvedValueOnce('valid-password')
+
+    const deleteUserDatabaseMock = jest.mocked(deleteUserDatabase)
+    deleteUserDatabaseMock.mockResolvedValueOnce('success')
+
+    await deleteUserService(USER, 'current-password')
+
+    expect(deleteUserDatabaseMock).toHaveBeenCalledTimes(1)
+    expect(deleteUserDatabaseMock).toHaveBeenCalledWith(USER.id)
+  })
+
+  test("should return 'unrecoverable-error' if database delete throws Error", async () => {
+    const validatePasswordMock = jest.mocked(validatePassword)
+    validatePasswordMock.mockResolvedValueOnce('valid-password')
+
+    const deleteUserDatabaseMock = jest.mocked(deleteUserDatabase)
+    deleteUserDatabaseMock.mockResolvedValueOnce(Error('fail'))
+
+    const result = await deleteUserService(USER, 'current-password')
+
+    expect(result).toBe('unrecoverable-error')
+  })
+
+  test("should return 'user-not-found' if database delete returns 'user-not-found'", async () => {
+    const validatePasswordMock = jest.mocked(validatePassword)
+    validatePasswordMock.mockResolvedValueOnce('valid-password')
+
+    const deleteUserDatabaseMock = jest.mocked(deleteUserDatabase)
+    deleteUserDatabaseMock.mockResolvedValueOnce('user-not-found')
+
+    const result = await deleteUserService(USER, 'current-password')
+
+    expect(result).toBe('user-not-found')
+  })
+
+  test("should return 'success' if database delete succeeds", async () => {
+    const validatePasswordMock = jest.mocked(validatePassword)
+    validatePasswordMock.mockResolvedValueOnce('valid-password')
+
+    const deleteUserDatabaseMock = jest.mocked(deleteUserDatabase)
+    deleteUserDatabaseMock.mockResolvedValueOnce('success')
+
+    const result = await deleteUserService(USER, 'current-password')
 
     expect(result).toBe('success')
   })

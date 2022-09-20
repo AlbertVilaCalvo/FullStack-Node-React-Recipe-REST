@@ -27,6 +27,11 @@ router.put(
   AuthMiddleware.requireLoggedUser,
   MyAccountController.updatePassword
 )
+router.post(
+  '/my-account/delete',
+  AuthMiddleware.requireLoggedUser,
+  MyAccountController.deleteAccount
+)
 
 router.get('/users/:userId', UserController.getUser)
 
