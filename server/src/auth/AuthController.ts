@@ -15,6 +15,7 @@ import { requestFullUrl } from '../misc/util'
 import { ApiError } from '../misc/ApiError'
 import { generateAuthToken } from './authtoken'
 import { isValidData, toApiError } from '../validation/validations'
+import { sendLoginEmail } from '../misc/email'
 
 type RegisterLoginResponse = {
   user: UserNoPassword
@@ -147,6 +148,8 @@ export const login: RequestHandler<
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
       return
     }
+
+    sendLoginEmail(user)
 
     const loginResponse: RegisterLoginResponse = {
       user: removePassword(user),
