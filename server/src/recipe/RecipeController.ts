@@ -4,7 +4,7 @@ import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
-import * as UserDatabase from '../user/UserDatabase'
+import * as RecipeService from './RecipeService'
 import { isValidData, isValidId, toApiError } from '../validation/validations'
 import { isError } from '../misc/result'
 import { User } from '../user/User'
@@ -48,45 +48,18 @@ export const getRecipe: RequestHandler<
 > = async (req, res) => {
   try {
     const recipeId = Number(req.params.recipeId)
-
-    const getRecipeResult = await RecipeDatabase.getRecipeById(recipeId)
+    const getRecipeResult = await RecipeService.getRecipeById(recipeId)
     if (getRecipeResult === 'recipe-not-found') {
       res
         .status(StatusCode.NOT_FOUND_404)
         .json(ApiError.recipeNotFound(recipeId))
-      return
-    } else if (isError(getRecipeResult)) {
+    } else if (getRecipeResult === 'unrecoverable-error') {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
+    } else {
+      res.json({
+        recipe: getRecipeResult,
+      })
     }
-
-    const recipe: Recipe = getRecipeResult
-    const getUserResult = await UserDatabase.getUserById(recipe.user_id)
-    if (isError(getUserResult)) {
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    } else if (getUserResult === 'user-not-found') {
-      // This should never happen. If it happens then there's a recipe with a
-      // user_id of a user that does not exist!
-      console.error(
-        `RecipeController.getRecipe - found recipe owned by a user that does not exist`,
-        recipe
-      )
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
-
-    const recipeOwner: User = getUserResult
-    const recipeWithUser: RecipeWithUser = {
-      ...recipe,
-      user: {
-        id: recipeOwner.id,
-        name: recipeOwner.name,
-      },
-    }
-    res.json({
-      recipe: recipeWithUser,
-    })
   } catch (e) {
     console.error('Unexpected error at RecipeController.getRecipe:', e)
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
