@@ -8,19 +8,26 @@
 - Send welcome email after registering, alert email after login etc
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/nodemailer.js
-- Forgot/recover password
+- Forgot/recover/reset password
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/services/auth.service.js#L37-L54
 - If the JWT token expires, do a logout on the client
 - Refresh token. We need an axios interceptor to handle 401 and refresh the token
   - https://javascript.plainenglish.io/expressjs-api-with-secure-jwt-access-and-refresh-token-64c5478be2c0
   - https://medium.com/swlh/authentication-using-jwt-and-refresh-token-part-1-aca5522c14c8
+- Changing the password or resetting the password should invalidate all existing tokens of that user?
+  - See https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c as an example
 
 ## Back and front
 
 - Pictures
   - Upload recipe pictures
   - User avatar picture
+  - S3
+    - https://medium.com/@teogoulois/image-uploader-with-nextjs-typescript-and-aws-s3-211b38a0af10
+    - https://create-react-app.dev/docs/deployment#s3-and-cloudfront
+    - https://wolovim.medium.com/deploying-create-react-app-to-s3-or-cloudfront-48dae4ce0af
+    - https://medium.com/dailyjs/a-guide-to-deploying-your-react-app-with-aws-s3-including-https-a-custom-domain-a-cdn-and-58245251f081
 - User, add fields:
   - Bio - see https://github.com/AlbertVilaCalvo
   - Link to Instagram - see https://github.com/AlbertVilaCalvo
@@ -48,6 +55,8 @@
   - https://github.com/platzi/curso-nodejs-postgres/blob/main/middlewares/validator.handler.js (utilitza joi)
 - Swagger:
   - https://github.com/danielkhan/todolist-backend/blob/master/utils/swagger.js
+  - https://github.com/hagopj13/node-express-boilerplate/blob/master/src/routes/v1/auth.route.js
+  - https://blog.logrocket.com/documenting-your-express-api-with-swagger/
 - Full text search of recipes
   - Use PostgreSQL's full-text search functionality to perform natural-language searches of your data. https://lets-go-further.alexedwards.net/
 - Rate limit:
