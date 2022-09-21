@@ -1,10 +1,9 @@
 import { RequestHandler } from 'express'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
-import { PublicUser, removeEmailPassword } from './User'
-import * as UserDatabase from './UserDatabase'
+import { PublicUser } from './User'
+import * as UserService from './UserService'
 import { isValidId } from '../validation/validations'
-import { isError } from '../misc/result'
 
 /**
  * GET /api/users/:userId
@@ -25,15 +24,14 @@ export const getUser: RequestHandler<
       return
     }
 
-    const getUserResult = await UserDatabase.getUserById(userId)
-    if (isError(getUserResult)) {
+    const getUserResult = await UserService.getUserById(userId)
+    if (getUserResult === 'unrecoverable-error') {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
     } else if (getUserResult === 'user-not-found') {
       res.status(StatusCode.NOT_FOUND_404).json(ApiError.userNotFound(userId))
     } else {
-      const publicUser = removeEmailPassword(getUserResult)
       res.json({
-        user: publicUser,
+        user: getUserResult,
       })
     }
   } catch (e) {

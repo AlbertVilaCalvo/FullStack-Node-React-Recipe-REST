@@ -1,4 +1,4 @@
-import { User } from './User'
+import { PublicUser, removeEmailPassword, User } from './User'
 import {
   checkIfPasswordsMatch,
   hashPassword,
@@ -6,6 +6,20 @@ import {
 } from '../auth/password'
 import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
+
+export async function getUserById(
+  userId: number
+): Promise<PublicUser | 'user-not-found' | 'unrecoverable-error'> {
+  const getUserResult = await UserDatabase.getUserById(userId)
+  if (isError(getUserResult)) {
+    return 'unrecoverable-error'
+  } else if (getUserResult === 'user-not-found') {
+    return 'user-not-found'
+  } else {
+    const publicUser: PublicUser = removeEmailPassword(getUserResult)
+    return publicUser
+  }
+}
 
 /**
  * @param user the user to whom we want the change the email
