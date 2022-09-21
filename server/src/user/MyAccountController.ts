@@ -10,9 +10,9 @@ import {
   PlainPasswordSchema,
   User,
   UserNameSchema,
-} from '../user/User'
-import * as UserService from '../user/UserService'
-import * as UserDatabase from '../user/UserDatabase'
+} from './User'
+import * as UserService from './UserService'
+import * as UserDatabase from './UserDatabase'
 import { isError } from '../misc/result'
 import { assertUser } from '../auth/AuthMiddleware'
 import { assertUnreachable } from '../misc/assertUnreachable'
