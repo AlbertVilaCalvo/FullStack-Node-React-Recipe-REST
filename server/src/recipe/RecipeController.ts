@@ -143,44 +143,24 @@ export const updateRecipe: RequestHandler<
 
     const recipeId = Number(req.params.recipeId)
 
-    let recipe: Recipe
-    const getRecipeResult = await RecipeDatabase.getRecipeById(recipeId)
-    if (getRecipeResult === 'recipe-not-found') {
-      res
-        .status(StatusCode.NOT_FOUND_404)
-        .json(ApiError.recipeNotFound(recipeId))
-      return
-    } else if (isError(getRecipeResult)) {
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    } else {
-      recipe = getRecipeResult
-    }
-
     assertUser(req.user, 'RecipeController.updateRecipe')
     const user: User = req.user
 
-    // Validate that the logged user is the recipe owner
-    if (user.id !== recipe.user_id) {
-      res.sendStatus(StatusCode.FORBIDDEN_403)
-      return
-    }
-
-    if (requestBody.title) {
-      recipe.title = requestBody.title
-    }
-    if (requestBody.cooking_time_minutes) {
-      recipe.cooking_time_minutes = requestBody.cooking_time_minutes
-    }
-
-    const updateRecipeResult = await RecipeDatabase.updateRecipe(recipe)
+    const updateRecipeResult = await RecipeService.updateRecipe(
+      recipeId,
+      requestBody,
+      user
+    )
     if (updateRecipeResult === 'recipe-not-found') {
       res
         .status(StatusCode.NOT_FOUND_404)
         .json(ApiError.recipeNotFound(recipeId))
-    } else if (isError(updateRecipeResult)) {
+    } else if (updateRecipeResult === 'user-not-owner') {
+      res.sendStatus(StatusCode.FORBIDDEN_403)
+    } else if (updateRecipeResult === 'unrecoverable-error') {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
     } else {
+      const recipe: Recipe = updateRecipeResult
       res.status(StatusCode.OK_200).json({ recipe: recipe })
     }
   } catch (e) {
