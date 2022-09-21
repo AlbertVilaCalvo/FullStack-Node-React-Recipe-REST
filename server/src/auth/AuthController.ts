@@ -1,21 +1,15 @@
 import { Request, RequestHandler } from 'express'
 import { StatusCode } from '../misc/StatusCode'
-import * as UserDatabase from '../user/UserDatabase'
-import { checkIfPasswordsMatch, hashPassword } from './password'
-import { isError } from '../misc/result'
+import * as AuthService from './AuthService'
 import {
   EmailSchema,
   PlainPasswordSchema,
-  removePassword,
-  User,
   UserNameSchema,
   UserNoPassword,
 } from '../user/User'
 import { requestFullUrl } from '../misc/util'
 import { ApiError } from '../misc/ApiError'
-import { generateAuthToken } from './authtoken'
 import { isValidData, toApiError } from '../validation/validations'
-import { sendLoginEmail } from '../misc/email'
 
 type RegisterLoginResponse = {
   user: UserNoPassword
@@ -46,43 +40,30 @@ export const register: RequestHandler<
     }
     const requestBody: RegisterRequest = validateBodyResult.data
 
-    let passwordHash: string
-    try {
-      passwordHash = await hashPassword(requestBody.password)
-    } catch (error) {
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
-
-    const insertUserResult = await UserDatabase.insertNewUser(
+    const registerResult = await AuthService.register(
       requestBody.name,
       requestBody.email,
-      passwordHash
+      requestBody.password
     )
 
-    if (isError(insertUserResult)) {
+    if (registerResult === 'unrecoverable-error') {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
       return
-    } else if (insertUserResult === 'duplicate-email-error') {
+    } else if (registerResult === 'duplicate-email') {
       res.status(StatusCode.CONFLICT_409).json(ApiError.duplicateEmail())
       return
     }
 
-    const user: User = insertUserResult
-    const generateAuthTokenResult = await generateAuthToken(user.id)
-
-    if (isError(generateAuthTokenResult)) {
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
-
+    const locationHeaderUrl = `${requestFullUrl(
+      req as unknown as Request
+    )}/users/${registerResult.user.id}`
     const registerResponse: RegisterLoginResponse = {
-      user: removePassword(user),
-      auth_token: generateAuthTokenResult,
+      user: registerResult.user,
+      auth_token: registerResult.authToken,
     }
     res
       .status(StatusCode.CREATED_201)
-      .location(`${requestFullUrl(req as unknown as Request)}/users/${user.id}`)
+      .location(locationHeaderUrl)
       .json(registerResponse)
   } catch (e) {
     console.error('Unexpected error at AuthController.register:', e)
@@ -114,50 +95,32 @@ export const login: RequestHandler<
     }
     const requestBody: LoginRequest = validateBodyResult.data
 
-    const getUserResult = await UserDatabase.getUserByEmail(requestBody.email)
+    const loginResult = await AuthService.login(
+      requestBody.email,
+      requestBody.password
+    )
 
-    if (isError(getUserResult)) {
+    if (loginResult === 'unrecoverable-error') {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
       return
-    } else if (getUserResult === 'user-not-found') {
+    } else if (loginResult === 'user-not-found') {
+      res.status(StatusCode.OK_200).json(ApiError.invalidLoginCredentials())
+      return
+    } else if (loginResult === 'invalid-password') {
       res.status(StatusCode.OK_200).json(ApiError.invalidLoginCredentials())
       return
     }
 
-    const user: User = getUserResult
-
-    let passwordsMatch: boolean
-    try {
-      passwordsMatch = await checkIfPasswordsMatch(
-        requestBody.password,
-        user.password
-      )
-    } catch (error) {
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
-
-    if (!passwordsMatch) {
-      res.status(StatusCode.OK_200).json(ApiError.invalidLoginCredentials())
-      return
-    }
-
-    const generateAuthTokenResult = await generateAuthToken(user.id)
-
-    if (isError(generateAuthTokenResult)) {
-      res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
-      return
-    }
-
-    sendLoginEmail(user)
-
+    const locationHeaderUrl = `${requestFullUrl(
+      req as unknown as Request
+    )}/users/${loginResult.user.id}`
     const loginResponse: RegisterLoginResponse = {
-      user: removePassword(user),
-      auth_token: generateAuthTokenResult,
+      user: loginResult.user,
+      auth_token: loginResult.authToken,
     }
     res
       .status(StatusCode.OK_200)
-      .location(`${requestFullUrl(req as unknown as Request)}/users/${user.id}`)
+      .location(locationHeaderUrl)
       .json(loginResponse)
   } catch (e) {
     console.error('Unexpected error at AuthController.login:', e)
