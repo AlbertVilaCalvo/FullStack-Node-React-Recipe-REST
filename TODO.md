@@ -2,21 +2,23 @@
 
 ## Authentication
 
-- Logout -> expire token at the server. Requires having a token store
-- Verify email
+- [x] Change email
+- [x] Change password
+- [x] Delete account
+- [ ] Logout -> expire token at the server. Requires having a token store
+- [ ] Verify email after registering
   - https://www.simplecode.io/blog/create-a-rest-api-part-4-send-emails-with-amazon-ses/
-- Send welcome email after registering, alert email after login etc
+- [ ] Send welcome email after register is complete (ie email validated), alert email after login etc
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/nodemailer.js
-- Forgot/recover/reset password
+- [ ] Forgot/recover/reset password
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/services/auth.service.js#L37-L54
 - If the JWT token expires, do a logout on the client
 - Refresh token. We need an axios interceptor to handle 401 and refresh the token
   - https://javascript.plainenglish.io/expressjs-api-with-secure-jwt-access-and-refresh-token-64c5478be2c0
   - https://medium.com/swlh/authentication-using-jwt-and-refresh-token-part-1-aca5522c14c8
-- Changing the password or resetting the password should invalidate all existing tokens of that user?
-  - See https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c as an example
+- Changing the password or resetting the password should invalidate all existing tokens of that user? See https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c as an example
 
 ## Back and front
 
@@ -40,6 +42,10 @@
 
 ## Back
 
+- [x] Data validation (using zod). Possible options:
+  - https://github.com/express-validator/express-validator
+  - https://github.com/colinhacks/zod
+  - https://github.com/hapijs/joi
 - Add created at & updated at Recipe and User table
 - Redis
   - Curso de Node.js: Autenticación, Microservicios y Redis - https://platzi.com/cursos/nodejs-microservicios - https://github.com/CodingCarlos/proyecto-backend-node-platzi
@@ -50,9 +56,9 @@
   - https://nemethgergely.com/blog/nodejs-security-overview#using-the-helmet-module
   - https://blog.risingstack.com/node-js-security-checklist/
 - Paginate GET /recipe
-- Validation middleware?
+- Re-usable data validation middleware, instead of putting repetitive code at each RequestHandler
   - https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/validation.md
-  - https://github.com/platzi/curso-nodejs-postgres/blob/main/middlewares/validator.handler.js (utilitza joi)
+  - https://github.com/platzi/curso-nodejs-postgres/blob/main/middlewares/validator.handler.js (uses joi)
 - Swagger:
   - https://github.com/danielkhan/todolist-backend/blob/master/utils/swagger.js
   - https://github.com/hagopj13/node-express-boilerplate/blob/master/src/routes/v1/auth.route.js
