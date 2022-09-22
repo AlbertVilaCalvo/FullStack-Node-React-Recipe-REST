@@ -12,20 +12,24 @@
 ## Database setup
 
 1. Start PostgreSQL with `brew services start postgresql`.
-2. Create the database: `createdb reciperest`.
+2. Create the database: `createdb reciperest`. (If the database already exists do `dropdb reciperest && createdb reciperest`.)
 3. Start psql with `psql reciperest`.
-4. In psql, run the commands in `server/database.sql` by loading it with `\i server/database-setup.sql`.
+4. In psql, create the tables by running `\i server/database-setup.sql`.
+
+(Exit psql with Ctrl+D or `\q`.)
 
 ## Database seed
 
-Once the database is created, you can automatically fill the database with recipes.
+Once the database is created, you can automatically fill the database with some recipes with `server/database-seed.sql`.
 
-To add recipes you need a user. If you don't have one, start the server (`cd server && npm run dev`) and then in another terminal do:
-`curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`.
+Note that you need two users with ids 1 and 2. If you don't have the two users yet, start the server (`cd server && npm start`) and in another terminal run:
 
-Once you have a user, make sure that its id matches the `user_id` in `server/database-seed.sql`.
+- `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`
+- `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Pere", "email":"b@b.com", "password":"123456"}'`
 
-Finally, seed data into the database by doing `psql reciperest` and `\i server/database-seed.sql`.
+Once you have two users with ids 1 and 2, seed data into the database by doing `psql reciperest` and `\i server/database-seed.sql`.
+
+(Exit psql with Ctrl+D or `\q`.)
 
 ## Develop
 
