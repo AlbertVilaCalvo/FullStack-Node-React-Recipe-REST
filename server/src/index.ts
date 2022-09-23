@@ -3,6 +3,6 @@ import { config } from './config'
 
 app.listen(config.port, () => {
   console.log(
-    `Server running on port ${config.port} - ${config.env} environment`
+    `Server running on port ${config.port} - ${config.environment} environment`
   )
 })

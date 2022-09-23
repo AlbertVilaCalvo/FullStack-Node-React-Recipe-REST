@@ -3,12 +3,17 @@ import { isNumber } from './misc/util'
 
 dotenv.config()
 
+type Environment = 'development' | 'production' | 'test'
+
 type Config = Readonly<{
   /** PORT */
   port: number
+
   /** NODE_ENV */
-  env: 'development' | 'production'
+  environment: Environment
   isDevelopment: boolean
+  isProduction: boolean
+  isTest: boolean
 
   /** DB_NAME */
   databaseName: string
@@ -32,8 +37,11 @@ type Config = Readonly<{
 
 export const config: Config = {
   port: getEnvarAsNumber('PORT'),
-  env: getEnvar('NODE_ENV') === 'production' ? 'production' : 'development',
-  isDevelopment: getEnvar('NODE_ENV') === 'development',
+
+  environment: getEnvironment(),
+  isDevelopment: getEnvironment() === 'development',
+  isProduction: getEnvironment() === 'production',
+  isTest: getEnvironment() === 'test',
 
   databaseName: getEnvar('DB_NAME'),
   databaseUser: getEnvar('DB_USER'),
@@ -62,4 +70,17 @@ function getEnvarAsNumber(environmentVariable: string): number {
   } else {
     throw Error(`process.env.${environmentVariable} is not a number`)
   }
+}
+
+function getEnvironment(): Environment {
+  const value = process.env.NODE_ENV
+  if (!value) {
+    throw Error(`process.env.NODE_ENV is not defined`)
+  }
+  if (value !== 'development' && value !== 'production' && value !== 'test') {
+    throw Error(
+      `process.env.NODE_ENV value '${value}' is not valid. Allowed values are 'development', 'production' and 'test'.`
+    )
+  }
+  return value
 }
