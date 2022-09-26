@@ -4,7 +4,7 @@ import { H1 } from '../../components/Headers'
 import * as AuthApi from '../../../auth/AuthApi'
 import { useErrorToast, useSuccessToast } from '../../misc/toast'
 import { userStore } from '../../../user/userStore'
-import { extractApiErrorMessage } from '../../../httpClient'
+import { extractApiErrorMessage, isApiError } from '../../../httpClient'
 import { Progress } from '../../components/Progress'
 
 export function VerifyEmailPage() {
@@ -25,11 +25,17 @@ export function VerifyEmailPage() {
     setLoading(true)
     AuthApi.verifyEmail(token)
       .then((response) => {
-        if (userStore.user) {
-          userStore.user.email_verified = true
+        if (isApiError(response)) {
+          // The token has expired
+          showErrorToast(response.error.message)
+          setLoading(false)
+        } else {
+          if (userStore.user) {
+            userStore.user.email_verified = true
+          }
+          showSuccessToast('Email verified successfully!')
+          navigate('/')
         }
-        showSuccessToast('Email verified successfully!')
-        navigate('/')
       })
       .catch((error) => {
         // TODO if request fails we need to provide the user a way to re-try

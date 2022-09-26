@@ -141,11 +141,13 @@ export async function sendVerifyEmail(
 
 export async function verifyEmail(
   verifyEmailToken: string
-): Promise<'success' | 'unrecoverable-error'> {
+): Promise<'success' | 'token-expired' | 'unrecoverable-error'> {
   const getPayloadResult = getPayloadFromVerifyEmailToken(verifyEmailToken)
 
   if (isError(getPayloadResult)) {
     return 'unrecoverable-error'
+  } else if (getPayloadResult === 'token-expired') {
+    return 'token-expired'
   }
 
   const payload: VerifyEmailTokenPayload = getPayloadResult

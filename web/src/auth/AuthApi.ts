@@ -68,13 +68,20 @@ export function sendEmailVerificationEmail() {
 }
 
 type VerifyEmailData = { verify_email_token: string }
+type VerifyEmailResponse = void | AnApiError<'validate_email_token_expired'>
 
-export function verifyEmail(verifyEmailToken: string) {
-  return httpClient.post<
-    void,
-    AxiosResponse<void, VerifyEmailData>,
-    VerifyEmailData
-  >(`/auth/verify-email`, {
-    verify_email_token: verifyEmailToken,
-  })
+export function verifyEmail(
+  verifyEmailToken: string
+): Promise<VerifyEmailResponse> {
+  return httpClient
+    .post<
+      VerifyEmailResponse,
+      AxiosResponse<VerifyEmailResponse, VerifyEmailData>,
+      VerifyEmailData
+    >(`/auth/verify-email`, {
+      verify_email_token: verifyEmailToken,
+    })
+    .then((response: AxiosResponse<VerifyEmailResponse>) => {
+      return response.data
+    })
 }

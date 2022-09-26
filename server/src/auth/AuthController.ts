@@ -196,6 +196,9 @@ export const verifyEmail: RequestHandler<
       case 'success':
         res.sendStatus(StatusCode.NO_CONTENT_204)
         return
+      case 'token-expired':
+        res.status(StatusCode.OK_200).json(ApiError.validateEmailTokenExpired())
+        return
       case 'unrecoverable-error':
         res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
         return

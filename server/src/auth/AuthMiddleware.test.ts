@@ -1,7 +1,7 @@
 import * as HttpMocks from 'node-mocks-http'
 import { requireLoggedUser } from './AuthMiddleware'
 import { StatusCode } from '../misc/StatusCode'
-import { generateAuthToken } from './token'
+import * as Token from './token'
 import { getUserById } from '../user/UserDatabase'
 import { User } from '../user/User'
 
@@ -58,8 +58,56 @@ describe('AuthMiddleware.requireLoggedUser', () => {
     expect401(res)
   })
 
+  test('should return 401 if the auth token has expired', async () => {
+    const authToken = Token.generateAuthToken(USER.id)
+    const req = HttpMocks.createRequest({
+      method: 'POST',
+      url: '/recipes',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+    const res = HttpMocks.createResponse()
+
+    // We only mock a single function of the token.ts module, rather than the
+    // whole module, since we want to use the actual implementations of the
+    // other functions.
+    const getPayloadFromAuthTokenSpy = jest
+      .spyOn(Token, 'getPayloadFromAuthToken')
+      .mockImplementation(() => 'token-expired')
+
+    await requireLoggedUser(req, res, next)
+
+    expect401(res)
+
+    // Restore the original (non-mocked) implementation so that other tests pass
+    getPayloadFromAuthTokenSpy.mockRestore()
+  })
+
+  test('should return 401 if getPayloadFromAuthToken returns Error', async () => {
+    const authToken = Token.generateAuthToken(USER.id)
+    const req = HttpMocks.createRequest({
+      method: 'POST',
+      url: '/recipes',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+    const res = HttpMocks.createResponse()
+
+    const getPayloadFromAuthTokenSpy = jest
+      .spyOn(Token, 'getPayloadFromAuthToken')
+      .mockImplementation(() => Error('test'))
+
+    await requireLoggedUser(req, res, next)
+
+    expect401(res)
+
+    getPayloadFromAuthTokenSpy.mockRestore()
+  })
+
   test('should return 401 if the auth token user is not found', async () => {
-    const authToken = generateAuthToken(USER.id)
+    const authToken = Token.generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',
@@ -78,7 +126,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
   })
 
   test('should return 500 if the database query for user throws Error', async () => {
-    const authToken = generateAuthToken(USER.id)
+    const authToken = Token.generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',
@@ -99,7 +147,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
   })
 
   test('should call the next middleware if the auth token is valid', async () => {
-    const authToken = generateAuthToken(USER.id)
+    const authToken = Token.generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',
@@ -120,7 +168,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
   })
 
   test('should set req.user if the auth token is valid', async () => {
-    const authToken = generateAuthToken(USER.id)
+    const authToken = Token.generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',

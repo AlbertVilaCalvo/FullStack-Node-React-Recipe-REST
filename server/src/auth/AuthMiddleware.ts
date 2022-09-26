@@ -38,7 +38,7 @@ export const requireLoggedUser: RequestHandler = async (req, res, next) => {
     const authToken: string = getAuthTokenResult
     const getPayloadResult = getPayloadFromAuthToken(authToken)
 
-    if (isError(getPayloadResult)) {
+    if (isError(getPayloadResult) || getPayloadResult === 'token-expired') {
       res
         .status(StatusCode.UNAUTHORIZED_401)
         .json(ApiError.validAuthTokenRequired())

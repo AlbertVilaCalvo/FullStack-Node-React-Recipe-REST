@@ -3,6 +3,7 @@ import * as jwt from 'jsonwebtoken'
 import { config } from '../config'
 import { toError } from '../misc/util'
 import { isError } from '../misc/result'
+import { TokenExpiredError } from 'jsonwebtoken'
 
 const TOKEN_VALIDITY_TIME = '1h'
 
@@ -113,7 +114,9 @@ export function getAuthTokenFromHeader(
  * It will return Error if the token has expired, if the signature is not valid,
  * or the payload does not have the expected shape.
  */
-function getPayloadFromToken(token: string): TokenPayload | Error {
+function getPayloadFromToken(
+  token: string
+): TokenPayload | 'token-expired' | Error {
   try {
     const decodedPayload = jwt.verify(token, config.jwtSecret, {
       // This is redundant since we also set 'expiresIn' when create the token
@@ -125,6 +128,9 @@ function getPayloadFromToken(token: string): TokenPayload | Error {
       return Error(`Unexpected payload format: ${decodedPayload}`)
     }
   } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      return 'token-expired'
+    }
     console.error(`jwt.verify error:`, error)
     return toError(error, 'getPayloadFromToken')
   }
@@ -136,15 +142,17 @@ function getPayloadFromToken(token: string): TokenPayload | Error {
  */
 export function getPayloadFromAuthToken(
   authToken: string
-): AuthTokenPayload | Error {
-  const payload = getPayloadFromToken(authToken)
-  if (isError(payload)) {
-    return payload
+): AuthTokenPayload | 'token-expired' | Error {
+  const getPayloadResult = getPayloadFromToken(authToken)
+  if (isError(getPayloadResult) || getPayloadResult === 'token-expired') {
+    return getPayloadResult
   }
-  if (payload.type === 'auth') {
-    return payload
+  if (getPayloadResult.type === 'auth') {
+    return getPayloadResult
   } else {
-    return Error(`Incorrect payload type ${payload.type}. It should be 'auth'.`)
+    return Error(
+      `Incorrect payload type ${getPayloadResult.type}. It should be 'auth'.`
+    )
   }
 }
 
@@ -154,16 +162,16 @@ export function getPayloadFromAuthToken(
  */
 export function getPayloadFromVerifyEmailToken(
   verifyEmailToken: string
-): VerifyEmailTokenPayload | Error {
-  const payload = getPayloadFromToken(verifyEmailToken)
-  if (isError(payload)) {
-    return payload
+): VerifyEmailTokenPayload | 'token-expired' | Error {
+  const getPayloadResult = getPayloadFromToken(verifyEmailToken)
+  if (isError(getPayloadResult) || getPayloadResult === 'token-expired') {
+    return getPayloadResult
   }
-  if (payload.type === 'verify-email') {
-    return payload
+  if (getPayloadResult.type === 'verify-email') {
+    return getPayloadResult
   } else {
     return Error(
-      `Incorrect payload type ${payload.type}. It should be 'verify-email'.`
+      `Incorrect payload type ${getPayloadResult.type}. It should be 'verify-email'.`
     )
   }
 }
@@ -174,7 +182,7 @@ export function getPayloadFromVerifyEmailToken(
  */
 export function getAuthTokenPayloadFromHeader(
   headers: IncomingHttpHeaders
-): AuthTokenPayload | Error {
+): AuthTokenPayload | 'token-expired' | Error {
   try {
     const getAuthTokenResult = getAuthTokenFromHeader(headers)
     if (isError(getAuthTokenResult)) {
@@ -183,8 +191,8 @@ export function getAuthTokenPayloadFromHeader(
     const authToken: string = getAuthTokenResult
     return getPayloadFromAuthToken(authToken)
   } catch (error) {
-    console.error(`getPayloadFromHeader error:`, error)
-    return toError(error, 'getPayloadFromHeader')
+    console.error(`getAuthTokenPayloadFromHeader error:`, error)
+    return toError(error, 'getAuthTokenPayloadFromHeader')
   }
 }
 
