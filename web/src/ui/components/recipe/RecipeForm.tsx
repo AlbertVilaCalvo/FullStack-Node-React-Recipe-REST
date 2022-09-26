@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
 import { useErrorToast } from '../../misc/toast'
-import { extractApiError } from '../../../httpClient'
+import { extractApiErrorMessage } from '../../../httpClient'
 import { SubmitButton } from '../form/SubmitButton'
 import {
   MAX_COOKING_TIME_MINUTES,
@@ -50,13 +50,9 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
         navigate(`/recipes/${response.recipeId}`)
       })
       .catch((error) => {
-        console.error(`RecipeApi error`, error)
-        const apiError = extractApiError(error)
-        if (apiError) {
-          showErrorToast(apiError.error.message)
-        } else {
-          showErrorToast(error.message)
-        }
+        console.error(`RecipeForm RecipeApi error`, error)
+        const errorMessage = extractApiErrorMessage(error)
+        showErrorToast(errorMessage)
         setLoading(false)
       })
   }

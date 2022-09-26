@@ -8,7 +8,7 @@ import { SubmitButton } from '../../components/form/SubmitButton'
 import { NavigateToLogin } from '../../components/navigation/RequireLogin'
 import * as MyAccountApi from '../../../myaccount/MyAccountApi'
 import { useErrorToast, useSuccessToast } from '../../misc/toast'
-import { extractApiError } from '../../../httpClient'
+import { extractApiErrorMessage } from '../../../httpClient'
 
 export function MyProfilePage() {
   const showSuccessToast = useSuccessToast()
@@ -37,12 +37,8 @@ export function MyProfilePage() {
       })
       .catch((error) => {
         console.error(`UserApi.updateUserProfile error`, error)
-        const apiError = extractApiError(error)
-        if (apiError) {
-          showErrorToast(apiError.error.message)
-        } else {
-          showErrorToast(error.message)
-        }
+        const errorMessage = extractApiErrorMessage(error)
+        showErrorToast(errorMessage)
       })
       .finally(() => {
         setLoading(false)
