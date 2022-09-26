@@ -7,7 +7,7 @@ import {
   generateVerifyEmailToken,
   getPayloadFromVerifyEmailToken,
   VerifyEmailTokenPayload,
-} from './authtoken'
+} from './token'
 import { sendLoginEmail, sendEmailVerificationEmail } from '../misc/email'
 
 /**

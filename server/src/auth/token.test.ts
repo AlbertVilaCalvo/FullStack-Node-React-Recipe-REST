@@ -1,5 +1,5 @@
 import { IncomingHttpHeaders } from 'http'
-import { getAuthTokenFromHeader } from './authtoken'
+import { getAuthTokenFromHeader } from './token'
 
 describe('getAuthTokenFromHeader', () => {
   test('should return Error if the Authorization header is missing', async () => {

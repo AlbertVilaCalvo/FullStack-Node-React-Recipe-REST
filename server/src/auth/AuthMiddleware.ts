@@ -3,7 +3,7 @@ import {
   AuthTokenPayload,
   getAuthTokenFromHeader,
   getPayloadFromAuthToken,
-} from './authtoken'
+} from './token'
 import { isError } from '../misc/result'
 import { StatusCode } from '../misc/StatusCode'
 import { ApiError } from '../misc/ApiError'

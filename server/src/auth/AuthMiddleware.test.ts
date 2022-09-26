@@ -1,7 +1,7 @@
 import * as HttpMocks from 'node-mocks-http'
 import { requireLoggedUser } from './AuthMiddleware'
 import { StatusCode } from '../misc/StatusCode'
-import { generateAuthToken } from './authtoken'
+import { generateAuthToken } from './token'
 import { getUserById } from '../user/UserDatabase'
 import { User } from '../user/User'
 
