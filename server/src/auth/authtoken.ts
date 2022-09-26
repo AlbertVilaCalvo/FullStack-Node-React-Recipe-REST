@@ -110,9 +110,7 @@ export function getAuthTokenPayloadFromHeader(
   }
 }
 
-export async function generateAuthToken(
-  userId: number
-): Promise<string | Error> {
+export function generateAuthToken(userId: number): string | Error {
   try {
     const payloadCustomData: AuthTokenPayloadCustomData = {
       uid: userId,

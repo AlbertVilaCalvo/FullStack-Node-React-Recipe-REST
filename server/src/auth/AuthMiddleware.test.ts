@@ -58,7 +58,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
   })
 
   test('should return 401 if the auth token user is not found', async () => {
-    const authToken = await generateAuthToken(USER.id)
+    const authToken = generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',
@@ -77,7 +77,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
   })
 
   test('should return 500 if the database query for user throws Error', async () => {
-    const authToken = await generateAuthToken(USER.id)
+    const authToken = generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',
@@ -98,7 +98,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
   })
 
   test('should call the next middleware if the auth token is valid', async () => {
-    const authToken = await generateAuthToken(USER.id)
+    const authToken = generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',
@@ -119,7 +119,7 @@ describe('AuthMiddleware.requireLoggedUser', () => {
   })
 
   test('should set req.user if the auth token is valid', async () => {
-    const authToken = await generateAuthToken(USER.id)
+    const authToken = generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',

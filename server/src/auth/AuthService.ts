@@ -39,7 +39,7 @@ export async function register(
   }
 
   const user: User = insertUserResult
-  const generateAuthTokenResult = await generateAuthToken(user.id)
+  const generateAuthTokenResult = generateAuthToken(user.id)
 
   if (isError(generateAuthTokenResult)) {
     return 'unrecoverable-error'
@@ -85,7 +85,7 @@ export async function login(
     return 'invalid-password'
   }
 
-  const generateAuthTokenResult = await generateAuthToken(user.id)
+  const generateAuthTokenResult = generateAuthToken(user.id)
 
   if (isError(generateAuthTokenResult)) {
     return 'unrecoverable-error'
