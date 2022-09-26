@@ -1,4 +1,4 @@
-import { Request, RequestHandler } from 'express'
+import { RequestHandler } from 'express'
 import { StatusCode } from '../misc/StatusCode'
 import * as AuthService from './AuthService'
 import {
@@ -6,8 +6,8 @@ import {
   PlainPasswordSchema,
   UserNameSchema,
   UserNoPassword,
+  userFrontendUrl,
 } from '../user/User'
-import { requestFullUrl } from '../misc/util'
 import { ApiError } from '../misc/ApiError'
 import { isValidData, toApiError } from '../validation/validations'
 
@@ -54,9 +54,7 @@ export const register: RequestHandler<
       return
     }
 
-    const locationHeaderUrl = `${requestFullUrl(
-      req as unknown as Request
-    )}/users/${registerResult.user.id}`
+    const locationHeaderUrl = userFrontendUrl(registerResult.user.id)
     const registerResponse: RegisterLoginResponse = {
       user: registerResult.user,
       auth_token: registerResult.authToken,
@@ -111,9 +109,7 @@ export const login: RequestHandler<
       return
     }
 
-    const locationHeaderUrl = `${requestFullUrl(
-      req as unknown as Request
-    )}/users/${loginResult.user.id}`
+    const locationHeaderUrl = userFrontendUrl(loginResult.user.id)
     const loginResponse: RegisterLoginResponse = {
       user: loginResult.user,
       auth_token: loginResult.authToken,

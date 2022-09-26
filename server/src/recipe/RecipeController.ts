@@ -1,8 +1,12 @@
-import { Request, RequestHandler } from 'express'
-import { Recipe, RecipeSchema, RecipeWithUser } from './Recipe'
+import { RequestHandler } from 'express'
+import {
+  Recipe,
+  recipeFrontendUrl,
+  RecipeSchema,
+  RecipeWithUser,
+} from './Recipe'
 import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
-import { requestFullUrl } from '../misc/util'
 import * as RecipeDatabase from './RecipeDatabase'
 import * as RecipeService from './RecipeService'
 import { isValidData, isValidId, toApiError } from '../validation/validations'
@@ -109,7 +113,7 @@ export const createRecipe: RequestHandler<
       const recipe: Recipe = insertResult
       res
         .status(StatusCode.CREATED_201)
-        .location(`${requestFullUrl(req as unknown as Request)}/${recipe.id}`)
+        .location(recipeFrontendUrl(recipe.id))
         .json({ id: recipe.id })
     }
   } catch (e) {

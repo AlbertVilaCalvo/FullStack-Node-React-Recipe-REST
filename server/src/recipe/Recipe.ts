@@ -33,3 +33,13 @@ export const RecipeSchema = z.object({
     .min(MIN_COOKING_TIME_MINUTES)
     .max(MAX_COOKING_TIME_MINUTES),
 })
+
+// Helper functions
+
+/**
+ * For the Location header. Returns the relative URL of the recipe at the
+ * frontend website.
+ */
+export function recipeFrontendUrl(recipeId: number): string {
+  return `/recipes/${recipeId}`
+}

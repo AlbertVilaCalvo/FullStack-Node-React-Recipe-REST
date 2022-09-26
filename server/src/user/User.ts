@@ -43,3 +43,13 @@ export const PlainPasswordSchema = z.object({
 export const EmailSchema = z.object({
   email: z.string().email().max(EMAIL_MAX_LENGTH),
 })
+
+// Helper functions
+
+/**
+ * For the Location header. Returns the relative URL of the user at the
+ * frontend website.
+ */
+export function userFrontendUrl(userId: number): string {
+  return `/users/${userId}`
+}
