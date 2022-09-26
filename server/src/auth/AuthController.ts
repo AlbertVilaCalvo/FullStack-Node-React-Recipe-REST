@@ -4,12 +4,16 @@ import * as AuthService from './AuthService'
 import {
   EmailSchema,
   PlainPasswordSchema,
+  User,
   UserNameSchema,
   UserNoPassword,
   userFrontendUrl,
 } from '../user/User'
 import { ApiError } from '../misc/ApiError'
 import { isValidData, toApiError } from '../validation/validations'
+import { assertUser } from './AuthMiddleware'
+import { assertUnreachable } from '../misc/assertUnreachable'
+import { z } from 'zod'
 
 type RegisterLoginResponse = {
   user: UserNoPassword
@@ -120,6 +124,86 @@ export const login: RequestHandler<
       .json(loginResponse)
   } catch (e) {
     console.error('Unexpected error at AuthController.login:', e)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  }
+}
+
+/**
+ * POST /api/auth/verify-email/send
+ *
+ * curl http://localhost:5000/api/auth/verify-email/send -H "Content-Type: application/json"
+ * -H "Authorization: Bearer auth_token" -d '{"verify_token":"token"}' -v
+ */
+export const sendVerifyEmail: RequestHandler<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
+  void,
+  undefined
+> = async (req, res) => {
+  try {
+    assertUser(req.user, 'AuthController.sendVerifyEmail')
+    const user: User = req.user
+
+    const sendEmailResult = await AuthService.sendVerifyEmail(user)
+    switch (sendEmailResult) {
+      case 'success':
+        res.sendStatus(StatusCode.NO_CONTENT_204)
+        return
+      case 'email-already-verified':
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      case 'unrecoverable-error':
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      default:
+        assertUnreachable(sendEmailResult)
+    }
+  } catch (e) {
+    console.error('Unexpected error at AuthController.sendVerifyEmail:', e)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  }
+}
+
+const VerifyEmailSchema = z.object({ verify_email_token: z.string().min(1) })
+type VerifyEmailRequest = { verify_email_token: string }
+
+/**
+ * POST /api/auth/verify-email
+ *
+ * curl http://localhost:5000/api/auth/verify-email -H "Content-Type: application/json"
+ * -d '{"verify_email_token":"token"}' -v
+ */
+export const verifyEmail: RequestHandler<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
+  void | ApiError,
+  VerifyEmailRequest
+> = async (req, res) => {
+  try {
+    const validateBodyResult = VerifyEmailSchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
+      return
+    }
+    const requestBody: VerifyEmailRequest = validateBodyResult.data
+
+    const verifyEmailResult = await AuthService.verifyEmail(
+      requestBody.verify_email_token
+    )
+
+    switch (verifyEmailResult) {
+      case 'success':
+        res.sendStatus(StatusCode.NO_CONTENT_204)
+        return
+      case 'unrecoverable-error':
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      default:
+        assertUnreachable(verifyEmailResult)
+    }
+  } catch (e) {
+    console.error('Unexpected error at AuthController.verifyEmail:', e)
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   }
 }

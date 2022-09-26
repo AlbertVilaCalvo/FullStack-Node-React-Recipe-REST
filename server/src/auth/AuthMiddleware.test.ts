@@ -12,6 +12,7 @@ const USER: User = {
   name: 'Pere',
   password: 'hash',
   email: 'x@y.co',
+  email_verified: true,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function

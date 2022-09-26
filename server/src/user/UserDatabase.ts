@@ -136,6 +136,25 @@ export async function updateUserPassword(
   }
 }
 
+export async function updateUserEmailVerified(
+  userId: number,
+  emailVerified: boolean
+): Promise<'success' | 'user-not-found' | Error> {
+  try {
+    const result = await database.query(
+      'UPDATE "user" SET email_verified = $1 WHERE id = $2',
+      [emailVerified, userId]
+    )
+    if (result.rowCount === 0) {
+      return 'user-not-found'
+    }
+    return 'success'
+  } catch (error) {
+    console.error(`UserDatabase - updateUserEmailVerified error`, error)
+    return toError(error, 'UserDatabase - updateUserEmailVerified')
+  }
+}
+
 export async function deleteUser(
   userId: number
 ): Promise<'success' | 'user-not-found' | Error> {

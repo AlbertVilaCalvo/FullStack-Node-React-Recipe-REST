@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { pick } from '../misc/util'
 
 export type User = {
   readonly id: number
@@ -6,6 +7,7 @@ export type User = {
   /** The hashed password. */
   password: string
   name: string
+  email_verified: boolean
 }
 
 export type UserNoPassword = Omit<User, 'password'>
@@ -16,12 +18,10 @@ export function removePassword(user: User): UserNoPassword {
   return rest
 }
 
-export type PublicUser = Omit<User, 'email' | 'password'>
+export type PublicUser = Pick<User, 'id' | 'name'>
 
-export function removeEmailPassword(user: User): PublicUser {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { email, password, ...rest } = user
-  return rest
+export function toPublicUser(user: User): PublicUser {
+  return pick(user, ['id', 'name'])
 }
 
 // Validation

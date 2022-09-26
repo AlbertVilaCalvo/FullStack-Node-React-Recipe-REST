@@ -11,6 +11,12 @@ export const router = Router()
 
 router.post('/auth/register', AuthController.register)
 router.post('/auth/login', AuthController.login)
+router.post(
+  '/auth/verify-email/send',
+  AuthMiddleware.requireLoggedUser,
+  AuthController.sendVerifyEmail
+)
+router.post('/auth/verify-email', AuthController.verifyEmail)
 
 router.put(
   '/my-account/profile',

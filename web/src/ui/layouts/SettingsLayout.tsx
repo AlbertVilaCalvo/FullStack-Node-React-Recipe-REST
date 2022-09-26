@@ -2,12 +2,19 @@ import * as React from 'react'
 import { Outlet } from 'react-router-dom'
 import { H1 } from '../components/Headers'
 import { SettingsNavLink } from '../components/navigation/SettingsNavLink'
+import { VerifyEmailAddressBanner } from '../components/VerifyEmailAddressBanner'
+import { Box } from '@chakra-ui/react'
 
 export function SettingsLayout() {
   return (
     <div className="main-container page">
       <div className="main-container-child-centered">
         <H1>Settings</H1>
+
+        <Box marginBottom="30px">
+          <VerifyEmailAddressBanner />
+        </Box>
+
         <div className="settings-container">
           <div>
             <nav>

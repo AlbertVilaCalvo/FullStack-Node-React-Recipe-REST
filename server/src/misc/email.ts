@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer'
 import { User } from '../user/User'
 import { config } from '../config'
+import { toError } from './util'
 
 // https://nodemailer.com/about/
 
@@ -19,15 +20,18 @@ type EmailOptions = Required<
   Pick<Mail.Options, 'to' | 'subject' | 'text' | 'html'>
 >
 
-async function sendEmail(options: EmailOptions) {
-  const info = await transporter.sendMail({
-    from: '"Recipe Manager" <donotreply@recipemanager.com>',
-    to: options.to,
-    subject: options.subject,
-    text: options.text,
-    html: options.html,
-  })
-  console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
+async function sendEmail(options: EmailOptions): Promise<void> {
+  return transporter
+    .sendMail({
+      from: '"Recipe Manager" <donotreply@recipemanager.com>',
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+    })
+    .then((info) => {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
+    })
 }
 
 /**
@@ -49,4 +53,30 @@ If it was not you, please contact us at hello@recipemanager.com.`,
   }).catch((error) => {
     console.error(`sendLoginEmail error`, error)
   })
+}
+
+export async function sendEmailVerificationEmail(
+  user: User,
+  verifyEmailLink: string
+): Promise<'success' | Error> {
+  return sendEmail({
+    to: {
+      name: user.name,
+      address: user.email,
+    },
+    subject: 'Please verify your email address - Recipe Manager',
+    text: `Hi ${user.name}!
+  Verify the email address to access Recipe Manager.
+  Please visit ${verifyEmailLink}`,
+    html: `<p>Hi ${user.name}!</p>
+  <p>Verify the email address to access Recipe Manager.</p>
+  <p>Please visit <a href="${verifyEmailLink}">${verifyEmailLink}</a>.</p>`,
+  })
+    .then<'success'>(() => {
+      return 'success'
+    })
+    .catch((error) => {
+      console.error(`sendEmailVerificationEmail error`, error)
+      return toError(error, 'sendEmailVerificationEmail')
+    })
 }

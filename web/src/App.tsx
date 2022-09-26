@@ -9,6 +9,7 @@ import { AboutPage } from './ui/pages/AboutPage'
 import { NotFound404Page } from './ui/pages/NotFound404Page'
 import { RegisterPage } from './ui/pages/auth/RegisterPage'
 import { LoginPage } from './ui/pages/auth/LoginPage'
+import { VerifyEmailPage } from './ui/pages/auth/VerifyEmailPage'
 import { UserDetailPage } from './ui/pages/user/UserDetailPage'
 import { MyProfilePage } from './ui/pages/settings/MyProfilePage'
 import { ChangeEmailPage } from './ui/pages/settings/ChangeEmailPage'
@@ -29,6 +30,7 @@ function App() {
             <Route path="about" element={<AboutPage />} />
             <Route path="register" element={<RegisterPage />} />
             <Route path="login" element={<LoginPage />} />
+            <Route path="verify-email" element={<VerifyEmailPage />} />
 
             <Route
               path="settings"

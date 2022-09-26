@@ -1,4 +1,4 @@
-import { PublicUser, removeEmailPassword, User } from './User'
+import { PublicUser, toPublicUser, User } from './User'
 import {
   checkIfPasswordsMatch,
   hashPassword,
@@ -16,7 +16,7 @@ export async function getUserById(
   } else if (getUserResult === 'user-not-found') {
     return 'user-not-found'
   } else {
-    const publicUser: PublicUser = removeEmailPassword(getUserResult)
+    const publicUser: PublicUser = toPublicUser(getUserResult)
     return publicUser
   }
 }

@@ -6,8 +6,9 @@
 - [x] Change password
 - [x] Delete account
 - [ ] Logout -> expire token at the server. Requires having a token store
-- [ ] Verify email after registering
+- [x] Verify email after registering
   - https://www.simplecode.io/blog/create-a-rest-api-part-4-send-emails-with-amazon-ses/
+  - https://www.simplecode.io/blog/create-a-rest-api-part-5-verify-users-with-tokens/
 - [ ] Send welcome email after register is complete (ie email validated), alert email after login etc
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/nodemailer.js

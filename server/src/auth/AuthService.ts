@@ -2,8 +2,13 @@ import { checkIfPasswordsMatch, hashPassword } from './password'
 import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
 import { removePassword, User, UserNoPassword } from '../user/User'
-import { generateAuthToken } from './authtoken'
-import { sendLoginEmail } from '../misc/email'
+import {
+  generateAuthToken,
+  generateVerifyEmailToken,
+  getPayloadFromVerifyEmailToken,
+  VerifyEmailTokenPayload,
+} from './authtoken'
+import { sendLoginEmail, sendEmailVerificationEmail } from '../misc/email'
 
 /**
  * @param name user full name (from the request body)
@@ -44,6 +49,11 @@ export async function register(
   if (isError(generateAuthTokenResult)) {
     return 'unrecoverable-error'
   }
+
+  // Since the user can manually trigger sending an email verification email
+  // from the settings at any time, we don't wait to completion, nor we care
+  // if it succeeds or fails.
+  sendVerifyEmail(user)
 
   return {
     user: removePassword(user),
@@ -96,5 +106,59 @@ export async function login(
   return {
     user: removePassword(user),
     authToken: generateAuthTokenResult,
+  }
+}
+
+/**
+ * Sends a 'verify email' email to the user.
+ */
+export async function sendVerifyEmail(
+  user: User
+): Promise<'success' | 'email-already-verified' | 'unrecoverable-error'> {
+  if (user.email_verified) {
+    console.warn(`The user with id ${user.id} has already verified the email`)
+    return 'email-already-verified'
+  }
+
+  const generateTokenResult = generateVerifyEmailToken(user.id)
+  if (isError(generateTokenResult)) {
+    return 'unrecoverable-error'
+  }
+  const verifyEmailToken: string = generateTokenResult
+
+  // TODO we'll need to change 'localhost:3000' when deployed
+  const verifyEmailLink = `http://localhost:3000/verify-email?token=${verifyEmailToken}`
+  const sendEmailResult = await sendEmailVerificationEmail(
+    user,
+    verifyEmailLink
+  )
+  if (sendEmailResult === 'success') {
+    return 'success'
+  } else {
+    return 'unrecoverable-error'
+  }
+}
+
+export async function verifyEmail(
+  verifyEmailToken: string
+): Promise<'success' | 'unrecoverable-error'> {
+  const getPayloadResult = getPayloadFromVerifyEmailToken(verifyEmailToken)
+
+  if (isError(getPayloadResult)) {
+    return 'unrecoverable-error'
+  }
+
+  const payload: VerifyEmailTokenPayload = getPayloadResult
+  const userId = payload.uid
+
+  const updateEmailVerifiedResult = await UserDatabase.updateUserEmailVerified(
+    userId,
+    true
+  )
+
+  if (updateEmailVerifiedResult === 'success') {
+    return 'success'
+  } else {
+    return 'unrecoverable-error'
   }
 }

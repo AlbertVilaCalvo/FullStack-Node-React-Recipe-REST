@@ -62,3 +62,19 @@ export function login(
       }
     })
 }
+
+export function sendEmailVerificationEmail() {
+  return httpClient.post<void>(`/auth/verify-email/send`)
+}
+
+type VerifyEmailData = { verify_email_token: string }
+
+export function verifyEmail(verifyEmailToken: string) {
+  return httpClient.post<
+    void,
+    AxiosResponse<void, VerifyEmailData>,
+    VerifyEmailData
+  >(`/auth/verify-email`, {
+    verify_email_token: verifyEmailToken,
+  })
+}

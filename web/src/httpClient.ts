@@ -53,6 +53,18 @@ export function extractApiError(error?: any): ApiError | undefined {
 }
 
 /**
+ * @param error the error of an axios request catch.
+ */
+export function extractApiErrorMessage(error?: any): string {
+  const apiError = extractApiError(error)
+  if (apiError) {
+    return apiError.error.message
+  } else {
+    return error.message
+  }
+}
+
+/**
  * Use it to set a specific ApiError like 'duplicate_email'.
  */
 export type AnApiError<ErrorCode extends string> = {

@@ -1,9 +1,10 @@
 CREATE TABLE "user"
 (
-    id       SERIAL PRIMARY KEY,
-    email    VARCHAR(254) NOT NULL UNIQUE,
-    password CHAR(60)     NOT NULL,
-    name     VARCHAR(255) NOT NULL
+    id             SERIAL PRIMARY KEY,
+    email          VARCHAR(254) NOT NULL UNIQUE,
+    password       CHAR(60)     NOT NULL,
+    name           VARCHAR(255) NOT NULL,
+    email_verified BOOLEAN      NOT NULL DEFAULT false
 );
 
 CREATE TABLE recipe

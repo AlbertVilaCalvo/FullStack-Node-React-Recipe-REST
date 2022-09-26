@@ -18,3 +18,16 @@ export function toError(error: unknown, where: string): Error {
     return Error('Unknown error')
   }
 }
+
+/**
+ * Constructs a new object by picking certain properties of the given object.
+ * Example: `const publicUser = pick(user, ['id', 'name'])`.
+ * Adapted from https://stackoverflow.com/a/35667463/4034572.
+ */
+export function pick<T extends object, K extends keyof T>(
+  object: T,
+  keys: K[]
+): Pick<T, K> {
+  const entries = keys.filter((k) => k in object).map((k) => [k, object[k]])
+  return Object.fromEntries(entries)
+}

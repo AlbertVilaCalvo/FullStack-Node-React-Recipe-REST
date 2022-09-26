@@ -12,6 +12,7 @@ const USER: User = {
   name: 'Albert',
   email: 'a@b.c',
   password: 'hash',
+  email_verified: true,
 }
 const RECIPE: Recipe = {
   id: 1,
