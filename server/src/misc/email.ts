@@ -30,6 +30,9 @@ async function sendEmail(options: EmailOptions) {
   console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
 }
 
+/**
+ * Alert the user that a new login was done with its account.
+ */
 export function sendLoginEmail(user: User) {
   sendEmail({
     to: {
@@ -37,11 +40,11 @@ export function sendLoginEmail(user: User) {
       address: user.email,
     },
     subject: 'New login at Recipe Manager',
-    text: `Hello ${user.name}!
-You have logged in at Recipe Manager.
+    text: `Hi ${user.name}!
+Your account was just used to log in at Recipe Manager.
 If it was not you, please contact us at hello@recipemanager.com.`,
-    html: `<p>Hello ${user.name}!</p>
-<p>You have logged in at Recipe Manager.</p>
+    html: `<p>Hi ${user.name}!</p>
+<p>Your account was just used to log in at Recipe Manager.</p>
 <p>If it was not you, <a href="mailto:hello@recipemanager.com">please contact us</a>.</p>`,
   }).catch((error) => {
     console.error(`sendLoginEmail error`, error)
