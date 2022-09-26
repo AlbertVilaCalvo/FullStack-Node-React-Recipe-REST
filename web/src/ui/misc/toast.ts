@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { ToastPosition, useToast } from '@chakra-ui/react'
 
 const POSITION: ToastPosition = 'top'
@@ -22,12 +23,14 @@ export function useSuccessToast(): ShowToast {
     duration: 3000,
     isClosable: true,
   })
-  return (title: string, description?: string) => {
+  const showToast = React.useCallback((title: string, description?: string) => {
     return toast({
       title,
       description,
     })
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return showToast
 }
 
 /**
@@ -45,10 +48,12 @@ export function useErrorToast() {
     duration: 7000,
     isClosable: true,
   })
-  return (title: string, description?: string) => {
+  const showToast = React.useCallback((title: string, description?: string) => {
     return toast({
       title,
       description,
     })
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return showToast
 }
