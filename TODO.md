@@ -20,6 +20,7 @@
   - https://javascript.plainenglish.io/expressjs-api-with-secure-jwt-access-and-refresh-token-64c5478be2c0
   - https://medium.com/swlh/authentication-using-jwt-and-refresh-token-part-1-aca5522c14c8
 - [ ] Changing the password or resetting the password should invalidate all existing tokens of that user? See https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c as an example
+- [ ] Once we have a token store, tt the Settings page, show a list of the active sessions like in https://github.com/settings/security
 
 ## Back and front
 
@@ -64,6 +65,7 @@
   - https://github.com/danielkhan/todolist-backend/blob/master/utils/swagger.js
   - https://github.com/hagopj13/node-express-boilerplate/blob/master/src/routes/v1/auth.route.js
   - https://blog.logrocket.com/documenting-your-express-api-with-swagger/
+  - https://www.manning.com/books/designing-apis-with-swagger-and-openapi
 - [ ] Full text search of recipes
   - Use PostgreSQL's full-text search functionality to perform natural-language searches of your data. https://lets-go-further.alexedwards.net/
 - [ ] Rate limit:
@@ -78,10 +80,14 @@
 - [ ] Check navigation with keyboard at forms
 - [ ] Why did you render: https://github.com/welldone-software/why-did-you-render
   - Setup requires many extra steps for Create React App :/
+  - This alternative seems somewhat similar: https://github.com/shuding/tilg
 
 ## Deploy AWS
 
 https://stackoverflow.com/questions/41250087/how-to-deploy-a-react-nodejs-express-application-to-aws
+
+Automate react application deployment on aws, mohamed labouardy
+https://livevideo.manning.com/module/536_1_1/automate-react-application-deployment-on-aws-mohamed-labouardy/author-talk/automate-react-application-deployment-on-aws?
 
 ### Docker
 
