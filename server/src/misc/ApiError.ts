@@ -34,38 +34,38 @@ export class ApiError {
   }
 
   static userNotFound(userId: number | string): ApiError {
-    return makeApiError('user_not_found', `User with id ${userId} not found`)
+    return makeApiError('user_not_found', `User with id ${userId} not found.`)
   }
 
   static recipeNotFound(recipeId: number | string): ApiError {
     return makeApiError(
       'recipe_not_found',
-      `Recipe with id ${recipeId} not found`
+      `Recipe with id ${recipeId} not found.`
     )
   }
 
   static duplicateEmail(): ApiError {
-    return makeApiError('duplicate_email', 'This email is already registered')
+    return makeApiError('duplicate_email', 'This email is already registered.')
   }
 
   static invalidLoginCredentials(): ApiError {
     return makeApiError(
       'invalid_login_credentials',
-      'The credentials are not valid'
+      'The credentials are not valid.'
     )
   }
 
   static validAuthTokenRequired(): ApiError {
     return makeApiError(
       'valid_auth_token_required',
-      "An 'Authorization' header containing 'Bearer ${token}' with a valid token is required"
+      "An 'Authorization' header containing 'Bearer ${token}' with a valid token is required."
     )
   }
 
   static invalidPassword(): ApiError {
     return makeApiError(
       'invalid_password',
-      'The provided password is not valid'
+      'The provided password is not valid.'
     )
   }
 }
