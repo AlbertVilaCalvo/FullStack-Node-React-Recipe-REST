@@ -135,7 +135,7 @@ export const login: RequestHandler<
  * curl http://localhost:5000/api/auth/email-verification/email -H "Content-Type: application/json"
  * -H "Authorization: Bearer auth_token" -d '{"verify_token":"token"}' -v
  */
-export const sendVerifyEmail: RequestHandler<
+export const sendEmailVerificationEmail: RequestHandler<
   // eslint-disable-next-line @typescript-eslint/ban-types
   {},
   void,
@@ -145,7 +145,7 @@ export const sendVerifyEmail: RequestHandler<
     assertUser(req.user, 'AuthController.sendVerifyEmail')
     const user: User = req.user
 
-    const sendEmailResult = await AuthService.sendVerifyEmail(user, false)
+    const sendEmailResult = await AuthService.sendVerifyEmailEmail(user, false)
     switch (sendEmailResult) {
       case 'success':
         res.sendStatus(StatusCode.NO_CONTENT_204)

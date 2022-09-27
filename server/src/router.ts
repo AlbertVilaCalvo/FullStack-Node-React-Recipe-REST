@@ -16,7 +16,7 @@ router.post('/auth/login', AuthController.login)
 router.post(
   '/auth/email-verification/email',
   AuthMiddleware.requireLoggedUser,
-  AuthController.sendVerifyEmail
+  AuthController.sendEmailVerificationEmail
 )
 router.post('/auth/email-verification', AuthController.verifyEmail)
 router.post('/auth/password-reset/email', AuthController.sendPasswordResetEmail)
