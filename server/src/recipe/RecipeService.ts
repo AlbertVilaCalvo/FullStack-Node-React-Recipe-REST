@@ -3,6 +3,7 @@ import { User } from '../user/User'
 import * as RecipeDatabase from './RecipeDatabase'
 import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
+import { assertUnreachable } from '../misc/assertUnreachable'
 
 export async function getRecipeById(
   recipeId: number
@@ -82,8 +83,8 @@ export async function updateRecipe(
     return 'recipe-not-found'
   } else if (isError(updateRecipeResult)) {
     return 'unrecoverable-error'
-  } else {
-    // success
+  } else if (updateRecipeResult === 'success') {
     return recipe
   }
+  assertUnreachable(updateRecipeResult)
 }

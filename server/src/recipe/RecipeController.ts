@@ -13,6 +13,7 @@ import { isValidData, isValidId, toApiError } from '../validation/validations'
 import { isError } from '../misc/result'
 import { User } from '../user/User'
 import { assertUser } from '../auth/AuthMiddleware'
+import { assertUnreachable } from '../misc/assertUnreachable'
 
 /**
  * GET /api/recipes
@@ -208,11 +209,15 @@ export const deleteRecipe: RequestHandler<
     )
     if (isError(deleteRecipeResult)) {
       res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+      return
     } else if (deleteRecipeResult === 'user-not-owner-or-recipe-not-found') {
       res.sendStatus(StatusCode.FORBIDDEN_403)
-    } else {
+      return
+    } else if (deleteRecipeResult === 'success') {
       res.sendStatus(StatusCode.NO_CONTENT_204)
+      return
     }
+    assertUnreachable(deleteRecipeResult)
   } catch (e) {
     console.error('Unexpected error at RecipeController.deleteRecipe:', e)
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)

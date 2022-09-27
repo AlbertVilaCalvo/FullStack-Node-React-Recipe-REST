@@ -6,6 +6,7 @@ import {
 } from '../auth/password'
 import * as UserDatabase from '../user/UserDatabase'
 import { isError } from '../misc/result'
+import { assertUnreachable } from '../misc/assertUnreachable'
 
 export async function getUserById(
   userId: number
@@ -53,9 +54,10 @@ export async function updateUserEmail(
     return 'user-not-found'
   } else if (isError(updateEmailResult)) {
     return 'unrecoverable-error'
-  } else {
+  } else if (updateEmailResult === 'success') {
     return 'success'
   }
+  assertUnreachable(updateEmailResult)
 }
 
 /**
@@ -97,9 +99,10 @@ export async function updateUserPassword(
     return 'user-not-found'
   } else if (isError(updateEmailResult)) {
     return 'unrecoverable-error'
-  } else {
+  } else if (updateEmailResult === 'success') {
     return 'success'
   }
+  assertUnreachable(updateEmailResult)
 }
 
 /**
@@ -128,7 +131,8 @@ export async function deleteUser(
     return 'user-not-found'
   } else if (isError(deleteUserResult)) {
     return 'unrecoverable-error'
-  } else {
+  } else if (deleteUserResult === 'success') {
     return 'success'
   }
+  assertUnreachable(deleteUserResult)
 }

@@ -9,6 +9,7 @@ import {
   VerifyEmailTokenPayload,
 } from './token'
 import { sendLoginAlertEmail, sendEmailVerificationEmail } from '../misc/email'
+import { assertUnreachable } from '../misc/assertUnreachable'
 
 /**
  * @param name user full name (from the request body)
@@ -136,9 +137,10 @@ export async function sendVerifyEmail(
   )
   if (sendEmailResult === 'success') {
     return 'success'
-  } else {
+  } else if (isError(sendEmailResult)) {
     return 'unrecoverable-error'
   }
+  assertUnreachable(sendEmailResult)
 }
 
 export async function verifyEmail(
