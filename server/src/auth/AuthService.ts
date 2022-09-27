@@ -8,7 +8,7 @@ import {
   getPayloadFromVerifyEmailToken,
   VerifyEmailTokenPayload,
 } from './token'
-import { sendLoginEmail, sendEmailVerificationEmail } from '../misc/email'
+import { sendLoginAlertEmail, sendEmailVerificationEmail } from '../misc/email'
 
 /**
  * @param name user full name (from the request body)
@@ -101,7 +101,7 @@ export async function login(
     return 'unrecoverable-error'
   }
 
-  sendLoginEmail(user)
+  sendLoginAlertEmail(user)
 
   return {
     user: removePassword(user),

@@ -37,7 +37,7 @@ async function sendEmail(options: EmailOptions): Promise<void> {
 /**
  * Alert the user that a new login was done with its account.
  */
-export function sendLoginEmail(user: User) {
+export function sendLoginAlertEmail(user: User) {
   sendEmail({
     to: {
       name: user.name,
@@ -51,7 +51,7 @@ If it was not you, please contact us at hello@recipemanager.com.`,
 <p>Your account was just used to log in at Recipe Manager.</p>
 <p>If it was not you, <a href="mailto:hello@recipemanager.com">please contact us</a>.</p>`,
   }).catch((error) => {
-    console.error(`sendLoginEmail error`, error)
+    console.error(`sendLoginAlertEmail error`, error)
   })
 }
 
