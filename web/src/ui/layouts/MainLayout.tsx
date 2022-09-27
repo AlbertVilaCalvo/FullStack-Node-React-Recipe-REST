@@ -9,7 +9,7 @@ export function MainLayout() {
 
   return (
     <>
-      <header className="main-container">
+      <header className="main-container header">
         <nav className="main-container-child-centered">
           <ul className="list-style-type-none">
             <li>
@@ -55,7 +55,7 @@ export function MainLayout() {
         </nav>
       </header>
       <Outlet />
-      <footer className="main-container">
+      <footer className="main-container footer">
         <div className="main-container-child-centered">
           <div id="footer-content">
             <p>The best recipe app!</p>

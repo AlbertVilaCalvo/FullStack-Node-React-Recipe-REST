@@ -22,9 +22,10 @@
   - What is the suggested best practice for changing a user's email address? - https://security.stackexchange.com/questions/234060/what-is-the-suggested-best-practice-for-changing-a-users-email-address
 - [ ] After changing the email, send an informative email to the previous account explaining that someone has changed the email
   - https://www.drupal.org/project/drupal/issues/85494 See point 2: "Sends a notification E-mail to the old address"
-- [ ] Forgot/recover/reset password
+- [x] Forgot/recover/reset password
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/services/auth.service.js#L37-L54
+  - https://www.simplecode.io/blog/create-a-rest-api-part-7-forgot-reset-password-routes/
 - [ ] Logout -> expire token at the server. Requires having a token store
 - [ ] If the JWT token expires, do a logout on the client
 - [ ] Refresh token. We need an axios interceptor to handle 401 and refresh the token

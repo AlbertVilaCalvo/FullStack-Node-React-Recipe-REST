@@ -9,6 +9,8 @@ import { validateParamRecipeId } from './validation/validateParamMiddleware'
 
 export const router = Router()
 
+// Auth
+
 router.post('/auth/register', AuthController.register)
 router.post('/auth/login', AuthController.login)
 router.post(
@@ -17,6 +19,10 @@ router.post(
   AuthController.sendVerifyEmail
 )
 router.post('/auth/verify-email', AuthController.verifyEmail)
+router.post('/auth/password-reset/email', AuthController.sendPasswordResetEmail)
+router.post('/auth/password-reset', AuthController.resetPassword)
+
+// My Account
 
 router.put(
   '/my-account/profile',
@@ -39,7 +45,11 @@ router.post(
   MyAccountController.deleteAccount
 )
 
+// User
+
 router.get('/users/:userId', UserController.getUser)
+
+// Recipe
 
 router.get('/recipes', RecipeController.getAllRecipes)
 router.get(
@@ -63,5 +73,7 @@ router.delete(
   AuthMiddleware.requireLoggedUser,
   RecipeController.deleteRecipe
 )
+
+// Catch all middleware
 
 router.use(unexpectedErrorHandler)

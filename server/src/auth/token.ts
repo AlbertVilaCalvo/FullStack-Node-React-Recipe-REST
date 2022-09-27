@@ -7,16 +7,17 @@ import { TokenExpiredError } from 'jsonwebtoken'
 
 const TOKEN_VALIDITY_TIME = '1h'
 
-type TokenType = 'auth' | 'verify-email'
+// If we add a new type we need to update isTokenPayload
+type TokenType = 'auth' | 'verify-email' | 'password-reset'
 
 /**
  * Our data added to the payload.
  * Note that the resulting payload will have more fields, added by the library.
  */
 interface TokenPayloadCustomData {
-  type: TokenType
   /** User ID. */
   uid: number
+  type: TokenType
 }
 
 interface AuthTokenPayloadCustomData extends TokenPayloadCustomData {
@@ -25,6 +26,10 @@ interface AuthTokenPayloadCustomData extends TokenPayloadCustomData {
 
 interface VerifyEmailTokenPayloadCustomData extends TokenPayloadCustomData {
   type: 'verify-email'
+}
+
+interface PasswordResetTokenPayloadCustomData extends TokenPayloadCustomData {
+  type: 'password-reset'
 }
 
 /**
@@ -49,7 +54,16 @@ export type AuthTokenPayload = TokenPayloadLibraryData &
 export type VerifyEmailTokenPayload = TokenPayloadLibraryData &
   VerifyEmailTokenPayloadCustomData
 
-type TokenPayload = AuthTokenPayload | VerifyEmailTokenPayload
+/**
+ * The fields added by the library plus our data.
+ */
+export type PasswordResetTokenPayload = TokenPayloadLibraryData &
+  PasswordResetTokenPayloadCustomData
+
+type TokenPayload =
+  | AuthTokenPayload
+  | VerifyEmailTokenPayload
+  | PasswordResetTokenPayload
 
 function isTokenPayload(arg: string | jwt.JwtPayload): arg is TokenPayload {
   if (typeof arg === 'string') {
@@ -65,7 +79,9 @@ function isTokenPayload(arg: string | jwt.JwtPayload): arg is TokenPayload {
     'uid' in arg &&
     typeof arg.uid === 'number' &&
     'type' in arg &&
-    (arg.type === 'auth' || arg.type === 'verify-email')
+    (arg.type === 'auth' ||
+      arg.type === 'verify-email' ||
+      arg.type === 'password-reset')
   ) {
     return true
   }
@@ -177,6 +193,26 @@ export function getPayloadFromVerifyEmailToken(
 }
 
 /**
+ * It will return Error if the token has expired, if the signature is not valid,
+ * or the payload does not have the expected shape.
+ */
+export function getPayloadFromPasswordResetToken(
+  verifyEmailToken: string
+): PasswordResetTokenPayload | 'token-expired' | Error {
+  const getPayloadResult = getPayloadFromToken(verifyEmailToken)
+  if (isError(getPayloadResult) || getPayloadResult === 'token-expired') {
+    return getPayloadResult
+  }
+  if (getPayloadResult.type === 'password-reset') {
+    return getPayloadResult
+  } else {
+    return Error(
+      `Incorrect payload type ${getPayloadResult.type}. It should be 'password-reset'.`
+    )
+  }
+}
+
+/**
  * A combination of `getAuthTokenFromHeader` and `getPayloadFromAuthToken` in a
  * single function.
  */
@@ -218,4 +254,8 @@ export function generateAuthToken(userId: number): string | Error {
 
 export function generateVerifyEmailToken(userId: number): string | Error {
   return generateToken('verify-email', userId)
+}
+
+export function generatePasswordResetToken(userId: number): string | Error {
+  return generateToken('password-reset', userId)
 }

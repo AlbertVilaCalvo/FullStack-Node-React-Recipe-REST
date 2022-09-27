@@ -5,6 +5,7 @@ import { ApiError } from '../misc/ApiError'
 import { StatusCode } from '../misc/StatusCode'
 import {
   EMAIL_MAX_LENGTH,
+  NewPlainPasswordSchema,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   PlainPasswordSchema,
@@ -127,13 +128,14 @@ export const updateEmail: RequestHandler<
   }
 }
 
-const ChangePasswordRequestSchema = z.object({
-  current_password: z
-    .string()
-    .min(PASSWORD_MIN_LENGTH)
-    .max(PASSWORD_MAX_LENGTH),
-  new_password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
-})
+const ChangePasswordRequestSchema = z
+  .object({
+    current_password: z
+      .string()
+      .min(PASSWORD_MIN_LENGTH)
+      .max(PASSWORD_MAX_LENGTH),
+  })
+  .merge(NewPlainPasswordSchema)
 type ChangePasswordRequest = { current_password: string; new_password: string }
 
 /**

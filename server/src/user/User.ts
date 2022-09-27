@@ -40,6 +40,10 @@ export const PlainPasswordSchema = z.object({
   password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
 })
 
+export const NewPlainPasswordSchema = z.object({
+  new_password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
+})
+
 export const EmailSchema = z.object({
   email: z.string().email().max(EMAIL_MAX_LENGTH),
 })

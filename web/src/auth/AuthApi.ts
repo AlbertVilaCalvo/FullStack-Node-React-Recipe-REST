@@ -85,3 +85,30 @@ export function verifyEmail(
       return response.data
     })
 }
+
+export function sendResetPasswordEmail(email: string) {
+  return httpClient.post<void>(`/auth/password-reset/email`, {
+    email,
+  })
+}
+
+type ResetPasswordData = { password_reset_token: string; new_password: string }
+type ResetPasswordResponse = void | AnApiError<'password_reset_token_expired'>
+
+export function resetPassword(
+  resetPasswordToken: string,
+  newPassword: string
+): Promise<ResetPasswordResponse> {
+  return httpClient
+    .post<
+      ResetPasswordResponse,
+      AxiosResponse<ResetPasswordResponse, ResetPasswordData>,
+      ResetPasswordData
+    >(`/auth/password-reset`, {
+      password_reset_token: resetPasswordToken,
+      new_password: newPassword,
+    })
+    .then((response: AxiosResponse<ResetPasswordResponse>) => {
+      return response.data
+    })
+}

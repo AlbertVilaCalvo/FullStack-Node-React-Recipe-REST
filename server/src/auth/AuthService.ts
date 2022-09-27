@@ -4,11 +4,18 @@ import { isError } from '../misc/result'
 import { removePassword, User, UserNoPassword } from '../user/User'
 import {
   generateAuthToken,
+  generatePasswordResetToken,
   generateVerifyEmailToken,
+  getPayloadFromPasswordResetToken,
   getPayloadFromVerifyEmailToken,
+  PasswordResetTokenPayload,
   VerifyEmailTokenPayload,
 } from './token'
-import { sendLoginAlertEmail, sendEmailVerificationEmail } from '../misc/email'
+import {
+  sendLoginAlertEmail,
+  sendEmailVerificationEmail,
+  sendResetPasswordEmail,
+} from '../misc/email'
 import { assertUnreachable } from '../misc/assertUnreachable'
 
 /**
@@ -167,4 +174,84 @@ export async function verifyEmail(
   } else {
     return 'unrecoverable-error'
   }
+}
+
+/**
+ * Sends a password reset email to the user.
+ */
+export async function sendPasswordResetEmail(
+  email: string
+): Promise<'success' | 'unrecoverable-error'> {
+  const getUserResult = await UserDatabase.getUserByEmail(email)
+
+  if (isError(getUserResult)) {
+    return 'unrecoverable-error'
+  } else if (getUserResult === 'user-not-found') {
+    // We don't want to reveal the user that this email does not exist
+    return 'success'
+  }
+
+  const user: User = getUserResult
+
+  const generateTokenResult = generatePasswordResetToken(user.id)
+  if (isError(generateTokenResult)) {
+    return 'unrecoverable-error'
+  }
+  const passwordResetToken: string = generateTokenResult
+
+  // TODO we'll need to change 'localhost:3000' when deployed
+  const passwordResetLink = `http://localhost:3000/password-reset?token=${passwordResetToken}`
+  const sendEmailResult = await sendResetPasswordEmail(user, passwordResetLink)
+
+  if (sendEmailResult === 'success') {
+    return 'success'
+  } else if (isError(sendEmailResult)) {
+    return 'unrecoverable-error'
+  }
+  assertUnreachable(sendEmailResult)
+}
+
+/**
+ * Set a new password for a user. This is part of the password reset via email flow.
+ * @param passwordResetToken a JWT token of type 'password-reset' (from the request body)
+ * @param newPassword new plain text password (from the request body)
+ */
+export async function resetPassword(
+  passwordResetToken: string,
+  newPassword: string
+): Promise<'success' | 'token-expired' | 'unrecoverable-error'> {
+  const getPayloadResult = getPayloadFromPasswordResetToken(passwordResetToken)
+
+  if (isError(getPayloadResult)) {
+    return 'unrecoverable-error'
+  } else if (getPayloadResult === 'token-expired') {
+    return 'token-expired'
+  }
+
+  const payload: PasswordResetTokenPayload = getPayloadResult
+  const userId = payload.uid
+
+  let newPasswordHash: string
+  try {
+    newPasswordHash = await hashPassword(newPassword)
+  } catch (error) {
+    return 'unrecoverable-error'
+  }
+
+  const updatePasswordResult = await UserDatabase.updateUserPassword(
+    userId,
+    newPasswordHash
+  )
+
+  if (isError(updatePasswordResult)) {
+    return 'unrecoverable-error'
+  } else if (updatePasswordResult === 'success') {
+    return 'success'
+  } else if (updatePasswordResult === 'user-not-found') {
+    // Unlikely. This can only happen if the user is deleted a few minutes
+    // after triggering the reset password. We can return 'success' or
+    // 'unrecoverable-error'.
+    return 'success'
+  }
+  assertUnreachable(updatePasswordResult)
 }

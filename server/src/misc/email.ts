@@ -83,7 +83,7 @@ export async function sendEmailVerificationEmail(
     `To have full access to all Recipe Manager features, please verify your email address by visiting ${verifyEmailLink}`
   html =
     html +
-    `<p>To have full access to all Recipe Manager features, please verify your email address by visiting <a href="${verifyEmailLink}">${verifyEmailLink}</a>.</p>`
+    `<p>To have full access to all Recipe Manager features, please verify your email address by visiting <a href="${verifyEmailLink}">${verifyEmailLink}</a></p>`
 
   return sendEmail({
     to: {
@@ -100,5 +100,34 @@ export async function sendEmailVerificationEmail(
     .catch((error) => {
       console.error(`sendEmailVerificationEmail error`, error)
       return toError(error, 'sendEmailVerificationEmail')
+    })
+}
+
+export async function sendResetPasswordEmail(
+  user: User,
+  passwordResetLink: string
+): Promise<'success' | Error> {
+  let text = hiText(user)
+  let html = hiHtml(user)
+  text = text + `Set a new password by visiting ${passwordResetLink}`
+  html =
+    html +
+    `<p>Set a new password by visiting <a href="${passwordResetLink}">${passwordResetLink}</a></p>`
+
+  return sendEmail({
+    to: {
+      name: user.name,
+      address: user.email,
+    },
+    subject: 'Set your Recipe Manager password',
+    text: text,
+    html: html,
+  })
+    .then<'success'>(() => {
+      return 'success'
+    })
+    .catch((error) => {
+      console.error(`sendResetPasswordEmail error`, error)
+      return toError(error, 'sendResetPasswordEmail')
     })
 }

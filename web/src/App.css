@@ -31,7 +31,7 @@
   padding-bottom: 70px;
 }
 
-header {
+.header {
   position: sticky;
   overflow: hidden;
   top: 0;
@@ -41,15 +41,15 @@ header {
   padding-bottom: 25px;
 }
 
-header > nav {
+.header > nav {
   color: var(--chakra-colors-gray-50);
 }
 
-header > nav > ul {
+.header > nav > ul {
   display: flex;
 }
 
-header > nav > ul > li:not(:last-child) {
+.header > nav > ul > li:not(:last-child) {
   margin-right: 22px;
 }
 
@@ -57,7 +57,7 @@ header > nav > ul > li:not(:last-child) {
   flex-grow: 1;
 }
 
-footer {
+.footer {
   flex-grow: 1; /* Fill all remaining vertical space */
   background-color: var(--chakra-colors-gray-700);
   color: var(--chakra-colors-gray-50);

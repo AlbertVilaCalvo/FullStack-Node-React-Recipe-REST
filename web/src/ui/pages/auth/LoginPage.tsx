@@ -14,12 +14,16 @@ import {
   PasswordFormControl,
 } from '../../components/form/FormControl'
 import { SubmitButton } from '../../components/form/SubmitButton'
+import { Button, useDisclosure } from '@chakra-ui/react'
+import { PasswordResetAlertDialog } from '../../components/auth/PasswordResetAlertDialog'
 
 export function LoginPage() {
   const showErrorToast = useErrorToast()
 
   const navigate = useNavigate()
   const location = useLocation()
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
@@ -58,6 +62,7 @@ export function LoginPage() {
     <div className="main-container page">
       <div className="main-container-child-centered">
         <H1>Login</H1>
+
         <Form onSubmit={onSubmit}>
           <EmailFormControl
             value={email}
@@ -76,9 +81,21 @@ export function LoginPage() {
           </SubmitButton>
         </Form>
 
+        <Button
+          onClick={onOpen}
+          colorScheme="teal"
+          variant="link"
+          ml={3}
+          marginTop="30px"
+        >
+          I forgot my password
+        </Button>
+
         <StyledLink to="/register" className="center" marginTop={10}>
           Don't have an account yet? <span className="bold">Register</span>
         </StyledLink>
+
+        <PasswordResetAlertDialog isOpen={isOpen} onClose={onClose} />
       </div>
     </div>
   )

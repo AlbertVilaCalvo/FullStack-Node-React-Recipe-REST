@@ -10,11 +10,12 @@ import { NotFound404Page } from './ui/pages/NotFound404Page'
 import { RegisterPage } from './ui/pages/auth/RegisterPage'
 import { LoginPage } from './ui/pages/auth/LoginPage'
 import { VerifyEmailPage } from './ui/pages/auth/VerifyEmailPage'
-import { UserDetailPage } from './ui/pages/user/UserDetailPage'
+import { PasswordResetPage } from './ui/pages/auth/PasswordResetPage'
 import { MyProfilePage } from './ui/pages/settings/MyProfilePage'
 import { ChangeEmailPage } from './ui/pages/settings/ChangeEmailPage'
 import { ChangePasswordPage } from './ui/pages/settings/ChangePasswordPage'
 import { DeleteAccountPage } from './ui/pages/settings/DeleteAccountPage'
+import { UserDetailPage } from './ui/pages/user/UserDetailPage'
 import { CreateRecipePage } from './ui/pages/recipe/CreateRecipePage'
 import { RecipeDetailPage } from './ui/pages/recipe/RecipeDetailPage'
 import { EditRecipePage } from './ui/pages/recipe/EditRecipePage'
@@ -31,6 +32,7 @@ function App() {
             <Route path="register" element={<RegisterPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="verify-email" element={<VerifyEmailPage />} />
+            <Route path="password-reset" element={<PasswordResetPage />} />
 
             <Route
               path="settings"

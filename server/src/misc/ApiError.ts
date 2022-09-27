@@ -8,6 +8,7 @@ type ApiErrorCode =
   | 'valid_auth_token_required'
   | 'invalid_password'
   | 'validate_email_token_expired'
+  | 'password_reset_token_expired'
   | ZodIssueCode
 
 /**
@@ -74,6 +75,13 @@ export class ApiError {
     return makeApiError(
       'validate_email_token_expired',
       'The token has expired. Please log in and request a new validation email at the Settings page.'
+    )
+  }
+
+  static passwordResetTokenExpired(): ApiError {
+    return makeApiError(
+      'password_reset_token_expired',
+      'The token has expired. Please request a new password reset email at the Login page.'
     )
   }
 }

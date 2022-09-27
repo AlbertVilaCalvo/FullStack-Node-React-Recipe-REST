@@ -8,6 +8,7 @@ import {
   UserNameSchema,
   UserNoPassword,
   userFrontendUrl,
+  NewPlainPasswordSchema,
 } from '../user/User'
 import { ApiError } from '../misc/ApiError'
 import { isValidData, toApiError } from '../validation/validations'
@@ -207,6 +208,105 @@ export const verifyEmail: RequestHandler<
     }
   } catch (e) {
     console.error('Unexpected error at AuthController.verifyEmail:', e)
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  }
+}
+
+type SendPasswordResetEmailRequest = { email: string }
+
+/**
+ * POST /api/auth/password-reset/email
+ *
+ * curl http://localhost:5000/api/auth/password-reset/email -H "Content-Type: application/json"
+ * -d '{"email":a@a.com}' -v
+ */
+export const sendPasswordResetEmail: RequestHandler<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
+  void | ApiError,
+  SendPasswordResetEmailRequest
+> = async (req, res) => {
+  try {
+    const validateBodyResult = EmailSchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
+      return
+    }
+    const requestBody: SendPasswordResetEmailRequest = validateBodyResult.data
+
+    const sendEmailResult = await AuthService.sendPasswordResetEmail(
+      requestBody.email
+    )
+    switch (sendEmailResult) {
+      case 'success':
+        res.sendStatus(StatusCode.NO_CONTENT_204)
+        return
+      case 'unrecoverable-error':
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      default:
+        assertUnreachable(sendEmailResult)
+    }
+  } catch (e) {
+    console.error(
+      'Unexpected error at AuthController.sendPasswordResetEmail:',
+      e
+    )
+    res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+  }
+}
+
+const ResetPasswordSchema = z
+  .object({
+    password_reset_token: z.string().min(1),
+  })
+  .merge(NewPlainPasswordSchema)
+type ResetPasswordRequest = {
+  password_reset_token: string
+  new_password: string
+}
+
+/**
+ * POST /api/auth/password-reset
+ *
+ * curl http://localhost:5000/api/auth/password-reset -H "Content-Type: application/json"
+ * -d '{"password_reset_token":"token"}' -v
+ */
+export const resetPassword: RequestHandler<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  {},
+  void | ApiError,
+  ResetPasswordRequest
+> = async (req, res) => {
+  try {
+    const validateBodyResult = ResetPasswordSchema.safeParse(req.body)
+    if (!isValidData(validateBodyResult)) {
+      const apiError = toApiError(validateBodyResult.error)
+      res.status(StatusCode.BAD_REQUEST_400).json(apiError)
+      return
+    }
+    const requestBody: ResetPasswordRequest = validateBodyResult.data
+
+    const resetPasswordResult = await AuthService.resetPassword(
+      requestBody.password_reset_token,
+      requestBody.new_password
+    )
+    switch (resetPasswordResult) {
+      case 'success':
+        res.sendStatus(StatusCode.NO_CONTENT_204)
+        return
+      case 'token-expired':
+        res.status(StatusCode.OK_200).json(ApiError.passwordResetTokenExpired())
+        return
+      case 'unrecoverable-error':
+        res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
+        return
+      default:
+        assertUnreachable(resetPasswordResult)
+    }
+  } catch (e) {
+    console.error('Unexpected error at AuthController.resetPassword:', e)
     res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR_500)
   }
 }
