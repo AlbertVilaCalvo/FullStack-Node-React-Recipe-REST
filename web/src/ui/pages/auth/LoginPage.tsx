@@ -77,7 +77,7 @@ export function LoginPage() {
         </Form>
 
         <StyledLink to="/register" className="center" marginTop={10}>
-          Don't have an account yet? Register
+          Don't have an account yet? <span className="bold">Register</span>
         </StyledLink>
       </div>
     </div>
