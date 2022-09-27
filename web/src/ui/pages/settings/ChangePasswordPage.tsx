@@ -68,7 +68,7 @@ export function ChangePasswordPage() {
           isLoading={loading}
           alignSelf="flex-start"
         >
-          Change Email
+          Change Password
         </SubmitButton>
       </Form>
     </>
