@@ -5,22 +5,33 @@
 - [x] Change email
 - [x] Change password
 - [x] Delete account
-- [ ] Logout -> expire token at the server. Requires having a token store
-- [x] Verify email after registering
-  - https://www.simplecode.io/blog/create-a-rest-api-part-4-send-emails-with-amazon-ses/
-  - https://www.simplecode.io/blog/create-a-rest-api-part-5-verify-users-with-tokens/
 - [ ] Send welcome email after register is complete (ie email validated), alert email after login etc
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/nodemailer.js
+- [x] Verify email after registering
+  - https://www.simplecode.io/blog/create-a-rest-api-part-4-send-emails-with-amazon-ses/
+  - https://www.simplecode.io/blog/create-a-rest-api-part-5-verify-users-with-tokens/
+- [ ] If email is not verified, restrict what you can do (eg do not allow to publish recipes)
+  - Can be easily done with a middleware that runs after AuthMiddleware.requireLoggedUser, checking `email_verified`
+  - We have to show a pop-up to the user after registering, see:
+  - https://ux.stackexchange.com/questions/109958/best-way-to-handle-new-user-registration-when-email-verification-is-required
+  - https://ux.stackexchange.com/questions/29145/limiting-access-before-email-address-is-confirmed
+  - https://ux.stackexchange.com/questions/12367/when-to-explain-email-verification-process-to-the-user
+- [ ] When the user changes the email, verify it before overriding the old one. We'll need to store the 2 emails (old and new) temporarily
+  - Changing an e-mail sends a verification mail to the user's mailbox, and only after verification - the new email overwrites the old one. [source](https://ux.stackexchange.com/questions/12367/when-to-explain-email-verification-process-to-the-user)
+  - What is the suggested best practice for changing a user's email address? - https://security.stackexchange.com/questions/234060/what-is-the-suggested-best-practice-for-changing-a-users-email-address
+- [ ] After changing the email, send an informative email to the previous account explaining that someone has changed the email
+  - https://www.drupal.org/project/drupal/issues/85494 See point 2: "Sends a notification E-mail to the old address"
 - [ ] Forgot/recover/reset password
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/services/auth.service.js#L37-L54
+- [ ] Logout -> expire token at the server. Requires having a token store
 - [ ] If the JWT token expires, do a logout on the client
 - [ ] Refresh token. We need an axios interceptor to handle 401 and refresh the token
   - https://javascript.plainenglish.io/expressjs-api-with-secure-jwt-access-and-refresh-token-64c5478be2c0
   - https://medium.com/swlh/authentication-using-jwt-and-refresh-token-part-1-aca5522c14c8
 - [ ] Changing the password or resetting the password should invalidate all existing tokens of that user? See https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c as an example
-- [ ] Once we have a token store, tt the Settings page, show a list of the active sessions like in https://github.com/settings/security
+- [ ] Once we have a token store, at the Settings page, show a list of the active sessions like in https://github.com/settings/security
 
 ## Back and front
 
@@ -58,6 +69,7 @@
   - https://nemethgergely.com/blog/nodejs-security-overview#using-the-helmet-module
   - https://blog.risingstack.com/node-js-security-checklist/
 - [ ] Paginate GET /recipe
+  - https://stackoverflow.com/questions/776448/pagination-in-a-rest-web-application
 - [ ] Re-usable data validation middleware, instead of putting repetitive code at each RequestHandler
   - https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/validation.md
   - https://github.com/platzi/curso-nodejs-postgres/blob/main/middlewares/validator.handler.js (uses joi)
