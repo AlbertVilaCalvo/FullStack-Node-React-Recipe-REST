@@ -53,7 +53,7 @@ export async function register(
   // Since the user can manually trigger sending an email verification email
   // from the settings at any time, we don't wait to completion, nor we care
   // if it succeeds or fails.
-  sendVerifyEmail(user)
+  sendVerifyEmail(user, true)
 
   return {
     user: removePassword(user),
@@ -113,7 +113,8 @@ export async function login(
  * Sends a 'verify email' email to the user.
  */
 export async function sendVerifyEmail(
-  user: User
+  user: User,
+  isRegister: boolean
 ): Promise<'success' | 'email-already-verified' | 'unrecoverable-error'> {
   if (user.email_verified) {
     console.warn(`The user with id ${user.id} has already verified the email`)
@@ -130,7 +131,8 @@ export async function sendVerifyEmail(
   const verifyEmailLink = `http://localhost:3000/verify-email?token=${verifyEmailToken}`
   const sendEmailResult = await sendEmailVerificationEmail(
     user,
-    verifyEmailLink
+    verifyEmailLink,
+    isRegister
   )
   if (sendEmailResult === 'success') {
     return 'success'

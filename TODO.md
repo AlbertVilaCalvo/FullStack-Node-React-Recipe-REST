@@ -5,7 +5,7 @@
 - [x] Change email
 - [x] Change password
 - [x] Delete account
-- [ ] Send welcome email after register is complete (ie email validated), alert email after login etc
+- [x] Send welcome email after registering, alert email after login etc
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/nodemailer.js
 - [x] Verify email after registering

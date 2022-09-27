@@ -144,7 +144,7 @@ export const sendVerifyEmail: RequestHandler<
     assertUser(req.user, 'AuthController.sendVerifyEmail')
     const user: User = req.user
 
-    const sendEmailResult = await AuthService.sendVerifyEmail(user)
+    const sendEmailResult = await AuthService.sendVerifyEmail(user, false)
     switch (sendEmailResult) {
       case 'success':
         res.sendStatus(StatusCode.NO_CONTENT_204)
