@@ -130,9 +130,9 @@ export const login: RequestHandler<
 }
 
 /**
- * POST /api/auth/verify-email/send
+ * POST /api/auth/verify-email/email
  *
- * curl http://localhost:5000/api/auth/verify-email/send -H "Content-Type: application/json"
+ * curl http://localhost:5000/api/auth/verify-email/email -H "Content-Type: application/json"
  * -H "Authorization: Bearer auth_token" -d '{"verify_token":"token"}' -v
  */
 export const sendVerifyEmail: RequestHandler<

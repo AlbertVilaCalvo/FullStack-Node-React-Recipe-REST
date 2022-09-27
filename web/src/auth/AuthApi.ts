@@ -64,7 +64,7 @@ export function login(
 }
 
 export function sendEmailVerificationEmail() {
-  return httpClient.post<void>(`/auth/verify-email/send`)
+  return httpClient.post<void>(`/auth/verify-email/email`)
 }
 
 type VerifyEmailData = { verify_email_token: string }
