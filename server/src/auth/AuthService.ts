@@ -169,11 +169,17 @@ export async function verifyEmail(
     true
   )
 
-  if (updateEmailVerifiedResult === 'success') {
-    return 'success'
-  } else {
+  if (isError(updateEmailVerifiedResult)) {
     return 'unrecoverable-error'
+  } else if (updateEmailVerifiedResult === 'success') {
+    return 'success'
+  } else if (updateEmailVerifiedResult === 'user-not-found') {
+    // Unlikely. This can only happen if the user is deleted a few minutes
+    // after sending the 'verify email' email. We can return 'success' or
+    // 'unrecoverable-error'.
+    return 'success'
   }
+  assertUnreachable(updateEmailVerifiedResult)
 }
 
 /**
