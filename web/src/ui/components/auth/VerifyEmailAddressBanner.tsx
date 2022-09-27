@@ -5,15 +5,15 @@ import {
   AlertTitle,
   Box,
 } from '@chakra-ui/react'
-import { Form } from './form/Form'
-import { SubmitButton } from './form/SubmitButton'
+import { Form } from '../form/Form'
+import { SubmitButton } from '../form/SubmitButton'
 import * as React from 'react'
-import { NavigateToLogin } from './navigation/RequireLogin'
-import { useErrorToast, useSuccessToast } from '../misc/toast'
+import { NavigateToLogin } from '../navigation/RequireLogin'
+import { useErrorToast, useSuccessToast } from '../../misc/toast'
 import { useSnapshot } from 'valtio'
-import { userStore } from '../../user/userStore'
-import * as AuthApi from '../../auth/AuthApi'
-import { extractApiErrorMessage } from '../../httpClient'
+import { userStore } from '../../../user/userStore'
+import * as AuthApi from '../../../auth/AuthApi'
+import { extractApiErrorMessage } from '../../../httpClient'
 
 export function VerifyEmailAddressBanner() {
   const showErrorToast = useErrorToast()
