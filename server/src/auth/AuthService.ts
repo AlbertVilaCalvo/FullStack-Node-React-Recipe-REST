@@ -136,7 +136,7 @@ export async function sendVerifyEmail(
   const verifyEmailToken: string = generateTokenResult
 
   // TODO we'll need to change 'localhost:3000' when deployed
-  const verifyEmailLink = `http://localhost:3000/verify-email?token=${verifyEmailToken}`
+  const verifyEmailLink = `http://localhost:3000/email-verification?token=${verifyEmailToken}`
   const sendEmailResult = await sendEmailVerificationEmail(
     user,
     verifyEmailLink,

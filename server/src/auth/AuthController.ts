@@ -130,9 +130,9 @@ export const login: RequestHandler<
 }
 
 /**
- * POST /api/auth/verify-email/email
+ * POST /api/auth/email-verification/email
  *
- * curl http://localhost:5000/api/auth/verify-email/email -H "Content-Type: application/json"
+ * curl http://localhost:5000/api/auth/email-verification/email -H "Content-Type: application/json"
  * -H "Authorization: Bearer auth_token" -d '{"verify_token":"token"}' -v
  */
 export const sendVerifyEmail: RequestHandler<
@@ -169,9 +169,9 @@ const VerifyEmailSchema = z.object({ verify_email_token: z.string().min(1) })
 type VerifyEmailRequest = { verify_email_token: string }
 
 /**
- * POST /api/auth/verify-email
+ * POST /api/auth/email-verification
  *
- * curl http://localhost:5000/api/auth/verify-email -H "Content-Type: application/json"
+ * curl http://localhost:5000/api/auth/email-verification -H "Content-Type: application/json"
  * -d '{"verify_email_token":"token"}' -v
  */
 export const verifyEmail: RequestHandler<

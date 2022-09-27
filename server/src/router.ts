@@ -14,11 +14,11 @@ export const router = Router()
 router.post('/auth/register', AuthController.register)
 router.post('/auth/login', AuthController.login)
 router.post(
-  '/auth/verify-email/email',
+  '/auth/email-verification/email',
   AuthMiddleware.requireLoggedUser,
   AuthController.sendVerifyEmail
 )
-router.post('/auth/verify-email', AuthController.verifyEmail)
+router.post('/auth/email-verification', AuthController.verifyEmail)
 router.post('/auth/password-reset/email', AuthController.sendPasswordResetEmail)
 router.post('/auth/password-reset', AuthController.resetPassword)
 
