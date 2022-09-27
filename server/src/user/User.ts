@@ -28,8 +28,8 @@ export function toPublicUser(user: User): PublicUser {
 
 export const USER_NAME_MIN_LENGTH = 1
 export const USER_NAME_MAX_LENGTH = 100
-export const PASSWORD_MIN_LENGTH = 6
-export const PASSWORD_MAX_LENGTH = 60
+export const PLAIN_PASSWORD_MIN_LENGTH = 6
+export const PLAIN_PASSWORD_MAX_LENGTH = 60
 export const EMAIL_MAX_LENGTH = 254
 
 export const UserNameSchema = z.object({
@@ -37,11 +37,17 @@ export const UserNameSchema = z.object({
 })
 
 export const PlainPasswordSchema = z.object({
-  password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
+  password: z
+    .string()
+    .min(PLAIN_PASSWORD_MIN_LENGTH)
+    .max(PLAIN_PASSWORD_MAX_LENGTH),
 })
 
 export const NewPlainPasswordSchema = z.object({
-  new_password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
+  new_password: z
+    .string()
+    .min(PLAIN_PASSWORD_MIN_LENGTH)
+    .max(PLAIN_PASSWORD_MAX_LENGTH),
 })
 
 export const EmailSchema = z.object({

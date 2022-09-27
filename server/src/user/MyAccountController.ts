@@ -6,8 +6,8 @@ import { StatusCode } from '../misc/StatusCode'
 import {
   EMAIL_MAX_LENGTH,
   NewPlainPasswordSchema,
-  PASSWORD_MAX_LENGTH,
-  PASSWORD_MIN_LENGTH,
+  PLAIN_PASSWORD_MAX_LENGTH,
+  PLAIN_PASSWORD_MIN_LENGTH,
   PlainPasswordSchema,
   User,
   UserNameSchema,
@@ -132,8 +132,8 @@ const ChangePasswordRequestSchema = z
   .object({
     current_password: z
       .string()
-      .min(PASSWORD_MIN_LENGTH)
-      .max(PASSWORD_MAX_LENGTH),
+      .min(PLAIN_PASSWORD_MIN_LENGTH)
+      .max(PLAIN_PASSWORD_MAX_LENGTH),
   })
   .merge(NewPlainPasswordSchema)
 type ChangePasswordRequest = { current_password: string; new_password: string }
