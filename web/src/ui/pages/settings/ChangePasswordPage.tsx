@@ -30,6 +30,9 @@ export function ChangePasswordPage() {
           showErrorToast(response.error.message)
         } else {
           showSuccessToast('Password changed')
+          setCurrentPassword('')
+          setNewPassword('')
+          setNewPasswordConfirm('')
         }
         setLoading(false)
       })
