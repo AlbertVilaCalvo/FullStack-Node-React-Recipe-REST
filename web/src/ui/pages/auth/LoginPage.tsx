@@ -16,6 +16,7 @@ import {
 import { SubmitButton } from '../../components/form/SubmitButton'
 import { Button, useDisclosure } from '@chakra-ui/react'
 import { PasswordResetAlertDialog } from '../../components/auth/PasswordResetAlertDialog'
+import { isDev } from '../../../misc/utils'
 
 export function LoginPage() {
   const showErrorToast = useErrorToast()
@@ -25,8 +26,8 @@ export function LoginPage() {
 
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const [email, setEmail] = React.useState('')
-  const [password, setPassword] = React.useState('')
+  const [email, setEmail] = React.useState(isDev ? 'a@a.com' : '')
+  const [password, setPassword] = React.useState(isDev ? '123456' : '')
   const [emailNotValid, setEmailNotValid] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
 

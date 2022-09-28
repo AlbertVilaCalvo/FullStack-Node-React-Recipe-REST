@@ -16,6 +16,7 @@ import { Form } from '../form/Form'
 import * as AuthApi from '../../../auth/AuthApi'
 import { extractApiErrorMessage } from '../../../httpClient'
 import { useErrorToast, useSuccessToast } from '../../misc/toast'
+import { isDev } from '../../../misc/utils'
 
 type Props = Required<Pick<UseDisclosureProps, 'isOpen' | 'onClose'>>
 
@@ -25,7 +26,7 @@ export function PasswordResetAlertDialog({ isOpen, onClose }: Props) {
 
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
-  const [email, setEmail] = React.useState('')
+  const [email, setEmail] = React.useState(isDev ? 'a@a.com' : '')
   const [emailNotValid, setEmailNotValid] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
 
