@@ -1,4 +1,11 @@
-import { Input, InputProps } from '@chakra-ui/react'
+import * as React from 'react'
+import {
+  Button,
+  Input,
+  InputGroup,
+  InputProps,
+  InputRightElement,
+} from '@chakra-ui/react'
 import {
   EMAIL_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
@@ -41,17 +48,28 @@ export function EmailInput({ onChange, ...props }: CustomInputProps) {
   )
 }
 
+// https://chakra-ui.com/docs/components/input/usage#password-input-example
 export function PasswordInput({ onChange, ...props }: CustomInputProps) {
+  const [show, setShow] = React.useState(false)
+  const handleClick = () => setShow(!show)
+
   return (
-    <Input
-      placeholder="Password"
-      type="password"
-      minLength={PASSWORD_MIN_LENGTH}
-      maxLength={PASSWORD_MAX_LENGTH}
-      onChange={(event) => {
-        onChange(event.target.value)
-      }}
-      {...props}
-    />
+    <InputGroup size="md">
+      <Input
+        placeholder="Password"
+        type={show ? 'text' : 'password'}
+        minLength={PASSWORD_MIN_LENGTH}
+        maxLength={PASSWORD_MAX_LENGTH}
+        onChange={(event) => {
+          onChange(event.target.value)
+        }}
+        {...props}
+      />
+      <InputRightElement width="4.5rem">
+        <Button h="1.75rem" size="sm" onClick={handleClick}>
+          {show ? 'Hide' : 'Show'}
+        </Button>
+      </InputRightElement>
+    </InputGroup>
   )
 }
