@@ -45,6 +45,12 @@ npm install
 npm start
 ```
 
+## Email account setup
+
+Sending emails requires creating an account at https://ethereal.email. Click the 'Create Ethereal Account' button and copy-paste the user and password to the `.env` file environment variables `EMAIL_USER` and `EMAIL_PASSWORD`.
+
+You can view the emails at https://ethereal.email/messages. URLs to view each email sent are also logged at the server console.
+
 ## Git pre-commit hook to run Prettier, ESLint and TypeScript checks on every commit
 
 To run Prettier and ESLint on every commit, run `cp pre-commit .git/hooks`.
