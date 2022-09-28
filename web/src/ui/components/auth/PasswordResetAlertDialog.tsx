@@ -25,7 +25,7 @@ export function PasswordResetAlertDialog({ isOpen, onClose }: Props) {
 
   const cancelRef = React.useRef<any>(null)
 
-  const [email, setEmail] = React.useState('a@a.com')
+  const [email, setEmail] = React.useState('')
   const [emailNotValid, setEmailNotValid] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
 
