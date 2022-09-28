@@ -23,15 +23,11 @@ export function PasswordResetAlertDialog({ isOpen, onClose }: Props) {
   const showSuccessToast = useSuccessToast()
   const showErrorToast = useErrorToast()
 
-  const cancelRef = React.useRef<any>(null)
+  const cancelRef = React.useRef<HTMLButtonElement>(null)
 
   const [email, setEmail] = React.useState('')
   const [emailNotValid, setEmailNotValid] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
-
-  if (!cancelRef) {
-    return null
-  }
 
   const onSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault()
