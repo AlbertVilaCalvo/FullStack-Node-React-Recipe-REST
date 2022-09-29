@@ -18,3 +18,10 @@ CREATE TABLE recipe
                     cooking_time_minutes <= 4320 -- 3 days (3 * 24 * 60)
             )
 );
+
+CREATE TABLE auth
+(
+    auth_token VARCHAR(255) NOT NULL,
+    user_id    INTEGER      NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
+--     expires_at
+);
