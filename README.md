@@ -8,6 +8,7 @@
 - Unit tests for route handlers and middleware with [node-mocks-http](https://github.com/howardabrams/node-mocks-http)
 - Integration tests for routes with [supertest](https://github.com/visionmedia/supertest)
 - Data validation with [zod](https://github.com/colinhacks/zod)
+- React state management with [Valtio](https://github.com/pmndrs/valtio)
 
 ## Database setup
 

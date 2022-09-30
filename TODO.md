@@ -11,6 +11,10 @@
 - [x] Verify email after registering
   - https://www.simplecode.io/blog/create-a-rest-api-part-4-send-emails-with-amazon-ses/
   - https://www.simplecode.io/blog/create-a-rest-api-part-5-verify-users-with-tokens/
+- [x] Forgot/recover/reset password
+  - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
+  - https://github.com/platzi/curso-nodejs-auth/blob/13-step/services/auth.service.js#L37-L54
+  - https://www.simplecode.io/blog/create-a-rest-api-part-7-forgot-reset-password-routes/
 - [ ] If email is not verified, restrict what you can do (eg do not allow to publish recipes)
   - Can be easily done with a middleware that runs after AuthMiddleware.requireLoggedUser, checking `email_verified`
   - We have to show a pop-up to the user after registering, see:
@@ -22,17 +26,26 @@
   - What is the suggested best practice for changing a user's email address? - https://security.stackexchange.com/questions/234060/what-is-the-suggested-best-practice-for-changing-a-users-email-address
 - [ ] After changing the email, send an informative email to the previous account explaining that someone has changed the email
   - https://www.drupal.org/project/drupal/issues/85494 See point 2: "Sends a notification E-mail to the old address"
-- [x] Forgot/recover/reset password
-  - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
-  - https://github.com/platzi/curso-nodejs-auth/blob/13-step/services/auth.service.js#L37-L54
-  - https://www.simplecode.io/blog/create-a-rest-api-part-7-forgot-reset-password-routes/
-- [ ] Logout -> expire token at the server. Requires having a token store
-- [ ] If the JWT token expires, do a logout on the client
-- [ ] Refresh token. We need an axios interceptor to handle 401 and refresh the token
-  - https://javascript.plainenglish.io/expressjs-api-with-secure-jwt-access-and-refresh-token-64c5478be2c0
-  - https://medium.com/swlh/authentication-using-jwt-and-refresh-token-part-1-aca5522c14c8
-- [ ] Changing the password or resetting the password should invalidate all existing tokens of that user? See https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c as an example
-- [ ] Once we have a token store, at the Settings page, show a list of the active sessions like in https://github.com/settings/security
+- [ ] Similarly, after changing the password, also send an alert email?
+
+## Authentication session
+
+- [ ] Replace JWT with opaque token or session id saved in cookie + session store (Redis/Postgres)
+  - JWT blacklist: https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/expirejwt.md
+  - https://fusionauth.io/learn/expert-advice/authentication/spa/oauth-authorization-code-grant-jwts-refresh-tokens-cookies
+  - Compatible Session Stores: https://github.com/expressjs/session#compatible-session-stores
+  - JWT vs. Opaque Tokens - https://news.ycombinator.com/item?id=33018135
+  - JWT saved in cookie
+    - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
+    - https://github.com/kriasoft/node-starter-kit/blob/main/auth/session.ts
+  - Refresh token on cookie
+    - https://dev.to/cotter/localstorage-vs-cookies-all-you-need-to-know-about-storing-jwt-tokens-securely-in-the-front-end-15id
+    - https://mannharleen.github.io/2020-04-10-handling-jwt-securely-part-2/
+    - https://medium.com/@brakdemir/jwt-authentication-with-csrf-prevention-on-node-js-express-b805504c2829 Code: https://github.com/kbrk/express_csrf_jwt_study
+- [ ] On logout, expire session at the server. Requires having a session store and adding a new route /logout
+- [ ] If the session expires, do a logout on the client?
+- [ ] Changing the password or resetting the password should invalidate all existing sessions of that user? See https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c as an example
+- [ ] Once we have a session store, at the Settings page, show a list of the active sessions like in https://github.com/settings/security
 
 ## Back and front
 
@@ -64,31 +77,49 @@
 - [ ] Redis
   - Curso de Node.js: Autenticación, Microservicios y Redis - https://platzi.com/cursos/nodejs-microservicios - https://github.com/CodingCarlos/proyecto-backend-node-platzi
   - https://github.com/guardian/gateway/search?q=redis
-- [ ] JWT blacklist: https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/expirejwt.md
+  - https://github.com/lesterfernandez/react-live-messenger/search?q=redisClient
+  - https://news.ycombinator.com/item?id=33021424
+    - We moved from jwt to opaque tokens and it's been fantastic. We also moved from using redis as our token store to using postgres (aurora).
+- XSS
+  - https://github.com/leizongmin/js-xss
+  - https://github.com/AhmedAdelFahim/express-xss-sanitizer
+  - https://github.com/jsonmaur/xss-clean
 - [ ] HelmetJS
   - https://www.freecodecamp.org/learn/information-security/#information-security-with-helmetjs
   - https://nemethgergely.com/blog/nodejs-security-overview#using-the-helmet-module
   - https://blog.risingstack.com/node-js-security-checklist/
 - [ ] Paginate GET /recipe
   - https://stackoverflow.com/questions/776448/pagination-in-a-rest-web-application
+  - https://github.dev/hagopj13/node-express-boilerplate/blob/master/src/models/plugins/paginate.plugin.js
 - [ ] Re-usable data validation middleware, instead of putting repetitive code at each RequestHandler
+  - https://github.com/hagopj13/node-express-boilerplate/blob/master/src/middlewares/validate.js
   - https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/validation.md
   - https://github.com/platzi/curso-nodejs-postgres/blob/main/middlewares/validator.handler.js (uses joi)
 - [ ] Swagger:
   - https://github.com/danielkhan/todolist-backend/blob/master/utils/swagger.js
-  - https://github.com/hagopj13/node-express-boilerplate/blob/master/src/routes/v1/auth.route.js
+  - https://github.com/hagopj13/node-express-boilerplate/blob/master/src/routes/v1/auth.route.js - Search for swagger
   - https://blog.logrocket.com/documenting-your-express-api-with-swagger/
   - https://www.manning.com/books/designing-apis-with-swagger-and-openapi
 - [ ] Full text search of recipes
   - Use PostgreSQL's full-text search functionality to perform natural-language searches of your data. https://lets-go-further.alexedwards.net/
 - [ ] Rate limit:
-  - https://github.com/nfriedly/express-rate-limit
-  - https://github.com/tj/node-ratelimiter
   - https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/login-rate-limit.md
-  - https://github.com/guardian/gateway/tree/main/src/server/lib/rate-limit
+  - Libraries:
+    - https://github.com/nfriedly/express-rate-limit
+    - https://github.com/tj/node-ratelimiter
+    - https://github.com/animir/node-rate-limiter-flexible
+  - With Redis:
+    - https://github.com/guardian/gateway/tree/main/src/server/lib/rate-limit
+    - https://github.dev/lesterfernandez/react-live-messenger/blob/master/packages/server/controllers/express/rateLimiter.js
+- [ ] Database migrations
+  - https://github.com/gjuchault/typescript-functional-service-starter/blob/main/src/infrastructure/database/migration.ts
+  - (Sequelize) https://platzi.com/cursos/backend-nodejs-postgres/ - https://github.com/platzi/curso-nodejs-postgres/tree/production/db/migrations
 
 ## Front
 
+- [ ] Add an error boundary
+  - https://reactjs.org/docs/error-boundaries.html
+- [ ] UI tests
 - [ ] Footer add my name and link to source code
 - [ ] Check navigation with keyboard at forms
 - [ ] Why did you render: https://github.com/welldone-software/why-did-you-render
@@ -96,6 +127,8 @@
   - This alternative seems somewhat similar: https://github.com/shuding/tilg
 
 ## Deploy AWS
+
+https://www.udemy.com/course/react-fullstack-with-nodeexpress-psql-and-aws/ - EC2, PM2
 
 https://stackoverflow.com/questions/41250087/how-to-deploy-a-react-nodejs-express-application-to-aws
 
@@ -105,6 +138,8 @@ https://livevideo.manning.com/module/536_1_1/automate-react-application-deployme
 ### Docker
 
 - https://github.com/platzi/curso-nodejs-auth/blob/13-step/docker-compose.yml
+- https://github.com/hagopj13/node-express-boilerplate
+- https://github.com/FaztWeb/pern-stack
 
 ## Various
 
