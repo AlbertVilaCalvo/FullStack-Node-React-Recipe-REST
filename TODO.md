@@ -15,6 +15,8 @@
   - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
   - https://github.com/platzi/curso-nodejs-auth/blob/13-step/services/auth.service.js#L37-L54
   - https://www.simplecode.io/blog/create-a-rest-api-part-7-forgot-reset-password-routes/
+  - Adds CSRF token at the view new-password.ejs https://github.com/PacktPublishing/Node.js-The-Complete-Guide/tree/main/S17 - https://www.packtpub.com/product/node-js-the-complete-guide/9781838826864
+  - Reset password token saved to database: https://github.com/PacktPublishing/Node.js-API-Masterclass-with-Express-and-MongoDB/blob/3129725fa9582011f1e9db3b94e1dda2aafa9f0f/models/User.js#L62 - https://www.packtpub.com/product/node-js-api-masterclass-with-express-and-mongodb/9781800569638
 - [ ] If email is not verified, restrict what you can do (eg do not allow to publish recipes)
   - Can be easily done with a middleware that runs after AuthMiddleware.requireLoggedUser, checking `email_verified`
   - We have to show a pop-up to the user after registering, see:
@@ -35,9 +37,12 @@
   - https://fusionauth.io/learn/expert-advice/authentication/spa/oauth-authorization-code-grant-jwts-refresh-tokens-cookies
   - Compatible Session Stores: https://github.com/expressjs/session#compatible-session-stores
   - JWT vs. Opaque Tokens - https://news.ycombinator.com/item?id=33018135
+  - https://github.com/PacktPublishing/Node.js-The-Complete-Guide/tree/main/S14 - https://www.packtpub.com/product/node-js-the-complete-guide/9781838826864
   - JWT saved in cookie
     - https://medium.com/@SigniorGratiano/express-authentication-and-security-dac99e6b33c
     - https://github.com/kriasoft/node-starter-kit/blob/main/auth/session.ts
+    - https://github.com/PacktPublishing/Node.js-API-Masterclass-with-Express-and-MongoDB/blob/master/controllers/auth.js - https://www.packtpub.com/product/node-js-api-masterclass-with-express-and-mongodb/9781800569638
+    - https://www.pluralsight.com/courses/securing-javascript-rest-api-json-web-tokens
   - Refresh token on cookie
     - https://dev.to/cotter/localstorage-vs-cookies-all-you-need-to-know-about-storing-jwt-tokens-securely-in-the-front-end-15id
     - https://mannharleen.github.io/2020-04-10-handling-jwt-securely-part-2/
@@ -52,11 +57,15 @@
 - [ ] Pictures
   - [ ] Upload recipe pictures
   - [ ] User avatar picture
+  - https://github.com/PacktPublishing/The-Complete-Node.js-Developer-Course-3rd-Edition-/tree/master/14.%20File%20Uploads%20(Task%20App) - https://www.packtpub.com/product/the-complete-node-js-developer-course/9781789955071
+  - https://www.pluralsight.com/courses/uploading-files-javascript-rest-api
+  - https://www.pluralsight.com/courses/managing-files-node-js
   - S3
     - https://medium.com/@teogoulois/image-uploader-with-nextjs-typescript-and-aws-s3-211b38a0af10
     - https://create-react-app.dev/docs/deployment#s3-and-cloudfront
     - https://wolovim.medium.com/deploying-create-react-app-to-s3-or-cloudfront-48dae4ce0af
     - https://medium.com/dailyjs/a-guide-to-deploying-your-react-app-with-aws-s3-including-https-a-custom-domain-a-cdn-and-58245251f081
+    - Chapter 7 - https://www.amazon.com/Hands-Full-Stack-Development-GraphQL-React/dp/1789134528/ - https://www.packtpub.com/product/full-stack-web-development-with-graphql-and-react/9781801077880
 - [ ] User, add fields:
   - [ ] Bio - see https://github.com/AlbertVilaCalvo
   - [ ] Link to Instagram - see https://github.com/AlbertVilaCalvo
@@ -78,6 +87,8 @@
   - Curso de Node.js: Autenticación, Microservicios y Redis - https://platzi.com/cursos/nodejs-microservicios - https://github.com/CodingCarlos/proyecto-backend-node-platzi
   - https://github.com/guardian/gateway/search?q=redis
   - https://github.com/lesterfernandez/react-live-messenger/search?q=redisClient
+  - https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
+  - https://github.com/CodingCarlos/proyecto-backend-node-platzi/blob/master/store/redis.js - https://platzi.com/cursos/nodejs-microservicios/
   - https://news.ycombinator.com/item?id=33021424
     - We moved from jwt to opaque tokens and it's been fantastic. We also moved from using redis as our token store to using postgres (aurora).
 - XSS
@@ -91,6 +102,7 @@
 - [ ] Paginate GET /recipe
   - https://stackoverflow.com/questions/776448/pagination-in-a-rest-web-application
   - https://github.dev/hagopj13/node-express-boilerplate/blob/master/src/models/plugins/paginate.plugin.js
+  - https://github.com/PacktPublishing/The-Complete-Node.js-Developer-Course-3rd-Edition-/tree/master/13.%20Sorting%2C%20Pagination%2C%20and%20Filtering%20(Task%20App) - https://www.packtpub.com/product/the-complete-node-js-developer-course/9781789955071
 - [ ] Re-usable data validation middleware, instead of putting repetitive code at each RequestHandler
   - https://github.com/hagopj13/node-express-boilerplate/blob/master/src/middlewares/validate.js
   - https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/validation.md
@@ -135,11 +147,22 @@ https://stackoverflow.com/questions/41250087/how-to-deploy-a-react-nodejs-expres
 Automate react application deployment on aws, mohamed labouardy
 https://livevideo.manning.com/module/536_1_1/automate-react-application-deployment-on-aws-mohamed-labouardy/author-talk/automate-react-application-deployment-on-aws?
 
+Node.js Web Development - Fifth Edition – Docker Swarm AWS EC2 ECR Terraform - https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
+
+### S3
+
+- Deploy a Static Website to Amazon S3: https://www.manning.com/liveproject/deploy-a-static-website-to-amazon-s3
+- https://www.manning.com/livevideo/serverless-applications-with-AWS
+- https://frontendmasters.com/courses/aws-v2/
+- https://www.edx.org/search?q=s3
+
 ### Docker
 
+- Docker in Motion - https://www.manning.com/livevideo/docker-in-motion
 - https://github.com/platzi/curso-nodejs-auth/blob/13-step/docker-compose.yml
 - https://github.com/hagopj13/node-express-boilerplate
 - https://github.com/FaztWeb/pern-stack
+- https://www.packtpub.com/product/restful-web-api-design-with-node-js-12-video/9781838648770 - https://github.com/PacktPublishing/RESTful-Web-API-Design-with-Node.js-12 - https://github.com/PacktPublishing/RESTful-Web-API-Design-with-Node.js-12-contact-api
 
 ## Various
 
