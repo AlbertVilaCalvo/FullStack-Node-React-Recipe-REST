@@ -135,7 +135,10 @@
 - [ ] UI tests
   - Introducción al Testing desde Cero con JEST - https://www.youtube.com/watch?v=_DzBez4qMi0&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=11
   - TESTING en REACT ¡Aprende DESDE CERO! Con react-testing-library y Jest- https://www.youtube.com/watch?v=KYjjtRgg_H0&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=21
-  - Aprende Testing en Cypress como lo hace un Senior en la vida real - https://www.youtube.com/watch?v=HDFNjDKKO6A&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=22
+  - Cypress
+    - Aprende Testing en Cypress como lo hace un Senior en la vida real - https://www.youtube.com/watch?v=HDFNjDKKO6A&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=22
+    - https://github.com/AJarombek/saints-xctf-web/tree/master/cypress
+    - https://www.coursera.org/search?query=cypress&
 - [ ] Footer add my name and link to source code
 - [ ] Check navigation with keyboard at forms
 - [ ] Why did you render: https://github.com/welldone-software/why-did-you-render
@@ -144,18 +147,12 @@
 
 ## Deploy AWS
 
-https://www.udemy.com/course/react-fullstack-with-nodeexpress-psql-and-aws/ - EC2, PM2
+Resources:
 
-Amazon EKS cluster using Terraform, ArgoCD - https://www.manning.com/liveproject/deploy-to-Amazon-Web-Services
-
-https://stackoverflow.com/questions/41250087/how-to-deploy-a-react-nodejs-express-application-to-aws
-
-Automate react application deployment on aws, mohamed labouardy
-https://livevideo.manning.com/module/536_1_1/automate-react-application-deployment-on-aws-mohamed-labouardy/author-talk/automate-react-application-deployment-on-aws?
-
-Node.js Web Development - Fifth Edition – Docker Swarm AWS EC2 ECR Terraform - https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
-
-GitHub Actions TUTORIAL Desde Cero - Integración continua (CI/CD) - https://www.youtube.com/watch?v=sIhm4YOMK6Q&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=57
+- https://www.udemy.com/course/react-fullstack-with-nodeexpress-psql-and-aws/ - React, VPC, EC2, PM2
+- Amazon EKS cluster using Terraform, ArgoCD - https://www.manning.com/liveproject/deploy-to-Amazon-Web-Services
+- https://stackoverflow.com/questions/41250087/how-to-deploy-a-react-nodejs-express-application-to-aws
+- Node.js Web Development - Fifth Edition – Docker Swarm AWS EC2 ECR Terraform - https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
 
 ### EC2
 
@@ -167,12 +164,21 @@ GitHub Actions TUTORIAL Desde Cero - Integración continua (CI/CD) - https://www
 - https://cloudacademy.com/lab/create-your-first-amazon-rds-database/
 - https://learn.acloud.guru/course/aws-rds/overview
 
-### S3
+### Host React app at S3/CloudFront
+
+- [ ] Deploy with Terraform
+  - https://www.karanpratapsingh.com/blog/deploy-react-s3-cloudfront
+  - https://jarombek.com/blog/feb-15-2020-s3-react
+- [ ] Deploy with CloudFormation
+  - https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/getting-started-secure-static-website-cloudformation-template.html - https://github.com/aws-samples/amazon-cloudfront-secure-static-site
+
+Resources
 
 - Deploy a Static Website to Amazon S3: https://www.manning.com/liveproject/deploy-a-static-website-to-amazon-s3
-- https://www.manning.com/livevideo/serverless-applications-with-AWS
-- https://frontendmasters.com/courses/aws-v2/
+- https://frontendmasters.com/courses/aws-v2/ - Creates two S3 buckets
 - https://www.edx.org/search?q=s3
+- Automate react application deployment on aws, mohamed labouardy
+  https://livevideo.manning.com/module/536_1_1/automate-react-application-deployment-on-aws-mohamed-labouardy/author-talk/automate-react-application-deployment-on-aws?
 
 ### Docker
 
@@ -186,6 +192,28 @@ GitHub Actions TUTORIAL Desde Cero - Integración continua (CI/CD) - https://www
 ### Terraform
 
 - https://developer.hashicorp.com/terraform/tutorials/aws-get-started (new) - https://learn.hashicorp.com/collections/terraform/aws-get-started (old)
+- Introduction to Infrastructure as Code with Terraform - https://www.karanpratapsingh.com/blog/introduction-to-iac-terraform
+- Terraform Basics: Automate Provisioning of AWS EC2 Instances - https://www.coursera.org/projects/terraform-devops-aws-cloud-iac-ec2
+- Terraform for absolute beginners - https://www.coursera.org/projects/terraform-for-absolute-beginners
+- https://github.com/AJarombek/global-aws-infrastructure
+- https://github.com/AJarombek/jarombek-com-infrastructure
+- https://github.com/AJarombek/saints-xctf-infrastructure
+
+### CloudFormation
+
+- https://www.linkedin.com/learning/aws-deployment-provisioning-and-automation/understand-aws-cloudformation?autoplay=true
+
+### GitHub actions
+
+- GitHub Actions TUTORIAL Desde Cero - Integración continua (CI/CD) - https://www.youtube.com/watch?v=sIhm4YOMK6Q&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=57
+- Deploy a React App to Amazon S3 using GitHub Actions And Bitbucket Pipelines - https://blog.devgenius.io/deploy-a-react-app-to-amazon-s3-using-github-actions-and-bitbucket-pipelines-74791ae10a7c
+- https://frontendmasters.com/courses/aws-v2/ - https://frontendmasters.com/courses/aws-v2/integrate-github-action/
+
+### EKS
+
+- https://www.coursera.org/learn/containerized-applications-on-aws
+- Terraform infrastructure for building an EKS cluster. Infrastructure includes a VPC, EKS cluster, and EC2 worker nodes: https://github.com/AJarombek/global-aws-infrastructure/tree/master/eks
+- Amazon EKS cluster using Terraform, ArgoCD - https://www.manning.com/liveproject/deploy-to-Amazon-Web-Services
 
 ## Various
 
