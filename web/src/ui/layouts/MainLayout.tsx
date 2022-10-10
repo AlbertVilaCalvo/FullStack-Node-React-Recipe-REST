@@ -13,7 +13,9 @@ export function MainLayout() {
         <nav className="main-container-child-centered">
           <ul className="list-style-type-none">
             <li>
-              <NavBarLink to="/">Home</NavBarLink>
+              <NavBarLink to="/" end>
+                Home
+              </NavBarLink>
             </li>
             <li>
               <NavBarLink to="/recipes/new">Create Recipe</NavBarLink>
@@ -54,7 +56,9 @@ export function MainLayout() {
           </ul>
         </nav>
       </header>
+
       <Outlet />
+
       <footer className="main-container footer">
         <div className="main-container-child-centered">
           <div id="footer-content">
