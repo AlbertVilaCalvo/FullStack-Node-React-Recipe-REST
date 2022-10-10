@@ -61,6 +61,7 @@
   - https://www.pluralsight.com/courses/uploading-files-javascript-rest-api
   - https://www.pluralsight.com/courses/managing-files-node-js
   - S3
+    - https://betterprogramming.pub/how-to-upload-files-to-amazon-s3-from-nextjs-app-b7ef1909976b
     - https://medium.com/@teogoulois/image-uploader-with-nextjs-typescript-and-aws-s3-211b38a0af10
     - https://create-react-app.dev/docs/deployment#s3-and-cloudfront
     - https://wolovim.medium.com/deploying-create-react-app-to-s3-or-cloudfront-48dae4ce0af
@@ -132,6 +133,9 @@
 - [ ] Add an error boundary
   - https://reactjs.org/docs/error-boundaries.html
 - [ ] UI tests
+  - Introducción al Testing desde Cero con JEST - https://www.youtube.com/watch?v=_DzBez4qMi0&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=11
+  - TESTING en REACT ¡Aprende DESDE CERO! Con react-testing-library y Jest- https://www.youtube.com/watch?v=KYjjtRgg_H0&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=21
+  - Aprende Testing en Cypress como lo hace un Senior en la vida real - https://www.youtube.com/watch?v=HDFNjDKKO6A&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=22
 - [ ] Footer add my name and link to source code
 - [ ] Check navigation with keyboard at forms
 - [ ] Why did you render: https://github.com/welldone-software/why-did-you-render
@@ -142,12 +146,26 @@
 
 https://www.udemy.com/course/react-fullstack-with-nodeexpress-psql-and-aws/ - EC2, PM2
 
+Amazon EKS cluster using Terraform, ArgoCD - https://www.manning.com/liveproject/deploy-to-Amazon-Web-Services
+
 https://stackoverflow.com/questions/41250087/how-to-deploy-a-react-nodejs-express-application-to-aws
 
 Automate react application deployment on aws, mohamed labouardy
 https://livevideo.manning.com/module/536_1_1/automate-react-application-deployment-on-aws-mohamed-labouardy/author-talk/automate-react-application-deployment-on-aws?
 
 Node.js Web Development - Fifth Edition – Docker Swarm AWS EC2 ECR Terraform - https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
+
+GitHub Actions TUTORIAL Desde Cero - Integración continua (CI/CD) - https://www.youtube.com/watch?v=sIhm4YOMK6Q&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=57
+
+### EC2
+
+- Deploying a React/Node/MySQL app to Amazon EC2 (2022) - https://towardsdev.com/deploying-a-react-node-mysql-app-to-aws-ec2-2022-1dfc98496acf
+- Deploying a Basic Express API on Amazon EC2 - https://betterprogramming.pub/deploying-a-basic-express-api-on-amazon-ec2-eea0b54a825
+
+### RDS
+
+- https://cloudacademy.com/lab/create-your-first-amazon-rds-database/
+- https://learn.acloud.guru/course/aws-rds/overview
 
 ### S3
 
@@ -158,11 +176,16 @@ Node.js Web Development - Fifth Edition – Docker Swarm AWS EC2 ECR Terraform -
 
 ### Docker
 
+- https://cloudonaut.io/rapid-docker-on-aws/
 - Docker in Motion - https://www.manning.com/livevideo/docker-in-motion
 - https://github.com/platzi/curso-nodejs-auth/blob/13-step/docker-compose.yml
 - https://github.com/hagopj13/node-express-boilerplate
 - https://github.com/FaztWeb/pern-stack
 - https://www.packtpub.com/product/restful-web-api-design-with-node-js-12-video/9781838648770 - https://github.com/PacktPublishing/RESTful-Web-API-Design-with-Node.js-12 - https://github.com/PacktPublishing/RESTful-Web-API-Design-with-Node.js-12-contact-api
+
+### Terraform
+
+- https://developer.hashicorp.com/terraform/tutorials/aws-get-started (new) - https://learn.hashicorp.com/collections/terraform/aws-get-started (old)
 
 ## Various
 
