@@ -84,14 +84,6 @@
   - https://github.com/colinhacks/zod
   - https://github.com/hapijs/joi
 - [ ] Add created at & updated at Recipe and User table
-- [ ] Redis
-  - Curso de Node.js: Autenticación, Microservicios y Redis - https://platzi.com/cursos/nodejs-microservicios - https://github.com/CodingCarlos/proyecto-backend-node-platzi
-  - https://github.com/guardian/gateway/search?q=redis
-  - https://github.com/lesterfernandez/react-live-messenger/search?q=redisClient
-  - https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
-  - https://github.com/CodingCarlos/proyecto-backend-node-platzi/blob/master/store/redis.js - https://platzi.com/cursos/nodejs-microservicios/
-  - https://news.ycombinator.com/item?id=33021424
-    - We moved from jwt to opaque tokens and it's been fantastic. We also moved from using redis as our token store to using postgres (aurora).
 - XSS
   - https://github.com/leizongmin/js-xss
   - https://github.com/AhmedAdelFahim/express-xss-sanitizer
@@ -128,6 +120,16 @@
   - https://github.com/gjuchault/typescript-functional-service-starter/blob/main/src/infrastructure/database/migration.ts
   - (Sequelize) https://platzi.com/cursos/backend-nodejs-postgres/ - https://github.com/platzi/curso-nodejs-postgres/tree/production/db/migrations
 
+## Redis
+
+- Curso de Node.js: Autenticación, Microservicios y Redis - https://platzi.com/cursos/nodejs-microservicios - https://github.com/CodingCarlos/proyecto-backend-node-platzi
+- https://github.com/guardian/gateway/search?q=redis
+- https://github.com/lesterfernandez/react-live-messenger/search?q=redisClient
+- https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
+- https://github.com/CodingCarlos/proyecto-backend-node-platzi/blob/master/store/redis.js - https://platzi.com/cursos/nodejs-microservicios/
+- https://news.ycombinator.com/item?id=33021424
+  - We moved from jwt to opaque tokens and it's been fantastic. We also moved from using redis as our token store to using postgres (aurora).
+
 ## Front
 
 - [ ] Add an error boundary
@@ -156,13 +158,17 @@ Resources:
 
 ### EC2
 
+- Deploy a Node.js Web App (uses Elastic Beanstalk) - https://aws.amazon.com/getting-started/hands-on/deploy-nodejs-web-app/
 - Deploying a React/Node/MySQL app to Amazon EC2 (2022) - https://towardsdev.com/deploying-a-react-node-mysql-app-to-aws-ec2-2022-1dfc98496acf
 - Deploying a Basic Express API on Amazon EC2 - https://betterprogramming.pub/deploying-a-basic-express-api-on-amazon-ec2-eea0b54a825
+- https://www.pluralsight.com/courses/aws-managing-ec2-instances
 
 ### RDS
 
 - https://cloudacademy.com/lab/create-your-first-amazon-rds-database/
 - https://learn.acloud.guru/course/aws-rds/overview
+- Migrating from PostgreSQL to Amazon RDS - https://www.amazon.com/Migrating-PostgreSQL-Database-Training-Certification/dp/B09HY8TQH7/ref=sr_1_86?qid=1665666086&s=courseware&sr=1-86
+- Migrating from MySQL to Amazon RDS - https://www.amazon.com/Migrating-Amazon-Database-Training-Certification/dp/B09HY1YT5S/ref=sr_1_68?qid=1665665854&s=courseware&sr=1-68
 
 ### Host React app at S3/CloudFront
 
@@ -191,6 +197,7 @@ Resources
 
 ### Terraform
 
+- https://www.linkedin.com/feed/update/urn:li:activity:6985936585028444160/ - https://blog.gruntwork.io/a-comprehensive-guide-to-terraform-b3d32832baca
 - https://developer.hashicorp.com/terraform/tutorials/aws-get-started (new) - https://learn.hashicorp.com/collections/terraform/aws-get-started (old)
 - Introduction to Infrastructure as Code with Terraform - https://www.karanpratapsingh.com/blog/introduction-to-iac-terraform
 - Terraform Basics: Automate Provisioning of AWS EC2 Instances - https://www.coursera.org/projects/terraform-devops-aws-cloud-iac-ec2
