@@ -119,6 +119,7 @@
 - [ ] Database migrations
   - https://github.com/gjuchault/typescript-functional-service-starter/blob/main/src/infrastructure/database/migration.ts
   - (Sequelize) https://platzi.com/cursos/backend-nodejs-postgres/ - https://github.com/platzi/curso-nodejs-postgres/tree/production/db/migrations
+- [ ] GitHub action to run backend tests on push
 
 ## Redis
 
@@ -134,18 +135,27 @@
 
 - [ ] Add an error boundary
   - https://reactjs.org/docs/error-boundaries.html
-- [ ] UI tests
-  - Introducción al Testing desde Cero con JEST - https://www.youtube.com/watch?v=_DzBez4qMi0&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=11
-  - TESTING en REACT ¡Aprende DESDE CERO! Con react-testing-library y Jest- https://www.youtube.com/watch?v=KYjjtRgg_H0&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=21
-  - Cypress
-    - Aprende Testing en Cypress como lo hace un Senior en la vida real - https://www.youtube.com/watch?v=HDFNjDKKO6A&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=22
-    - https://github.com/AJarombek/saints-xctf-web/tree/master/cypress
-    - https://www.coursera.org/search?query=cypress&
 - [ ] Footer add my name and link to source code
 - [ ] Check navigation with keyboard at forms
 - [ ] Why did you render: https://github.com/welldone-software/why-did-you-render
   - Setup requires many extra steps for Create React App :/
   - This alternative seems somewhat similar: https://github.com/shuding/tilg
+
+## UI tests
+
+- Introducción al Testing desde Cero con JEST - https://www.youtube.com/watch?v=_DzBez4qMi0&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=11
+- TESTING en REACT ¡Aprende DESDE CERO! Con react-testing-library y Jest- https://www.youtube.com/watch?v=KYjjtRgg_H0&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=21
+- https://github.com/midudev/pokedex-for-ci/tree/main/test
+
+[ ] GitHub action to run UI tests on push
+
+### UI tests with Cypress
+
+- Aprende Testing en Cypress como lo hace un Senior en la vida real - https://www.youtube.com/watch?v=HDFNjDKKO6A&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=22
+- https://github.com/AJarombek/saints-xctf-web/tree/master/cypress
+- https://www.coursera.org/search?query=cypress&
+
+[ ] GitHub action to run Cypress tests on push - Important: see https://youtu.be/sIhm4YOMK6Q?t=2246 for how to do it - repo: https://github.com/midudev/pokedex-for-ci/blob/main/.github/workflows/pipeline.yml
 
 ## Deploy AWS
 
@@ -211,6 +221,11 @@ Resources
 - https://www.linkedin.com/learning/aws-deployment-provisioning-and-automation/understand-aws-cloudformation?autoplay=true
 
 ### GitHub actions
+
+- [] ESLint GitHub action on push
+
+  - https://github.com/actions/starter-workflows/blob/main/code-scanning/eslint.yml
+  - https://github.com/midudev/pokedex-for-ci/blob/main/.github/workflows/pipeline.yml#L20-L33
 
 - GitHub Actions TUTORIAL Desde Cero - Integración continua (CI/CD) - https://www.youtube.com/watch?v=sIhm4YOMK6Q&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=57
 - Deploy a React App to Amazon S3 using GitHub Actions And Bitbucket Pipelines - https://blog.devgenius.io/deploy-a-react-app-to-amazon-s3-using-github-actions-and-bitbucket-pipelines-74791ae10a7c
