@@ -57,3 +57,14 @@ You can view the emails at https://ethereal.email/messages. URLs to view each em
 To run Prettier and ESLint on every commit, run `cp pre-commit .git/hooks`.
 
 Note that the checks do not abort the commit, they only inform you of any issues found.
+
+## Manually deploy React web app to AWS S3 and CloudFront
+
+Note that there's a GitHub action that does this automatically.
+
+```
+cd web
+npm run build
+aws s3 sync build s3://<s3-bucket-name> --delete
+aws cloudfront create-invalidation --distribution-id <cf-distribution-id> --paths '/*'
+```
