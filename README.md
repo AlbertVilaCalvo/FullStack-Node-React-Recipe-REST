@@ -1,14 +1,42 @@
-# Recipe Manager - A Full Stack app built with Node, React, PostgreSQL, REST API
+# Recipe Manager - A Full Stack app built with Node, React, PostgreSQL, REST API, AWS, GitHub Actions
+
+Live site: https://recipeapp.link
+
+## Technologies used
+
+### Tools
+
+- Code quality with ESLint.
+- Auto-formatting with Prettier.
+- CI/CD with GitHub Actions.
+- 100% TypeScript, no JavaScript.
+
+### Frontend
+
+- Single Page Web application built with React.
+- State management with [Valtio](https://github.com/pmndrs/valtio).
+- Routing with [React Router](https://reactrouter.com/en/main) 6.
+- UI design with [Chakra UI](https://chakra-ui.com).
+
+### Backend
+
+- Node.js server built with Express.js.
+- Database with PostgreSQL.
+- Data validation with [zod](https://github.com/colinhacks/zod).
+- Testing
+  - Unit tests for functions with Jest.
+  - Unit tests for route handlers and middleware with [node-mocks-http](https://github.com/howardabrams/node-mocks-http).
+  - Integration tests for routes with [supertest](https://github.com/visionmedia/supertest).
+
+### AWS
+
+- Frontend deployed to S3 and CloudFront automatically using GitHub actions.
 
 ## Features
 
-- Express Backend and React Frontend
-- Database with PostgreSQL
-- Unit tests for functions with Jest
-- Unit tests for route handlers and middleware with [node-mocks-http](https://github.com/howardabrams/node-mocks-http)
-- Integration tests for routes with [supertest](https://github.com/visionmedia/supertest)
-- Data validation with [zod](https://github.com/colinhacks/zod)
-- React state management with [Valtio](https://github.com/pmndrs/valtio)
+- Authentication: register, login, validate email, recover password.
+- Settings: change user name, email and password. Delete user account.
+- Recipe: publish, edit and delete recipes.
 
 ## Database setup
 
