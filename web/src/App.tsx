@@ -31,7 +31,7 @@ function App() {
             <Route path="about" element={<AboutPage />} />
             <Route path="register" element={<RegisterPage />} />
             <Route path="login" element={<LoginPage />} />
-            <Route path="verify-email" element={<VerifyEmailPage />} />
+            <Route path="email-verification" element={<VerifyEmailPage />} />
             <Route path="password-reset" element={<PasswordResetPage />} />
 
             <Route
