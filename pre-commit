@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Runs Prettier, ESLint and tsc on .ts, .tsx, .js, .md, .yml, .yaml, .css and .json files. Prettier and ESLint only check the
-# committed files, whereas tsc checks all project files, since it's not possible to run tsc on specific files while
-# obeying the tsconfig.json options (see https://github.com/microsoft/TypeScript/issues/27379 and
+# Runs Prettier, ESLint and tsc on .ts, .tsx, .js, .jsx, .md, .yml, .yaml, .css and .json files. Prettier and ESLint
+# only check the committed files, whereas tsc checks all project files, since it's not possible to run tsc on specific
+# files while obeying the tsconfig.json options (see https://github.com/microsoft/TypeScript/issues/27379 and
 # https://www.npmjs.com/package/tsc-files).
 # This hook always commits, even if errors are found. And it does not modify the files (ie it does not do `prettier
 # write`), it only checks if there is any issue and reports it.
@@ -20,8 +20,8 @@ then
 fi
 
 get_staged_files() {
-  ALL_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | awk '/\.ts$|\.tsx$|\.js$|\.md|\.yml|\.yaml|\.css|\.json/')
-  ALL_CODE_FILES=$(echo "$ALL_FILES" | awk '/\.ts$|\.tsx$|\.js$/')
+  ALL_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | awk '/\.ts$|\.tsx$|\.js$|\.jsx$|\.md|\.yml|\.yaml|\.css|\.json/')
+  ALL_CODE_FILES=$(echo "$ALL_FILES" | awk '/\.ts$|\.tsx$|\.js$|\.jsx$/')
   FILES_SERVER=$(echo "$ALL_CODE_FILES" | awk '/server\//' | sed 's/server\///')
   FILES_WEB=$(echo "$ALL_CODE_FILES" | awk '/web\//' | sed 's/web\///')
 }
