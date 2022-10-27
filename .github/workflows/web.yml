@@ -1,4 +1,4 @@
-name: Deploy React web app to AWS S3 and CloudFront using CLI
+name: Web (frontend React app)
 
 on:
   push:
@@ -23,6 +23,7 @@ defaults:
 
 jobs:
   eslint:
+    name: ESLint
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -35,6 +36,7 @@ jobs:
         run: npm run eslint
 
   build_and_deploy_react_app:
+    name: Deploy React web app to AWS S3 and CloudFront using the CLI
     # Deploy only when pushing to the main branch, or when a pull request is merged (closed) to then main branch
     # but not when is opened or synchronize.
     # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges
