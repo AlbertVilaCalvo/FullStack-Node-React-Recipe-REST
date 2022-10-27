@@ -8,6 +8,7 @@
     "build": "npx tsc",
     "serve": "npx tsc && node build/index.js",
     "test": "jest",
+    "eslint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "test-watch": "jest --watch"
   },
   "author": "Albert",
