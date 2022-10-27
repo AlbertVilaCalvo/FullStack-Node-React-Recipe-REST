@@ -22,8 +22,8 @@ fi
 get_staged_files() {
   ALL_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | awk '/\.ts$|\.tsx$|\.js$|\.jsx$|\.md|\.yml|\.yaml|\.css|\.json/')
   ALL_CODE_FILES=$(echo "$ALL_FILES" | awk '/\.ts$|\.tsx$|\.js$|\.jsx$/')
-  FILES_SERVER=$(echo "$ALL_CODE_FILES" | awk '/server\//' | sed 's/server\///')
-  FILES_WEB=$(echo "$ALL_CODE_FILES" | awk '/web\//' | sed 's/web\///')
+  CODE_FILES_SERVER=$(echo "$ALL_CODE_FILES" | awk '/server\//' | sed 's/server\///')
+  CODE_FILES_WEB=$(echo "$ALL_CODE_FILES" | awk '/web\//' | sed 's/web\///')
 }
 
 print_title() {
@@ -54,10 +54,10 @@ print_result "Prettier"
 
 cd server || exit 1
 
-printf "📁 Files server\n\n%s" "$FILES_SERVER"
+printf "📁 Files server\n\n%s" "$CODE_FILES_SERVER"
 
 print_title "ESLint server"
-echo "$FILES_SERVER" | xargs ./node_modules/.bin/eslint
+echo "$CODE_FILES_SERVER" | xargs ./node_modules/.bin/eslint
 print_result "ESLint server"
 
 print_title "tsc server"
@@ -69,11 +69,11 @@ print_result "tsc server"
 cd ..
 cd web || exit 1
 
-printf "📁 Files web\n\n%s" "$FILES_WEB"
-[ -z "$FILES_WEB" ] && exit 0
+printf "📁 Files web\n\n%s" "$CODE_FILES_WEB"
+[ -z "$CODE_FILES_WEB" ] && exit 0
 
 print_title "ESLint web"
-echo "$FILES_WEB" | xargs ./node_modules/.bin/eslint
+echo "$CODE_FILES_WEB" | xargs ./node_modules/.bin/eslint
 print_result "ESLint web"
 
 print_title "tsc web"
