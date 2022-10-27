@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# Runs Prettier, ESLint and tsc on .ts, .tsx, .js, .jsx, .md, .yml, .yaml, .css and .json files. Prettier and ESLint
-# only check the committed files, whereas tsc checks all project files, since it's not possible to run tsc on specific
-# files while obeying the tsconfig.json options (see https://github.com/microsoft/TypeScript/issues/27379 and
-# https://www.npmjs.com/package/tsc-files).
+# Runs Prettier on .ts, .tsx, .js, .jsx, .md, .yml, .yaml, .css and .json files, and also runs ESLint and tsc on .ts,
+# .tsx, .js, .jsx files. Prettier and ESLint only check the committed files, whereas tsc checks all project files, since
+# it's not possible to run tsc on specific files while obeying the tsconfig.json options (see
+# https://github.com/microsoft/TypeScript/issues/27379 and https://www.npmjs.com/package/tsc-files).
 # This hook always commits, even if errors are found. And it does not modify the files (ie it does not do `prettier
 # write`), it only checks if there is any issue and reports it.
 # Inspired by https://prettier.io/docs/en/precommit.html#option-6-shell-script
