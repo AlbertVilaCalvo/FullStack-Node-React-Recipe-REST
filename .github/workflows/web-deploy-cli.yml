@@ -2,10 +2,15 @@ name: Deploy React web app to AWS S3 and CloudFront using CLI
 
 on:
   push:
+  pull_request:
     branches:
       - main
     paths:
       - web/**
+    types:
+      - opened
+      - synchronize
+      - closed
 
 # Allow only one concurrent deployment
 concurrency:
@@ -18,6 +23,10 @@ defaults:
 
 jobs:
   build_and_deploy_react_app:
+    # Deploy only when pushing to the main branch, or when a pull request is merged (closed) to then main branch
+    # but not when is opened or synchronize.
+    # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
