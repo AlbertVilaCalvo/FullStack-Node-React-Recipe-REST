@@ -35,8 +35,25 @@ jobs:
       - name: Run ESLint
         run: npm run eslint
 
+  tests:
+    name: Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: npm ci
+        # On my machine doing 'npm run' runs tests in watch mode, but on GitHub runners, because the environment
+        # variable CI is true, 'npm run' only runs the tests once. (If CI was not set to true we could force to run
+        # tests once by using the command 'CI=true npm test'.) See https://create-react-app.dev/docs/running-tests
+      - name: Run tests
+        run: npm test
+
   build_and_deploy_react_app:
     name: Deploy React web app to AWS S3 and CloudFront using the CLI
+    needs: [eslint, tests]
     # Deploy only when pushing to the main branch, or when a pull request is merged (closed) to then main branch
     # but not when is opened or synchronize.
     # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges
