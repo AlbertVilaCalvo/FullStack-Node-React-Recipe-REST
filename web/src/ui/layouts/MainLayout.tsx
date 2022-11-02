@@ -62,7 +62,7 @@ export function MainLayout() {
       <footer className="main-container footer">
         <div className="main-container-child-centered">
           <div id="footer-content">
-            <p>The best recipe manager app! 🍒</p>
+            <p>The best recipe manager app! 🥑</p>
           </div>
         </div>
       </footer>
