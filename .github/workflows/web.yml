@@ -37,7 +37,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'web/package-lock.json'
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-fund
       - name: Run ESLint
         run: npm run eslint
 
@@ -52,7 +52,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'web/package-lock.json'
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-fund
         # On my machine doing 'npm run' runs tests in watch mode, but on GitHub runners, because the environment
         # variable CI is true, 'npm run' only runs the tests once. (If CI was not set to true we could force to run
         # tests once by using the command 'CI=true npm test'.) See https://create-react-app.dev/docs/running-tests
@@ -75,7 +75,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'web/package-lock.json'
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-fund
       - name: Build React web app
         run: npm run build
       - name: Configure AWS Credentials
