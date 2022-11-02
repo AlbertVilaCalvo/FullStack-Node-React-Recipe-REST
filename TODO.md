@@ -168,6 +168,7 @@ Resources:
 
 ### EC2
 
+- https://workshops.aws/?tag=EC2
 - Deploy a Node.js Web App (uses Elastic Beanstalk) - https://aws.amazon.com/getting-started/hands-on/deploy-nodejs-web-app/
 - Deploying a React/Node/MySQL app to Amazon EC2 (2022) - https://towardsdev.com/deploying-a-react-node-mysql-app-to-aws-ec2-2022-1dfc98496acf
 - Deploying a Basic Express API on Amazon EC2 - https://betterprogramming.pub/deploying-a-basic-express-api-on-amazon-ec2-eea0b54a825
@@ -198,6 +199,7 @@ Resources
 
 ### Docker
 
+- https://www.docker.com/blog/how-to-use-the-node-docker-official-image/
 - https://cloudonaut.io/rapid-docker-on-aws/
 - Docker in Motion - https://www.manning.com/livevideo/docker-in-motion
 - https://github.com/platzi/curso-nodejs-auth/blob/13-step/docker-compose.yml
@@ -233,8 +235,18 @@ Resources
 
 ### EKS
 
+- https://workshops.aws/?tag=EKS
+  - EKS Immersion Workshop - https://catalog.workshops.aws/eks-immersionday/en-US
+  - https://www.eksworkshop.com
+  - EKS Terraform Workshop - https://tf-eks-workshop.workshop.aws/
+  - Web Application Hosts on EKS Workshop - https://catalog.us-east-1.prod.workshops.aws/workshops/a1101fcc-c7cf-4dd5-98c4-f599a65056d5/en-US
+- Deploy a Container Web App on Amazon EKS - https://aws.amazon.com/getting-started/guides/deploy-webapp-eks
 - https://www.coursera.org/learn/containerized-applications-on-aws
 - Terraform infrastructure for building an EKS cluster. Infrastructure includes a VPC, EKS cluster, and EC2 worker nodes: https://github.com/AJarombek/global-aws-infrastructure/tree/master/eks
+- Amazon EKS cluster using Terraform, ArgoCD - https://www.manning.com/liveproject/deploy-to-Amazon-Web-Services
+
+## ArgoCD
+
 - Amazon EKS cluster using Terraform, ArgoCD - https://www.manning.com/liveproject/deploy-to-Amazon-Web-Services
 
 ## Various
