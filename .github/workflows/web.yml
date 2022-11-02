@@ -2,6 +2,10 @@ name: Web (frontend React app)
 
 on:
   push:
+    branches:
+      - main
+    paths:
+      - web/**
   pull_request:
     branches:
       - main
