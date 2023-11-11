@@ -1,5 +1,9 @@
 # TODO
 
+Rename DB password to password_hash
+
+Check `npx npm-check-updates` - https://github.com/raineorshine/npm-check-updates
+
 ## Authentication
 
 - [x] Change email
@@ -33,6 +37,9 @@
 ## Authentication session
 
 - [ ] Replace JWT with opaque token or session id saved in cookie + session store (Redis/Postgres)
+  - React Cookies: https://www.npmjs.com/package/react-cookie
+  - Client-side caching in Redis: https://redis.io/docs/manual/client-side-caching
+  - Authentication: https://redis.io/docs/manual/patterns/twitter-clone/#authentication
   - JWT blacklist: https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/security/expirejwt.md
   - https://fusionauth.io/learn/expert-advice/authentication/spa/oauth-authorization-code-grant-jwts-refresh-tokens-cookies
   - Compatible Session Stores: https://github.com/expressjs/session#compatible-session-stores
@@ -128,6 +135,7 @@
 - https://github.com/lesterfernandez/react-live-messenger/search?q=redisClient
 - https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
 - https://github.com/CodingCarlos/proyecto-backend-node-platzi/blob/master/store/redis.js - https://platzi.com/cursos/nodejs-microservicios/
+- Fulltext Search with Redis and Next.js - https://fireship.io/lessons/redis-nextjs/
 - https://news.ycombinator.com/item?id=33021424
   - We moved from jwt to opaque tokens and it's been fantastic. We also moved from using redis as our token store to using postgres (aurora).
 
@@ -157,14 +165,24 @@
 
 [ ] GitHub action to run Cypress tests on push - Important: see https://youtu.be/sIhm4YOMK6Q?t=2246 for how to do it - repo: https://github.com/midudev/pokedex-for-ci/blob/main/.github/workflows/pipeline.yml
 
+### UI tests with Playwright
+
+https://playwright.dev
+
 ## Deploy AWS
 
 Resources:
 
 - https://www.udemy.com/course/react-fullstack-with-nodeexpress-psql-and-aws/ - React, VPC, EC2, PM2
 - Amazon EKS cluster using Terraform, ArgoCD - https://www.manning.com/liveproject/deploy-to-Amazon-Web-Services
+- Learn Containerization & Server Deployment - https://www.udacity.com/course/server-deployment-and-containerization--cd0157
 - https://stackoverflow.com/questions/41250087/how-to-deploy-a-react-nodejs-express-application-to-aws
 - Node.js Web Development - Fifth Edition – Docker Swarm AWS EC2 ECR Terraform - https://www.packtpub.com/product/node-js-web-development/9781838987572 - https://github.com/PacktPublishing/Node.js-Web-Development-Fifth-Edition
+
+### CloudFront HTTP headers
+
+- Adding HTTP headers to CloudFront responses - https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/adding-response-headers.html
+- Use https://pentest-tools.com/website-vulnerability-scanning/website-scanner to check the headers
 
 ### EC2
 
@@ -173,6 +191,7 @@ Resources:
 - Deploying a React/Node/MySQL app to Amazon EC2 (2022) - https://towardsdev.com/deploying-a-react-node-mysql-app-to-aws-ec2-2022-1dfc98496acf
 - Deploying a Basic Express API on Amazon EC2 - https://betterprogramming.pub/deploying-a-basic-express-api-on-amazon-ec2-eea0b54a825
 - https://www.pluralsight.com/courses/aws-managing-ec2-instances
+- Deploy NodeJS APP on AWS EC2 Instance - https://www.youtube.com/watch?v=S45jZCvd2M8
 
 ### RDS
 
@@ -200,10 +219,12 @@ Resources
 ### Docker
 
 - https://www.docker.com/blog/how-to-use-the-node-docker-official-image/
+- Sample https://github.com/docker/awesome-compose/tree/master/react-express-mysql
 - https://cloudonaut.io/rapid-docker-on-aws/
 - Docker in Motion - https://www.manning.com/livevideo/docker-in-motion
 - https://github.com/platzi/curso-nodejs-auth/blob/13-step/docker-compose.yml
 - https://github.com/hagopj13/node-express-boilerplate
+- https://mentorcruise.com/blog/how-to-dockerize-a-react-app-and-deploy-it-easily/ - https://github.com/victorgrubio/blog-projects/tree/main/react-nginx-dockerization
 - https://github.com/FaztWeb/pern-stack
 - https://www.packtpub.com/product/restful-web-api-design-with-node-js-12-video/9781838648770 - https://github.com/PacktPublishing/RESTful-Web-API-Design-with-Node.js-12 - https://github.com/PacktPublishing/RESTful-Web-API-Design-with-Node.js-12-contact-api
 
@@ -217,6 +238,7 @@ Resources
 - https://github.com/AJarombek/global-aws-infrastructure
 - https://github.com/AJarombek/jarombek-com-infrastructure
 - https://github.com/AJarombek/saints-xctf-infrastructure
+- Upload files to S3 with Terraform - https://gmusumeci.medium.com/how-to-upload-files-to-private-or-public-aws-ec2-instances-using-terraform-e62d3c4dd3a6
 
 ### CloudFormation
 
@@ -224,10 +246,22 @@ Resources
 
 ### GitHub actions
 
-- [] ESLint GitHub action on push
+> Test your web service and its DB in your workflow by simply adding some docker-compose to your workflow file. From https://github.com/features/actions
 
+- [x] ESLint GitHub action on push
   - https://github.com/actions/starter-workflows/blob/main/code-scanning/eslint.yml
   - https://github.com/midudev/pokedex-for-ci/blob/main/.github/workflows/pipeline.yml#L20-L33
+- [ ] Replace AWS IAM User with Role at the workflow web-deploy-cli as recommended at https://github.com/aws-actions/configure-aws-credentials#assuming-a-role
+- [ ] Change AWS Policy to have less "Action" as seen here: https://www.alexhyett.com/github-actions-deploy-to-s3
+- [ ] Cache node_modules with actions/cache? We use the actions/setup-node cache now, but we can do more as explained at https://stackoverflow.com/questions/67136614/cache-node-modules-in-github-actions#comment130767778_73800704
+  - https://stackoverflow.com/questions/67136614/cache-node-modules-in-github-actions
+  - https://www.jonathan-wilkinson.com/github-actions-cache-everything
+  - https://www.voorhoede.nl/en/blog/super-fast-npm-install-on-github-actions/
+  - https://stackoverflow.com/questions/64226272/caching-npm-dependency-with-github-action
+  - https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows
+  - https://stackoverflow.com/questions/55110729/how-do-i-cache-steps-in-github-actions
+
+Resources
 
 - GitHub Actions TUTORIAL Desde Cero - Integración continua (CI/CD) - https://www.youtube.com/watch?v=sIhm4YOMK6Q&list=PLV8x_i1fqBw0Kn_fBIZTa3wS_VZAqddX7&index=57
 - Deploy a React App to Amazon S3 using GitHub Actions And Bitbucket Pipelines - https://blog.devgenius.io/deploy-a-react-app-to-amazon-s3-using-github-actions-and-bitbucket-pipelines-74791ae10a7c
