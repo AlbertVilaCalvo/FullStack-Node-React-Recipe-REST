@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/RecipeREST.iml" filepath="$PROJECT_DIR$/.idea/RecipeREST.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/RecipeManager.iml" filepath="$PROJECT_DIR$/.idea/RecipeManager.iml" />
     </modules>
   </component>
 </project>

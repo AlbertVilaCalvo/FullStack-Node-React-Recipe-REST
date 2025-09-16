@@ -1,6 +1,7 @@
 {
   "name": "web",
   "version": "0.1.0",
+  "description": "Recipe manager web frontend",
   "private": true,
   "dependencies": {
     "@chakra-ui/react": "^2.3.4",

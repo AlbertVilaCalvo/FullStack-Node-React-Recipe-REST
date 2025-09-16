@@ -1,4 +1,6 @@
-# Recipe Manager - A Full Stack app built with Node, React, PostgreSQL, REST API, AWS, GitHub Actions
+# Recipe Manager
+
+_A Full Stack app built with Node, React, PostgreSQL, REST API, AWS and GitHub Actions_
 
 Live site: https://recipeapp.link
 
@@ -41,8 +43,8 @@ Live site: https://recipeapp.link
 ## Database setup
 
 1. Start PostgreSQL with `brew services start postgresql`.
-2. Create the database: `createdb reciperest`. (If the database already exists do `dropdb reciperest && createdb reciperest`.)
-3. Start psql with `psql reciperest`.
+2. Create the database: `createdb recipemanager`. (If the database already exists do `dropdb recipemanager && createdb recipemanager`.)
+3. Start psql with `psql recipemanager`.
 4. In psql, create the tables by running `\i server/database-setup.sql`.
 
 (Exit psql with Ctrl+D or `\q`.)
@@ -56,7 +58,7 @@ Note that you need two users with ids 1 and 2. If you don't have the two users y
 - `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`
 - `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Pere", "email":"b@b.com", "password":"123456"}'`
 
-Once you have two users with ids 1 and 2, seed data into the database by doing `psql reciperest` and `\i server/database-seed.sql`.
+Once you have two users with ids 1 and 2, seed data into the database by doing `psql recipemanager` and `\i server/database-seed.sql`.
 
 (Exit psql with Ctrl+D or `\q`.)
 

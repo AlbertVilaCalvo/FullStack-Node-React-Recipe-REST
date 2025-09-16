@@ -1,4 +1,4 @@
-# GitHub Copilot Instructions for RecipeREST
+# GitHub Copilot Instructions for Recipe Manager
 
 This project is a web application that allows users to manage cooking recipes. It's built using React on the client and Node.js on the server, with a PostgreSQL database.
 
@@ -22,7 +22,7 @@ The server follows a three-layer architecture for organizing business logic:
 
 ## Server Patterns
 
-- Error Handling: The server endpoints return a custom `ApiError` class (`/server/src/misc/ApiError.ts`) for expected errors (e.g., "not found", "invalid input"). Unexpected errors are caught by the `unexpectedErrorHandler` middleware.
+- Error Handling: The server endpoints return a custom `ApiError` class (`/server/src/misc/ApiError.ts`) for expected errors (e.g., "not found", "invalid input").
 - Result: Database functions return a result (`/server/src/misc/result.ts`) discriminated union.
 - Use Jest for unit tests.
 - Use Supertest for integration tests.

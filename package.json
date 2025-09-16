@@ -1,7 +1,7 @@
 {
-  "name": "recipe-rest",
+  "name": "recipe-manager",
   "version": "1.0.0",
-  "description": "Recipe manager app, with REST API",
+  "description": "Recipe manager application",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

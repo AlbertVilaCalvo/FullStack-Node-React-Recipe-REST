@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "Recipe manager REST",
+  "description": "Recipe manager server",
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",
