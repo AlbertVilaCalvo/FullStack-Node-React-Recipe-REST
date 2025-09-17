@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { userStore } from '../../../user/userStore'
 import { useErrorToast } from '../../misc/toast'
 import { isApiError } from '../../../httpClient'
-import { getFromLocation } from '../../components/navigation/RequireLogin'
+import { getFromLocation } from '../../../auth/getFromLocation.ts'
 import { StyledLink } from '../../components/navigation/StyledLink'
 import { Form } from '../../components/form/Form'
 import {

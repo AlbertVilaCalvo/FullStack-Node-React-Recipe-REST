@@ -1,5 +1,4 @@
 import * as React from 'react'
-import type { Location } from 'react-router-dom'
 import { Navigate, useLocation } from 'react-router-dom'
 import { userStore } from '../../../user/userStore'
 
@@ -30,15 +29,4 @@ export function RequireLogin({ Page }: { Page: React.ComponentType<any> }) {
 export function NavigateToLogin() {
   const location = useLocation()
   return <Navigate to="/login" state={{ from: location }} replace />
-}
-
-/**
- * Returns the 'from' location set by the `RequireLogin` component.
- */
-export function getFromLocation(location: Location): string | undefined {
-  const state = location.state as any
-  if (state && state.from && state.from.pathname) {
-    return state.from.pathname
-  }
-  return undefined
 }
