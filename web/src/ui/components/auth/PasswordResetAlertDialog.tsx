@@ -6,9 +6,9 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   Button,
-  UseDisclosureProps,
   Flex,
 } from '@chakra-ui/react'
+import type { UseDisclosureProps } from '@chakra-ui/react'
 import { EmailFormControl } from '../form/FormControl'
 import { isValidEmail, ValidationError } from '../../../misc/validations'
 import { SubmitButton } from '../form/SubmitButton'

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Recipe } from '../../../recipe/Recipe'
+import type { Recipe } from '../../../recipe/Recipe'
 import {
   FormControl,
   FormLabel,
@@ -80,7 +80,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           max={MAX_COOKING_TIME_MINUTES}
           allowMouseWheel
           value={cookingTimeMinutes}
-          onChange={(valueAsString, valueAsNumber) => {
+          onChange={(valueAsString, _valueAsNumber) => {
             setCookingTimeMinutes(valueAsString)
           }}
         >

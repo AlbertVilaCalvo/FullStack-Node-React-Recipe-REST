@@ -1,6 +1,6 @@
 import { httpClient } from '../httpClient'
-import { AxiosResponse } from 'axios'
-import { PublicUser } from './User'
+import type { AxiosResponse } from 'axios'
+import type { PublicUser } from './User'
 
 export function getUser(userId: number): Promise<PublicUser> {
   return httpClient

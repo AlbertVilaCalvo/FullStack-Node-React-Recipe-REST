@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { useGetUser } from '../../../user/useGetUser'
 import { isError, isLoading } from '../../../misc/result'

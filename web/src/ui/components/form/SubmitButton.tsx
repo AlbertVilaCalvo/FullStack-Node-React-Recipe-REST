@@ -1,5 +1,5 @@
-import { Button, ButtonProps } from '@chakra-ui/react'
-import * as React from 'react'
+import type { ButtonProps } from '@chakra-ui/react'
+import { Button } from '@chakra-ui/react'
 
 type Props = Omit<ButtonProps, 'type'>
 

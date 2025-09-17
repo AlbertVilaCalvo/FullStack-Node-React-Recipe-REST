@@ -1,19 +1,14 @@
 import * as React from 'react'
 import {
   FormControl,
-  FormControlProps,
   FormErrorMessage,
   FormHelperText,
   FormLabel,
-  InputProps,
 } from '@chakra-ui/react'
-import {
-  CustomInputProps,
-  EmailInput,
-  PasswordInput,
-  UserNameInput,
-} from './Input'
-import { OptionalChildren } from '../../misc/Children'
+import type { FormControlProps, InputProps } from '@chakra-ui/react'
+import { EmailInput, PasswordInput, UserNameInput } from './Input'
+import type { CustomInputProps } from './Input'
+import type { OptionalChildren } from '../../misc/Children'
 
 type Props = Pick<InputProps, 'value'> &
   Pick<CustomInputProps, 'onChange'> &

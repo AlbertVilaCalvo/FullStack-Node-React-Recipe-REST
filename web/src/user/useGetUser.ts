@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { PublicUser } from './User'
+import type { PublicUser } from './User'
 import * as UserApi from './UserApi'
 import { isValidId } from '../misc/validations'
 import { is404NotFound } from '../httpClient'

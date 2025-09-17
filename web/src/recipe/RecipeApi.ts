@@ -1,4 +1,4 @@
-import {
+import type {
   Recipe,
   RecipeJson,
   RecipeWithUser,
@@ -6,7 +6,7 @@ import {
 } from './Recipe'
 import { RecipeUtil, RecipeWithUserUtil } from './RecipeUtil'
 import { httpClient } from '../httpClient'
-import { AxiosResponse } from 'axios'
+import type { AxiosResponse } from 'axios'
 
 export function getAllRecipes(): Promise<Recipe[]> {
   return httpClient

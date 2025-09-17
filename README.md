@@ -73,7 +73,7 @@ npm start
 ```shell
 cd web
 npm install
-npm start
+npm run dev
 ```
 
 ## Email account setup

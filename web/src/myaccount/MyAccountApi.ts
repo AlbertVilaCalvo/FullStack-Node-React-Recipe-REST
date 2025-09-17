@@ -1,10 +1,6 @@
-import {
-  ApiError,
-  extractApiError,
-  httpClient,
-  isApiError,
-} from '../httpClient'
-import { AxiosResponse } from 'axios'
+import { extractApiError, httpClient, isApiError } from '../httpClient'
+import type { ApiError } from '../httpClient'
+import type { AxiosResponse } from 'axios'
 
 export function updateProfile(name: string) {
   return httpClient.put<void>(`/my-account/profile`, {

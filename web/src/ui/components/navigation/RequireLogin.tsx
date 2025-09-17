@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { Location, Navigate, useLocation } from 'react-router-dom'
+import type { Location } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { userStore } from '../../../user/userStore'
 
 /**

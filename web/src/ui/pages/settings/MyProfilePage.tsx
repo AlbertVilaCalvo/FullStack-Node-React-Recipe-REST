@@ -31,7 +31,7 @@ export function MyProfilePage() {
     event.preventDefault()
     setLoading(true)
     MyAccountApi.updateProfile(name)
-      .then((response) => {
+      .then((_response) => {
         storeUser.name = name
         showSuccessToast('Profile updated')
       })

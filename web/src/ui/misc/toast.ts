@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { ToastPosition, useToast } from '@chakra-ui/react'
+import type { ToastPosition } from '@chakra-ui/react'
+import { useToast } from '@chakra-ui/react'
 
 const POSITION: ToastPosition = 'top'
 

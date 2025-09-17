@@ -1,4 +1,5 @@
-import { NavLink, NavLinkProps, useLocation } from 'react-router-dom'
+import type { NavLinkProps } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 
 export function NavBarLink(props: NavLinkProps) {
   const location = useLocation()

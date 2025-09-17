@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Outlet } from 'react-router-dom'
 import { H1 } from '../components/Headers'
 import { SettingsNavLink } from '../components/navigation/SettingsNavLink'

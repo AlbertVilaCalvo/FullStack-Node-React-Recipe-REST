@@ -1,12 +1,7 @@
-import {
-  ApiError,
-  httpClient,
-  isApiError,
-  AnApiError,
-  extractApiError,
-} from '../httpClient'
-import { AxiosResponse } from 'axios'
-import { User } from '../user/User'
+import { httpClient, isApiError, extractApiError } from '../httpClient'
+import type { ApiError, AnApiError } from '../httpClient'
+import type { AxiosResponse } from 'axios'
+import type { User } from '../user/User'
 
 // What the API returns
 type RegisterLoginResponseJson = {

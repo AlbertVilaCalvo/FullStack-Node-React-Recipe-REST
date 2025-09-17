@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Recipe } from './Recipe'
+import type { Recipe } from './Recipe'
 import * as RecipeApi from './RecipeApi'
 
 export function useGetAllRecipes(): 'loading' | Recipe[] | Error {

@@ -1,11 +1,6 @@
 import * as React from 'react'
-import {
-  Button,
-  Input,
-  InputGroup,
-  InputProps,
-  InputRightElement,
-} from '@chakra-ui/react'
+import { Button, Input, InputGroup, InputRightElement } from '@chakra-ui/react'
+import type { InputProps } from '@chakra-ui/react'
 import {
   EMAIL_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,

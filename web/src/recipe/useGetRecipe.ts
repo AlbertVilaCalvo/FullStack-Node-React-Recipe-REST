@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RecipeWithUser } from './Recipe'
+import type { RecipeWithUser } from './Recipe'
 import * as RecipeApi from './RecipeApi'
 import { isValidId } from '../misc/validations'
 import { is404NotFound } from '../httpClient'
