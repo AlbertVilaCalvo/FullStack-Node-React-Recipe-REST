@@ -2,7 +2,10 @@
   "name": "recipe-manager",
   "version": "1.0.0",
   "description": "Recipe manager application",
+  "private": true,
   "scripts": {
+    "format": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Albert",
