@@ -48,7 +48,7 @@ export function PasswordResetAlertDialog({ isOpen, onClose }: Props) {
       })
       .finally(() => {
         // We need to set loading false for success too, because the loading
-        // state persist when the AlertDialog is shown again.
+        // state persists when the AlertDialog is shown again.
         setLoading(false)
       })
   }
