@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1
+FROM node:24-alpine
+
+# Install Python and build tools required for bcrypt, otherwise we
+# get the error "Could not find any Python installation to use"
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-fund --no-audit
+
+COPY . .
+
+EXPOSE ${SERVER_PORT}
+
+CMD ["npm", "run", "dev:docker"]

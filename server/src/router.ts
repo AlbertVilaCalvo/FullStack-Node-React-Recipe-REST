@@ -74,6 +74,12 @@ router.delete(
   RecipeController.deleteRecipe
 )
 
+// Health check
+
+router.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
 // Catch all middleware
 
 router.use(unexpectedErrorHandler)

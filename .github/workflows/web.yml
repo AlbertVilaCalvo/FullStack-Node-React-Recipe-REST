@@ -25,6 +25,10 @@ defaults:
   run:
     working-directory: web
 
+env:
+  VITE_PORT: 3000 # Required by 'npm test' since it loads config from vite.config.ts
+  VITE_API_BASE_URL: 'http://localhost:5000/api' # Required by 'npm test' since it loads httpClient.ts
+
 jobs:
   eslint:
     name: ESLint

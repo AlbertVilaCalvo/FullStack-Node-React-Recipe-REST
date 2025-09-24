@@ -1,0 +1,14 @@
+# syntax=docker/dockerfile:1
+FROM node:24-alpine
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-fund --no-audit
+
+COPY . .
+
+EXPOSE ${VITE_PORT}
+
+# Vite dev server with hot reload
+CMD ["npm", "run", "dev:docker"]
