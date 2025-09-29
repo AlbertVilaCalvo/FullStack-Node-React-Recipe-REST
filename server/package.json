@@ -5,11 +5,11 @@
   "private": true,
   "main": "build/index.js",
   "scripts": {
-    "start": "tsx watch --env-file=.env src/index.ts",
+    "dev": "tsx watch --env-file=../.env src/index.ts",
     "build": "npx tsc",
     "serve": "npx tsc && node build/index.js",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "test": "jest",
-    "eslint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "test-watch": "jest --watch"
   },
   "author": "Albert",

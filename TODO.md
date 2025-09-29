@@ -146,7 +146,6 @@ Check `npx npm-check-updates` - https://github.com/raineorshine/npm-check-update
 - [ ] Footer add my name and link to source code
 - [ ] Check navigation with keyboard at forms
 - [ ] Why did you render: https://github.com/welldone-software/why-did-you-render
-  - Setup requires many extra steps for Create React App :/
   - This alternative seems somewhat similar: https://github.com/shuding/tilg
 
 ## UI tests
@@ -215,18 +214,6 @@ Resources
 - https://www.edx.org/search?q=s3
 - Automate react application deployment on aws, mohamed labouardy
   https://livevideo.manning.com/module/536_1_1/automate-react-application-deployment-on-aws-mohamed-labouardy/author-talk/automate-react-application-deployment-on-aws?
-
-### Docker
-
-- https://www.docker.com/blog/how-to-use-the-node-docker-official-image/
-- Sample https://github.com/docker/awesome-compose/tree/master/react-express-mysql
-- https://cloudonaut.io/rapid-docker-on-aws/
-- Docker in Motion - https://www.manning.com/livevideo/docker-in-motion
-- https://github.com/platzi/curso-nodejs-auth/blob/13-step/docker-compose.yml
-- https://github.com/hagopj13/node-express-boilerplate
-- https://mentorcruise.com/blog/how-to-dockerize-a-react-app-and-deploy-it-easily/ - https://github.com/victorgrubio/blog-projects/tree/main/react-nginx-dockerization
-- https://github.com/FaztWeb/pern-stack
-- https://www.packtpub.com/product/restful-web-api-design-with-node-js-12-video/9781838648770 - https://github.com/PacktPublishing/RESTful-Web-API-Design-with-Node.js-12 - https://github.com/PacktPublishing/RESTful-Web-API-Design-with-Node.js-12-contact-api
 
 ### Terraform
 

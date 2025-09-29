@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1
+FROM node:24-alpine
+
+# Install Python and build tools required for bcrypt, otherwise we
+# get the error "Could not find any Python installation to use"
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-fund --no-audit
+
+# We don't need to copy the source code ("COPY . .") because
+# it will be mounted as a volume in docker-compose.yml for development.
+
+EXPOSE ${SERVER_PORT}
+
+# tsx dev server with hot reload
+# Equivalent to "tsx watch src/index.ts" in a npm script
+CMD ["node", "node_modules/tsx/dist/cli.mjs", "watch", "src/index.ts"]

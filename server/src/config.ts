@@ -6,7 +6,7 @@ dotenv.config()
 type Environment = 'development' | 'production' | 'test'
 
 type Config = Readonly<{
-  /** PORT */
+  /** SERVER_PORT */
   port: number
 
   /** NODE_ENV */
@@ -36,7 +36,7 @@ type Config = Readonly<{
 }>
 
 export const config: Config = {
-  port: getEnvarAsNumber('PORT'),
+  port: getEnvarAsNumber('SERVER_PORT'),
 
   environment: getEnvironment(),
   isDevelopment: getEnvironment() === 'development',

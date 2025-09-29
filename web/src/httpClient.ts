@@ -1,7 +1,11 @@
 import axios from 'axios'
 import { userStore } from './user/userStore'
 
-axios.defaults.baseURL = 'http://localhost:5000/api'
+if (!import.meta.env.VITE_API_BASE_URL) {
+  throw new Error(`Missing required environment variable VITE_API_BASE_URL`)
+}
+
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL
 axios.defaults.timeout = 10_000
 axios.defaults.headers.common['Content-Type'] = 'application/json'
 

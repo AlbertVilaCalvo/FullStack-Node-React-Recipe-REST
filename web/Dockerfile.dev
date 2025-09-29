@@ -1,0 +1,16 @@
+# syntax=docker/dockerfile:1
+FROM node:24-alpine
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-fund --no-audit
+
+# We don't need to copy the source code ("COPY . .") because
+# it will be mounted as a volume in docker-compose.yml for development.
+
+EXPOSE ${VITE_PORT}
+
+# Vite dev server with hot reload
+# Equivalent to "vite --host" in a npm script
+CMD ["node", "node_modules/vite/bin/vite.js", "dev", "--host"]

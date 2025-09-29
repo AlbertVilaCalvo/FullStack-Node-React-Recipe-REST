@@ -8,10 +8,11 @@ Live site: https://recipeapp.link
 
 ### Tools
 
+- CI/CD with GitHub Actions.
+- 100% TypeScript, zero JavaScript.
+- Local development with Docker Compose.
 - Code quality with ESLint.
 - Auto-formatting with Prettier.
-- CI/CD with GitHub Actions.
-- 100% TypeScript, no JavaScript.
 
 ### Frontend
 
@@ -40,41 +41,81 @@ Live site: https://recipeapp.link
 - Settings: change user name, email and password. Delete user account.
 - Recipe: publish, edit and delete recipes.
 
-## Database setup
-
-1. Start PostgreSQL with `brew services start postgresql`.
-2. Create the database: `createdb recipemanager`. (If the database already exists do `dropdb recipemanager && createdb recipemanager`.)
-3. Start psql with `psql recipemanager`.
-4. In psql, create the tables by running `\i server/database-setup.sql`.
-
-(Exit psql with Ctrl+D or `\q`.)
-
-## Database seed
-
-Once the database is created, you can automatically fill the database with some recipes with `server/database-seed.sql`.
-
-Note that you need two users with ids 1 and 2. If you don't have the two users yet, start the server (`cd server && npm start`) and in another terminal run:
-
-- `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`
-- `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Pere", "email":"b@b.com", "password":"123456"}'`
-
-Once you have two users with ids 1 and 2, seed data into the database by doing `psql recipemanager` and `\i server/database-seed.sql`.
-
-(Exit psql with Ctrl+D or `\q`.)
-
 ## Develop
 
-```shell
-cd server
-npm install
-npm start
-```
+The application is available at:
+
+- Web (React): http://localhost:3000
+- Server (API): http://localhost:5000
+- Database: localhost:5432
+
+To run the app locally do:
 
 ```shell
-cd web
+cp .env.dev.sample .env
+
+# Start all services
+docker compose up --build
+
+# View service status
+docker compose ps
+
+# Stop everything, but keep the database data
+docker compose down
+# Stop everything and discard the database data
+docker compose down --volumes
+```
+
+To run only a single service do:
+
+```shell
+cd server # Or cd web
 npm install
 npm run dev
 ```
+
+## Database
+
+The database is created automatically when you run `docker compose up --build`. You can interact with it from within the Docker container.
+
+```shell
+# Connect to database from within the Docker container
+docker compose exec db psql -U postgres -d recipemanager
+
+# Backup database
+docker compose exec db pg_dump -U postgres recipemanager > backup.sql
+
+# Restore database
+docker compose exec -T db psql -U postgres -d recipemanager < backup.sql
+```
+
+The database port is exposed to `localhost:5432` on the host machine. This allows you to connect to the database using a client from your machine.
+
+```shell
+# Connect to database from your host machine
+psql -h localhost -p 5432 -U postgres -d recipemanager
+```
+
+You will be prompted for the password, which is defined in your `.env` file.
+
+### Seed the database
+
+Once the database is created, you can automatically fill the database with users and recipes using the provided script:
+
+```shell
+./scripts/seed-database.sh
+```
+
+This script will:
+
+1. Create two test users.
+2. Seed the database with sample recipe data.
+
+Alternatively, you can run the steps manually:
+
+- `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`
+- `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Blanca", "email":"b@b.com", "password":"123456"}'`
+- `docker compose exec -T db psql -U postgres -d recipemanager < server/database-seed.sql`
 
 ## Email account setup
 
@@ -92,7 +133,7 @@ Note that the checks do not abort the commit, they only inform you of any issues
 
 Note that there's a GitHub action that does this automatically.
 
-```
+```shell
 cd web
 npm run build
 aws s3 sync build s3://<s3-bucket-name> --delete

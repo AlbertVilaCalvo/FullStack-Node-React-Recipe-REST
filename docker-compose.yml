@@ -1,0 +1,72 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Initialize schema/data on the first run
+      - ./server/database-setup.sql:/docker-entrypoint-initdb.d/01-setup.sql
+    healthcheck:
+      test: 'pg_isready -U ${DB_USER} -d ${DB_NAME}'
+      interval: 3s
+      timeout: 1s
+      retries: 10
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: server
+    # restart: no
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+    ports:
+      - '${SERVER_PORT}:${SERVER_PORT}'
+    volumes:
+      # Mount source code for hot reloading
+      - ./server/src:/app/src:ro
+      - ./server/package.json:/app/package.json:ro
+      - ./server/package-lock.json:/app/package-lock.json:ro
+      - ./server/tsconfig.json:/app/tsconfig.json:ro
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    container_name: web
+    env_file:
+      - .env
+    ports:
+      - '${VITE_PORT}:${VITE_PORT}'
+    volumes:
+      # Mount source code for hot reloading
+      - ./web/src:/app/src:ro
+      - ./web/public:/app/public:ro
+      - ./web/package.json:/app/package.json:ro
+      - ./web/package-lock.json:/app/package-lock.json:ro
+      - ./web/vite.config.ts:/app/vite.config.ts:ro
+      - ./web/tsconfig.json:/app/tsconfig.json:ro
+      - ./web/tsconfig.node.json:/app/tsconfig.node.json:ro
+      - ./web/tsconfig.app.json:/app/tsconfig.app.json:ro
+      - ./web/index.html:/app/index.html:ro
+
+volumes:
+  # Named volume for PostgreSQL data persistence
+  # Stores database files on the host machine
+  # Ensures that data is not lost if the database container is removed or recreated
+  postgres_data:
+    driver: local
