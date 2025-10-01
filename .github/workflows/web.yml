@@ -6,15 +6,6 @@ on:
       - main
     paths:
       - web/**
-  pull_request:
-    branches:
-      - main
-    paths:
-      - web/**
-    types:
-      - opened
-      - synchronize
-      - closed
 
 # Allow only one concurrent execution
 concurrency:
@@ -32,7 +23,7 @@ env:
 jobs:
   eslint:
     name: ESLint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -49,7 +40,7 @@ jobs:
 
   tests:
     name: Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -72,7 +63,7 @@ jobs:
     # but not when is opened or synchronize.
     # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges
     if: github.event_name == 'push' || github.event.pull_request.merged == true
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -85,7 +76,7 @@ jobs:
       - name: Build React web app
         run: npm run build
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16 # https://github.com/aws-actions/configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v5.0.0 # https://github.com/aws-actions/configure-aws-credentials
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_WEB }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_WEB }}
