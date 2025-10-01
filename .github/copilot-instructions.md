@@ -1,12 +1,19 @@
-# GitHub Copilot Instructions for Recipe Manager
+# Recipe Manager
 
-This project is a web application that allows users to manage cooking recipes. It's built using React on the client and Node.js on the server, with a PostgreSQL database.
+Recipe Manager is a web application that allows users to manage cooking recipes. Users can read, create, update and delete recipes.
 
 ## Project Overview & Architecture
 
-- `/server`: A Node.js/Express.js REST API backend.
-- `/web`: A React single-page application.
-- `/aws`: Contains scripts and assets for AWS deployment, like CloudFront functions.
+Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS. Deployment is done with GitHub Actions. Local development is done using Docker and Docker Compose.
+
+The project structure is:
+
+- `/server`: A Node.js (Express) REST API backend.
+- `/web`: A React single-page application frontend.
+  - `/web/src/ui`: React components and pages.
+- `/aws`: Assets for AWS, like CloudFront functions.
+- `/scripts`: Scripts for seeding the database, etc.
+- `.github/workflows`: GitHub Actions workflows for CI/CD.
 
 The server follows a three-layer architecture for organizing business logic:
 
@@ -22,6 +29,7 @@ The server follows a three-layer architecture for organizing business logic:
 
 ## Server Patterns
 
+- Follow RESTful API design principles.
 - Error Handling: The server endpoints return a custom `ApiError` class (`/server/src/misc/ApiError.ts`) for expected errors (e.g., "not found", "invalid input").
 - Result: Database functions return a result (`/server/src/misc/result.ts`) discriminated union.
 - Use Jest for unit tests.
