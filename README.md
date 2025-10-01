@@ -16,7 +16,7 @@ Live site: https://recipeapp.link
 
 ### Frontend
 
-- Single Page Web application built with React.
+- React single-page application.
 - State management with [Valtio](https://github.com/pmndrs/valtio).
 - Routing with [React Router](https://reactrouter.com/en/main) 6.
 - UI design with [Chakra UI](https://chakra-ui.com).
@@ -33,12 +33,12 @@ Live site: https://recipeapp.link
 
 ### AWS
 
-- Frontend deployed to S3 and CloudFront automatically using GitHub actions.
+- Frontend deployed to S3 and CloudFront automatically using GitHub Actions.
 
 ## Features
 
 - Authentication: register, login, validate email, recover password.
-- Settings: change user name, email and password. Delete user account.
+- Settings: change the user's name, email and password. Delete the user account.
 - Recipe: publish, edit and delete recipes.
 
 ## Develop
@@ -49,13 +49,17 @@ The application is available at:
 - Server (API): http://localhost:5000
 - Database: localhost:5432
 
-To run the app locally do:
+To run the app locally, do:
 
 ```shell
 cp .env.dev.sample .env
+# (Optional) Edit .env to adjust values
 
 # Start all services
 docker compose up --build
+
+# (Optional) Seed the database with users and recipes
+./scripts/seed-database.sh
 
 # View service status
 docker compose ps
