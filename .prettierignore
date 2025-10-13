@@ -1,3 +1,6 @@
 build
 .idea
 tsconfig.json
+
+.terraform
+*.tfstate

@@ -254,6 +254,11 @@ Resources
 - Deploy a React App to Amazon S3 using GitHub Actions And Bitbucket Pipelines - https://blog.devgenius.io/deploy-a-react-app-to-amazon-s3-using-github-actions-and-bitbucket-pipelines-74791ae10a7c
 - https://frontendmasters.com/courses/aws-v2/ - https://frontendmasters.com/courses/aws-v2/integrate-github-action/
 
+### Web infrastructure
+
+- CloudFront logs (logging_config block)
+- WAF (aws_wafv2_web_acl)
+
 ### EKS
 
 - https://workshops.aws/?tag=EKS

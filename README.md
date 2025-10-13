@@ -8,11 +8,11 @@ Live site: https://recipeapp.link
 
 ### Tools
 
+- Hosted on AWS.
+- Infrastructure as Code with Terraform
 - CI/CD with GitHub Actions.
-- 100% TypeScript, zero JavaScript.
 - Local development with Docker Compose.
-- Code quality with ESLint.
-- Auto-formatting with Prettier.
+- 100% TypeScript, zero JavaScript.
 
 ### Frontend
 
@@ -133,6 +133,24 @@ To run Prettier and ESLint on every commit, run `cp pre-commit .git/hooks`.
 
 Note that the checks do not abort the commit, they only inform you of any issues found.
 
+## Deploy infrastructure with Terraform
+
+```shell
+cd terraform/web/environments/prod
+terraform init
+terraform plan -out tfplan
+terraform apply tfplan
+```
+
+## Automatic deployment with GitHub Actions
+
+After deploying the infrastructure with Terraform, set these GitHub repository secrets:
+
+```shell
+WEB_S3_BUCKET=<website_s3_bucket_name from output>
+WEB_CLOUDFRONT_DISTRIBUTION_ID=<website_cloudfront_distribution_id from output>
+```
+
 ## Manually deploy React web app to AWS S3 and CloudFront
 
 Note that there's a GitHub action that does this automatically.
@@ -141,5 +159,5 @@ Note that there's a GitHub action that does this automatically.
 cd web
 npm run build
 aws s3 sync build s3://<s3-bucket-name> --delete
-aws cloudfront create-invalidation --distribution-id <cf-distribution-id> --paths '/*'
+aws cloudfront create-invalidation --distribution-id <distribution-id> --paths '/*'
 ```

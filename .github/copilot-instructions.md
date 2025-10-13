@@ -4,14 +4,14 @@ Recipe Manager is a web application that allows users to manage cooking recipes.
 
 ## Project Overview & Architecture
 
-Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS. Deployment is done with GitHub Actions. Local development is done using Docker and Docker Compose.
+Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS, with infrastructure managed using Terraform. Deployment is done with GitHub Actions. Local development is done using Docker and Docker Compose.
 
 The project structure is:
 
 - `/server`: A Node.js (Express) REST API backend.
 - `/web`: A React single-page application frontend.
   - `/web/src/ui`: React components and pages.
-- `/aws`: Assets for AWS, like CloudFront functions.
+- `/terraform`: Terraform code for AWS resources.
 - `/scripts`: Scripts for seeding the database, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
 
@@ -41,3 +41,16 @@ The server follows a three-layer architecture for organizing business logic:
 - API Communication: All HTTP requests to the backend are centralized in API modules (e.g., `/web/src/recipe/RecipeApi.ts`) which use a shared `httpClient.ts`.
 - UI Components: The UI is built using Chakra UI. When creating new components, use Chakra components whenever possible.
 - Navigation: React Router is used for client-side routing. Define routes in `/web/src/App.tsx` and use the `useNavigate` hook for navigation within components.
+
+## Infrastructure (Terraform)
+
+- Infrastructure as Code: All AWS infrastructure is defined using Terraform in the `/terraform` directory.
+- Variables: Define input variables in `variables.tf` and outputs in `outputs.tf`.
+- Organization: Group resources by AWS service (e.g., `s3.tf`, `rds.tf`, `eks.tf` or `cloudfront.tf`).
+- Tagging: All resources should include the default tags `Application` and `Environment`.
+- Follow Google Cloud's best practices for Terraform: https://cloud.google.com/docs/terraform/best-practices/root-modules. In particular, ensure that:
+  - Don't include more than 100 resources in a single state.
+  - Use separate directories for each service.
+  - Split the Terraform configuration for a service into two top-level directories: a `modules` directory that contains the actual configuration for the service, and an `environments` directory that contains the root configurations for each environment.
+    - Each module in the `modules` directory must contain the files `provider.tf` and `versions.tf`.
+    - Each `environment` directory must contain a `main.tf` file that instantiates the service module.

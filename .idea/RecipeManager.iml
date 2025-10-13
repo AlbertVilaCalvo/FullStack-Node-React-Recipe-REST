@@ -6,6 +6,11 @@
       <excludeFolder url="file://$MODULE_DIR$/.tmp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/server/build" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/server/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/terraform/web/environments/dev/.terraform/modules" />
+      <excludeFolder url="file://$MODULE_DIR$/terraform/web/environments/dev/.terraform/providers" />
+      <excludeFolder url="file://$MODULE_DIR$/web/.idea" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
