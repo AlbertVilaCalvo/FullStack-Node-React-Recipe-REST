@@ -135,8 +135,12 @@ Note that the checks do not abort the commit, they only inform you of any issues
 
 ## Deploy infrastructure with Terraform
 
+To deploy the AWS infrastructure with Terraform, do:
+
 ```shell
-cd terraform/web/environments/prod
+cd terraform/web/environments/dev # Or prod
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars.example with your values if needed
 terraform init
 terraform plan -out tfplan
 terraform apply tfplan
@@ -144,16 +148,19 @@ terraform apply tfplan
 
 ## Automatic deployment with GitHub Actions
 
-After deploying the infrastructure with Terraform, set these GitHub repository secrets:
+Once the AWS infrastructure is deployed, you can set up automatic deployment of the React web app to S3 and CloudFront using GitHub Actions.
 
-```shell
-WEB_S3_BUCKET=<website_s3_bucket_name from output>
-WEB_CLOUDFRONT_DISTRIBUTION_ID=<website_cloudfront_distribution_id from output>
-```
+At the GitHub repository, go to Settings → Environments and create an environment named "dev" or "prod".
+On that page, click the environment and add the following environment variables (not secrets):
 
-## Manually deploy React web app to AWS S3 and CloudFront
+| Environment variable               | Value                                                 |
+| ---------------------------------- | ----------------------------------------------------- |
+| `AWS_REGION`                       | `terraform output aws_region`                         |
+| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN` | `terraform output oidc_role_arn`                      |
+| `WEB_S3_BUCKET`                    | `terraform output website_s3_bucket_name`             |
+| `WEB_CLOUDFRONT_DISTRIBUTION_ID`   | `terraform output website_cloudfront_distribution_id` |
 
-Note that there's a GitHub action that does this automatically.
+## Manually deploy the React web app to AWS S3 and CloudFront
 
 ```shell
 cd web
@@ -161,3 +168,5 @@ npm run build
 aws s3 sync build s3://<s3-bucket-name> --delete
 aws cloudfront create-invalidation --distribution-id <distribution-id> --paths '/*'
 ```
+
+Note that there's a GitHub action that does this automatically, see [Automatic deployment with GitHub Actions](#automatic-deployment-with-github-actions).

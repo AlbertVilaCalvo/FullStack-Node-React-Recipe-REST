@@ -1,3 +1,8 @@
+output "aws_region" {
+  description = "The AWS region where resources are deployed"
+  value       = var.aws_region
+}
+
 output "s3_bucket_name" {
   description = "Name of the S3 bucket"
   value       = aws_s3_bucket.web_hosting.bucket

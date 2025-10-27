@@ -30,25 +30,34 @@ variable "default_tags" {
 
 # Module variables
 
-variable "domain_name" {
-  description = "Root domain name (e.g., recipemanager.com)"
+variable "github_org" {
+  description = "GitHub organization or username"
   type        = string
   validation {
-    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.domain_name))
-    error_message = "The domain name must be a valid domain (e.g., example.com, recipemanager.link)."
+    condition     = can(regex("^[a-zA-Z0-9-]+$", var.github_org))
+    error_message = "GitHub organization must contain only alphanumeric characters and hyphens."
   }
 }
 
-variable "cloudfront_price_class" {
-  description = "CloudFront price class"
+variable "github_repo" {
+  description = "GitHub repository name"
   type        = string
-  default     = "PriceClass_100" # Cheapest
   validation {
-    condition = contains([
-      "PriceClass_All",
-      "PriceClass_200",
-      "PriceClass_100"
-    ], var.cloudfront_price_class)
-    error_message = "Price class must be PriceClass_All, PriceClass_200, or PriceClass_100."
+    condition     = can(regex("^[a-zA-Z0-9-_\\.]+$", var.github_repo))
+    error_message = "GitHub repository name must contain only alphanumeric characters, hyphens, underscores, and dots."
   }
+}
+
+variable "website_s3_bucket_arn" {
+  description = "ARN of the S3 bucket that contains the website files"
+  type        = string
+  validation {
+    condition     = can(regex("^arn:aws:s3:::[a-z0-9.-]{3,63}$", var.website_s3_bucket_arn))
+    error_message = "The S3 bucket ARN must be a valid ARN (e.g., arn:aws:s3:::my-bucket)."
+  }
+}
+
+variable "website_cloudfront_distribution_arn" {
+  description = "ARN of the CloudFront distribution of the website"
+  type        = string
 }

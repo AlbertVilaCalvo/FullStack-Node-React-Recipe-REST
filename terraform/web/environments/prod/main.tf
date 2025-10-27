@@ -1,17 +1,30 @@
-locals {
-  environment = "prod"
-  app_name    = "recipe-manager"
+module "github_actions_oidc" {
+  source = "../../modules/github-actions-oidc"
+
+  environment = var.environment
+  app_name    = var.app_name
+  aws_region  = var.aws_region
+  default_tags = {
+    Application = var.app_name
+    Environment = var.environment
+  }
+
+  github_org                          = var.github_org
+  github_repo                         = var.github_repo
+  website_s3_bucket_arn               = module.web_hosting.s3_bucket_arn
+  website_cloudfront_distribution_arn = module.web_hosting.cloudfront_distribution_arn
 }
 
 module "web_hosting" {
   source = "../../modules/web-hosting"
 
-  aws_region  = "us-east-1"
-  app_name    = local.app_name
-  environment = local.environment
+  environment = var.environment
+  app_name    = var.app_name
+  aws_region  = var.aws_region
   default_tags = {
-    Application = local.app_name
-    Environment = local.environment
+    Application = var.app_name
+    Environment = var.environment
   }
-  domain_name = "recipemanager.link"
+
+  domain_name = var.domain_name
 }

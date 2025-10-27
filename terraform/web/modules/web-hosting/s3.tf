@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "web_hosting" {
-  bucket = "${var.app_name}-web-hosting-${local.account_id}-${var.environment}"
+  bucket        = "${var.app_name}-web-hosting-${local.account_id}-${var.environment}"
+  force_destroy = true
 }
 
 # Block all public access

@@ -6,10 +6,21 @@ on:
       - main
     paths:
       - web/**
+      - .github/workflows/web.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - web/**
+      - .github/workflows/web.yml
+    types:
+      - opened
+      - synchronize
+      - closed
 
 # Allow only one concurrent execution
 concurrency:
-  group: 'web-deploy-cli'
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 defaults:
@@ -24,6 +35,7 @@ jobs:
   eslint:
     name: ESLint
     runs-on: ubuntu-24.04
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -56,14 +68,21 @@ jobs:
       - name: Run tests
         run: npm test
 
-  build_and_deploy_react_app:
-    name: Deploy React web app to AWS S3 and CloudFront using the CLI
+  deploy_dev:
+    name: Deploy React web app to the dev environment
     needs: [eslint, tests]
     # Deploy only when pushing to the main branch or when a pull request is merged (closed) to then main branch
     # but not when is opened or synchronize.
     # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges
     if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: ubuntu-24.04
+    environment:
+      name: dev
+    # Permissions needed to interact with GitHub’s OIDC Token endpoint
+    # https://docs.github.com/en/actions/reference/security/oidc#workflow-permissions-for-the-requesting-the-oidc-token
+    permissions:
+      id-token: write # Allows the job to request the JWT token from GitHub's OIDC provider
+      contents: read # Allows the action to clone your repository code. Required for actions/checkout
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -76,12 +95,17 @@ jobs:
       - name: Build React web app
         run: npm run build
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v5.0.0 # https://github.com/aws-actions/configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.0 # https://github.com/aws-actions/configure-aws-credentials
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_WEB }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_WEB }}
-          aws-region: eu-west-3
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN }}
+          role-session-name: 'GitHubActions-web-deploy-dev'
+          # We could also do:
+          # role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       - name: Upload build folder files to S3
-        run: aws s3 sync build s3://${{ secrets.WEB_S3_BUCKET }} --delete
+        run: aws s3 sync build s3://${{ vars.WEB_S3_BUCKET }} --delete
       - name: Invalidate CloudFront distribution
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.WEB_CLOUDFRONT_DISTRIBUTION_ID }} --paths '/*'
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.WEB_CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths '/*'

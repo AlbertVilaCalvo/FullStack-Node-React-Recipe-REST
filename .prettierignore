@@ -3,4 +3,4 @@ build
 tsconfig.json
 
 .terraform
-*.tfstate
+*.tfstate*
