@@ -52,7 +52,7 @@ The application is available at:
 To run the app locally, do:
 
 ```shell
-cp .env.dev.sample .env
+cp .env.example .env
 # (Optional) Edit .env to adjust values
 
 # Start all services
