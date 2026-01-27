@@ -17,6 +17,7 @@ on:
       - opened
       - synchronize
       - closed
+  workflow_dispatch:
 
 # Allow only one concurrent execution
 concurrency:
@@ -83,6 +84,8 @@ jobs:
     permissions:
       id-token: write # Allows the job to request the JWT token from GitHub's OIDC provider
       contents: read # Allows the action to clone your repository code. Required for actions/checkout
+    env:
+      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }} # Override with environment-specific API URL
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
