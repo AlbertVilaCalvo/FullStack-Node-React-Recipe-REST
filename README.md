@@ -64,7 +64,7 @@ The application is available at:
 To run the app locally, do:
 
 ```shell
-cp .env.example .env
+cp .env.local .env
 # (Optional) Edit .env to adjust values
 
 # Start all services

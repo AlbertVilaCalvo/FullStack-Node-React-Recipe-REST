@@ -22,7 +22,7 @@ services:
   server:
     build:
       context: ./server
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.local
     container_name: server
     # restart: no
     depends_on:
@@ -45,7 +45,7 @@ services:
   web:
     build:
       context: ./web
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.local
     container_name: web
     env_file:
       - .env
