@@ -27,13 +27,13 @@ echo "👤 Creating user Albert (a@a.com)..."
 curl -s -X POST http://localhost:${SERVER_PORT}/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}' \
-  | grep -q "token" && echo -e "✅ User Albert created successfully\n" || echo "⚠️ User Albert may already exist"
+  | grep -q "token" && echo -e "✅ User Albert created successfully\n" || echo "⚠️ User with email a@a.com may already exist"
 
 echo "👤 Creating user Blanca (b@b.com)..."
 curl -s -X POST http://localhost:${SERVER_PORT}/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Blanca", "email":"b@b.com", "password":"123456"}' \
-  | grep -q "token" && echo -e "✅ User Blanca created successfully\n" || echo "⚠️ User Blanca may already exist"
+  | grep -q "token" && echo -e "✅ User Blanca created successfully\n" || echo "⚠️ User with email b@b.com may already exist"
 
 echo "🍳 Seeding recipe data..."
 

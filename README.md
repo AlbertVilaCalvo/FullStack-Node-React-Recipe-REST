@@ -34,6 +34,18 @@ Live site: https://recipeapp.link
 ### AWS
 
 - Frontend deployed to S3 and CloudFront automatically using GitHub Actions.
+- EKS cluster for server deployment.
+- RDS PostgreSQL database.
+- ECR for Docker image storage.
+- Secrets Manager for application secrets (RDS master password, JWT secret).
+
+### Kubernetes (EKS)
+
+- Ingress with AWS Load Balancer Controller.
+- Karpenter for automatic provisioning of nodes based on workload.
+- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller.
+- Pod Identity.
+- Kustomize for managing Kubernetes manifests.
 
 ## Features
 
@@ -41,7 +53,7 @@ Live site: https://recipeapp.link
 - Settings: change the user's name, email and password. Delete the user account.
 - Recipe: publish, edit and delete recipes.
 
-## Develop
+## Local development
 
 The application is available at:
 
@@ -59,7 +71,7 @@ cp .env.example .env
 docker compose up --build
 
 # (Optional) Seed the database with users and recipes
-./scripts/seed-database.sh
+./scripts/local-development/seed-database.sh
 
 # View service status
 docker compose ps
@@ -70,7 +82,7 @@ docker compose down
 docker compose down --volumes
 ```
 
-To run only a single service do:
+To run only a single service locally do:
 
 ```shell
 cd server # Or cd web
@@ -78,9 +90,9 @@ npm install
 npm run dev
 ```
 
-## Database
+### Local database
 
-The database is created automatically when you run `docker compose up --build`. You can interact with it from within the Docker container.
+The local PostgreSQL database is created automatically when you run `docker compose up --build`. You can interact with it from within the Docker container.
 
 ```shell
 # Connect to database from within the Docker container
@@ -102,12 +114,12 @@ psql -h localhost -p 5432 -U postgres -d recipemanager
 
 You will be prompted for the password, which is defined in your `.env` file.
 
-### Seed the database
+### Seed the local database
 
-Once the database is created, you can automatically fill the database with users and recipes using the provided script:
+Once the local database container is running, you can automatically fill it with users and recipes using the provided script:
 
 ```shell
-./scripts/seed-database.sh
+./scripts/local-development/seed-database.sh
 ```
 
 This script will:
@@ -115,11 +127,48 @@ This script will:
 1. Create two test users.
 2. Seed the database with sample recipe data.
 
-Alternatively, you can run the steps manually:
+Alternatively, you can run similar steps manually:
 
 - `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}'`
 - `curl http://localhost:5000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Blanca", "email":"b@b.com", "password":"123456"}'`
 - `docker compose exec -T db psql -U postgres -d recipemanager < server/database-seed.sql`
+
+## Database
+
+Database schema changes are managed using [node-pg-migrate](https://github.com/salsita/node-pg-migrate).
+Migrations run automatically when the server starts.
+Migrations are stored in `server/migrations/` as SQL files.
+
+### Creating a new migration
+
+```shell
+cd server
+npm run migrate:create -- my-migration-name
+```
+
+This creates a new SQL file in `server/migrations/` with a timestamp prefix. Edit the file to add your schema changes:
+
+```sql
+-- Up Migration
+ALTER TABLE recipe ADD COLUMN description TEXT;
+
+---- Down Migration
+ALTER TABLE recipe DROP COLUMN description;
+```
+
+### Running migrations manually
+
+Migrations run automatically on server startup, but you can also run them manually:
+
+```shell
+cd server
+
+# Run the next pending migration
+npm run migrate:up
+
+# Rollback the last migration
+npm run migrate:down
+```
 
 ## Email account setup
 
@@ -135,16 +184,101 @@ Note that the checks do not abort the commit, they only inform you of any issues
 
 ## Deploy infrastructure with Terraform
 
-To deploy the AWS infrastructure with Terraform, do:
+### Web (Frontend)
+
+To deploy the React frontend to S3 and CloudFront:
 
 ```shell
 cd terraform/web/environments/dev # Or prod
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars.example with your values if needed
+# Edit terraform.tfvars with your values if needed
 terraform init
 terraform plan -out tfplan
 terraform apply tfplan
 ```
+
+### Server (API)
+
+#### 1. Create AWS Infrastructure
+
+Create the AWS infrastructure (VPC, EKS, RDS, ECR, etc.):
+
+```shell
+./scripts/server/create-aws-infrastructure.sh dev  # Or prod
+```
+
+Edit the `terraform/server/environments/dev/terraform.tfvars` or `prod/terraform.tfvars` file to adjust values to your desire before running the script.
+
+This script will:
+
+- Initialize Terraform
+- Create VPC, EKS cluster, RDS database, ECR repository, Pod Identity, ACM certificate for the API endpoint and application secrets (JWT, email credentials)
+- Install Load Balancer Controller and Karpenter
+- Create Karpenter NodePool and EC2NodeClass
+- Display next steps
+
+This process takes approximately 20-30 minutes.
+
+#### 2. Build and Push Docker Image
+
+After the AWS infrastructure is created, build and push the Docker image to ECR:
+
+```shell
+./scripts/server/build-push-image-ecr.sh dev  # Or prod
+```
+
+This script will:
+
+- Build the Docker image with a timestamp-based tag
+- Log in to ECR and push the image
+- Output the IMAGE_TAG to use for deployment
+
+#### 3. Deploy Server Application to EKS
+
+Deploy the server application to the EKS cluster:
+
+```shell
+./scripts/server/deploy-server-eks.sh dev <image_tag>  # Use the IMAGE_TAG from build-push-image-ecr.sh output
+```
+
+For example:
+
+```shell
+./scripts/server/deploy-server-eks.sh dev 2026-01-15-12h00m00s
+```
+
+This script will:
+
+- Configure kubectl to connect to the EKS cluster
+- Fetch configuration from Terraform outputs, terraform.tfvars file, AWS Secrets Manager, etc.
+- Process Kubernetes manifests using Kustomize and replace placeholders
+- Apply the manifests to deploy the server to EKS and wait for the deployment to complete
+
+#### 4. Create Route53 A Record
+
+After deploying the application, create the Route53 A record for the API endpoint:
+
+```shell
+cd terraform/server/environments/dev  # Or prod
+terraform apply -target=module.api_endpoint_dns_record
+```
+
+This creates a Route53 A record (api.recipemanager.link) pointing to the Application Load Balancer created by the Ingress. The ACM certificate was already created and validated during infrastructure setup in step 1.
+
+#### 5. Delete AWS Infrastructure
+
+To delete all AWS infrastructure:
+
+```shell
+./scripts/server/delete-aws-infrastructure.sh dev  # Or prod
+```
+
+This script will:
+
+- Prompt for confirmation
+- Delete Kubernetes resources
+- Delete AWS infrastructure (VPC, EKS, RDS, ECR, etc.) in the correct order
+
+**Warning:** This will permanently delete all infrastructure resources, including the ECR images!
 
 ## Automatic deployment with GitHub Actions
 
@@ -155,12 +289,15 @@ On that page, click the environment and add the following environment variables 
 
 | Environment variable               | Value                                                 |
 | ---------------------------------- | ----------------------------------------------------- |
-| `AWS_REGION`                       | `terraform output aws_region`                         |
+| `AWS_REGION`                       | `us-east-1`                                           |
 | `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN` | `terraform output oidc_role_arn`                      |
 | `WEB_S3_BUCKET`                    | `terraform output website_s3_bucket_name`             |
 | `WEB_CLOUDFRONT_DISTRIBUTION_ID`   | `terraform output website_cloudfront_distribution_id` |
+| `VITE_API_BASE_URL`                | `https://api.recipemanager.link/api`                  |
 
 ## Manually deploy the React web app to AWS S3 and CloudFront
+
+This is done automatically using GitHub Actions (see [Automatic deployment with GitHub Actions](#automatic-deployment-with-github-actions)), but you can also do it manually:
 
 ```shell
 cd web
@@ -168,5 +305,3 @@ npm run build
 aws s3 sync build s3://<s3-bucket-name> --delete
 aws cloudfront create-invalidation --distribution-id <distribution-id> --paths '/*'
 ```
-
-Note that there's a GitHub action that does this automatically, see [Automatic deployment with GitHub Actions](#automatic-deployment-with-github-actions).

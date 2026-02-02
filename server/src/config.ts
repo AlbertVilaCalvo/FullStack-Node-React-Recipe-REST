@@ -33,6 +33,9 @@ type Config = Readonly<{
   emailUser: string
   /** EMAIL_PASSWORD */
   emailPassword: string
+
+  /** CORS_ORIGINS */
+  corsOrigins: string[]
 }>
 
 export const config: Config = {
@@ -53,6 +56,8 @@ export const config: Config = {
 
   emailUser: getEnvar('EMAIL_USER'),
   emailPassword: getEnvar('EMAIL_PASSWORD'),
+
+  corsOrigins: getEnvarAsArray('CORS_ORIGINS'),
 }
 
 function getEnvar(environmentVariable: string): string {
@@ -67,9 +72,16 @@ function getEnvarAsNumber(environmentVariable: string): number {
   const value = getEnvar(environmentVariable)
   if (isNumber(value)) {
     return Number(value)
-  } else {
-    throw Error(`process.env.${environmentVariable} is not a number`)
   }
+  throw Error(`process.env.${environmentVariable} is not a number`)
+}
+
+function getEnvarAsArray(environmentVariable: string): string[] {
+  const value = process.env[environmentVariable]
+  if (value) {
+    return value.split(',')
+  }
+  throw Error(`process.env.${environmentVariable} is not defined`)
 }
 
 function getEnvironment(): Environment {

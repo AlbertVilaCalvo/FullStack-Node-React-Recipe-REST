@@ -36,8 +36,16 @@ FROM node:24-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Download AWS RDS CA bundle.
+# ADD for remote URLs creates files with 600 permissions owned by root,
+# we need to chmod 644 to make it readable by the application user, otherwise
+# we get error "EACCES: permission denied, open '/app/rds-global-bundle.pem'"
+ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /app/rds-global-bundle.pem
+RUN chmod 644 /app/rds-global-bundle.pem
+
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=build /app/build ./build
+COPY migrations ./migrations
 
 EXPOSE 5000
 

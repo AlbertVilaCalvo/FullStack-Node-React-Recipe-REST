@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recipe-manager-api
+  namespace: recipe-manager
+  labels:
+    app: recipe-manager
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: recipe-manager
+  template:
+    metadata:
+      labels:
+        app: recipe-manager
+    spec:
+      serviceAccountName: recipe-manager-api
+      containers:
+        - name: api
+          image: REPLACE_WITH_ECR_IMAGE_URL
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: recipe-manager-api-config
+            - secretRef:
+                name: recipe-manager-api-secrets
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '250m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      terminationGracePeriodSeconds: 30

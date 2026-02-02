@@ -2,7 +2,7 @@ import express, { RequestHandler } from 'express'
 import { router } from './router'
 import { config } from './config'
 import cors from 'cors'
-import morgan from 'morgan'
+import { loggingMiddleware } from './misc/loggingMiddleware'
 
 const app = express()
 
@@ -17,15 +17,11 @@ if (config.isDevelopment) {
 
 app.use(
   cors({
-    origin: ['http://localhost:3000'],
+    origin: config.corsOrigins,
   })
 )
 
-if (config.isDevelopment) {
-  app.use(morgan('dev'))
-} else if (config.isProduction) {
-  app.use(morgan('combined'))
-}
+app.use(loggingMiddleware)
 
 app.use('/api', router)
 

@@ -10,7 +10,10 @@
     "serve": "npx tsc && node build/index.js",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "test": "jest",
-    "test-watch": "jest --watch"
+    "test-watch": "jest --watch",
+    "migrate:up": "node-pg-migrate --migration-file-language sql -m migrations up",
+    "migrate:down": "node-pg-migrate --migration-file-language sql -m migrations down",
+    "migrate:create": "node-pg-migrate --migration-file-language sql -m migrations create"
   },
   "author": "Albert",
   "license": "ISC",
@@ -21,6 +24,7 @@
     "express": "4.18.1",
     "jsonwebtoken": "8.5.1",
     "morgan": "1.10.0",
+    "node-pg-migrate": "8.0.4",
     "nodemailer": "6.8.0",
     "pg": "8.8.0",
     "zod": "3.19.1"

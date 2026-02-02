@@ -1,13 +1,24 @@
-import { Pool } from 'pg'
+import { Pool, PoolConfig } from 'pg'
 import { config } from './config'
+import * as fs from 'fs'
 
-export const database = new Pool({
-  database: config.databaseName,
-  user: config.databaseUser,
-  password: config.databasePassword,
-  host: config.databaseHost,
-  port: config.databasePort,
-})
+export function getDatabaseConfig(): PoolConfig {
+  return {
+    database: config.databaseName,
+    user: config.databaseUser,
+    password: config.databasePassword,
+    host: config.databaseHost,
+    port: config.databasePort,
+    ssl: config.isProduction
+      ? {
+          rejectUnauthorized: true,
+          ca: fs.readFileSync('/app/rds-global-bundle.pem').toString(),
+        }
+      : undefined,
+  }
+}
+
+export const database = new Pool(getDatabaseConfig())
 
 /**
  * PostgreSQL Error Codes: https://www.postgresql.org/docs/current/errcodes-appendix.html.

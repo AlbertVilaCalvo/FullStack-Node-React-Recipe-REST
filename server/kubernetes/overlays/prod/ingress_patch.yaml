@@ -1,0 +1,8 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: recipe-manager-api
+  namespace: recipe-manager
+  annotations:
+    alb.ingress.kubernetes.io/tags: environment=prod,app=recipe-manager
+    alb.ingress.kubernetes.io/load-balancer-name: recipe-manager-api-lb-prod
