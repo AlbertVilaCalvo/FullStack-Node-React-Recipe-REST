@@ -3,7 +3,6 @@ import * as jwt from 'jsonwebtoken'
 import { config } from '../config'
 import { toError } from '../misc/util'
 import { isError } from '../misc/result'
-import { TokenExpiredError } from 'jsonwebtoken'
 
 const TOKEN_VALIDITY_TIME = '1h'
 
@@ -144,7 +143,7 @@ function getPayloadFromToken(
       return Error(`Unexpected payload format: ${decodedPayload}`)
     }
   } catch (error) {
-    if (error instanceof TokenExpiredError) {
+    if (error instanceof jwt.TokenExpiredError) {
       return 'token-expired'
     }
     console.error(`jwt.verify error:`, error)

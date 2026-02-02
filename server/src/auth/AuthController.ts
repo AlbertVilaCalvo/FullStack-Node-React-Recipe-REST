@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express'
+import type { RequestHandler } from 'express'
 import { StatusCode } from '../misc/StatusCode'
 import * as AuthService from './AuthService'
 import {
