@@ -1,4 +1,4 @@
-# SSL Certificate. Must be created in us-east-1
+# SSL Certificate. CloudFront certificates must be created in us-east-1
 resource "aws_acm_certificate" "web_hosting" {
   provider          = aws.us_east_1
   domain_name       = var.domain_name

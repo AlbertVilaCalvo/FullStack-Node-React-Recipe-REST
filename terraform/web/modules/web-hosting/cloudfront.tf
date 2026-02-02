@@ -3,6 +3,8 @@ locals {
 }
 
 resource "aws_cloudfront_distribution" "web_hosting" {
+  depends_on = [aws_acm_certificate_validation.web_hosting]
+
   enabled             = true
   is_ipv6_enabled     = true
   comment             = local.description
@@ -53,8 +55,6 @@ resource "aws_cloudfront_distribution" "web_hosting" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
-
-  depends_on = [aws_acm_certificate_validation.web_hosting]
 }
 
 # Limit the S3 bucket access to only authenticated requests from CloudFront
