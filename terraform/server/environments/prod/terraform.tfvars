@@ -35,8 +35,7 @@ deletion_protection      = true
 skip_final_snapshot      = false
 
 # API Endpoint
-api_endpoint    = "api.recipeapp.link"
-route53_zone_id = "REPLACE_WITH_ZONE_ID"
+api_endpoint = "api.recipeapp.link"
 
 # App Secrets
 secretsmanager_secret_recovery_days = 30

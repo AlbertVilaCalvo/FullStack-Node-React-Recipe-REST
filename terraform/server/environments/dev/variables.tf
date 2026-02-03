@@ -218,16 +218,6 @@ variable "api_endpoint" {
   }
 }
 
-variable "route53_zone_id" {
-  description = "Route53 hosted zone ID"
-  type        = string
-  validation {
-    # Ensure the value "REPLACE_WITH_ZONE_ID" is replaced
-    condition     = var.route53_zone_id != "REPLACE_WITH_ZONE_ID"
-    error_message = "route53_zone_id must be set to your actual Route53 hosted zone ID"
-  }
-}
-
 # App Secrets
 
 # Used in RDS master password too

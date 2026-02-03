@@ -2,6 +2,13 @@
 # This certificate doesn't need to be created in us-east-1 like the
 # CloudFront certificate for the web distribution. It needs to be in
 # the same region as the ALB (ie the EKS cluster).
+
+data "aws_route53_zone" "api_endpoint" {
+  # Get the root domain from the full API endpoint domain (api.recipemanager.link -> recipemanager.link)
+  name         = join(".", slice(split(".", var.api_endpoint), length(split(".", var.api_endpoint)) - 2, length(split(".", var.api_endpoint))))
+  private_zone = false
+}
+
 resource "aws_acm_certificate" "api_endpoint" {
   domain_name       = var.api_endpoint
   validation_method = "DNS"
@@ -30,7 +37,7 @@ resource "aws_route53_record" "api_validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = var.route53_zone_id
+  zone_id         = data.aws_route53_zone.api_endpoint.zone_id
 }
 
 # Wait for certificate validation to complete

@@ -24,8 +24,3 @@ variable "api_endpoint" {
     error_message = "The API endpoint must be a valid domain name."
   }
 }
-
-variable "route53_zone_id" {
-  description = "The Route53 hosted zone ID for DNS validation"
-  type        = string
-}

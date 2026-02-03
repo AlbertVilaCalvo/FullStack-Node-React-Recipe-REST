@@ -9,11 +9,6 @@ variable "api_endpoint" {
   }
 }
 
-variable "route53_zone_id" {
-  description = "The Route53 hosted zone ID for the DNS record"
-  type        = string
-}
-
 variable "load_balancer_name" {
   description = "The name of the load balancer created by the Kubernetes Ingress"
   type        = string

@@ -110,8 +110,7 @@ module "api_endpoint_certificate" {
   app_name    = var.app_name
   environment = var.environment
 
-  api_endpoint    = var.api_endpoint
-  route53_zone_id = var.route53_zone_id
+  api_endpoint = var.api_endpoint
 }
 
 module "app_secrets" {
@@ -174,6 +173,5 @@ module "api_endpoint_dns_record" {
   source = "../../modules/api-endpoint-dns-record"
 
   api_endpoint       = var.api_endpoint
-  route53_zone_id    = var.route53_zone_id
   load_balancer_name = "recipe-manager-api-lb-dev"
 }

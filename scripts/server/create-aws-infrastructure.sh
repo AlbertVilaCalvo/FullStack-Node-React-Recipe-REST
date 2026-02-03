@@ -17,7 +17,7 @@
 #   - Terraform installed
 #   - Helm installed
 #   - kubectl installed
-#   - Valid Route53 zone ID set in terraform.tfvars
+#   - Route53 hosted zone for the API domain exists in AWS
 
 set -euo pipefail
 
@@ -117,46 +117,6 @@ cd "${TERRAFORM_DIR}"
 # Step 1: Initialize Terraform
 log_step "Step 1/4: Initializing Terraform..."
 terraform init
-
-# Replace REPLACE_WITH_ZONE_ID in terraform.tfvars
-log_info "Validating terraform.tfvars configuration..."
-if grep -q "REPLACE_WITH_ZONE_ID" terraform.tfvars; then
-  log_warn "Route53 Zone ID not configured in terraform.tfvars"
-
-  # Extract api_endpoint from terraform.tfvars
-  API_ENDPOINT=$(grep "^api_endpoint" terraform.tfvars | cut -d'"' -f2)
-
-  if [[ -z "${API_ENDPOINT}" ]]; then
-    log_error "Could not find api_endpoint in terraform.tfvars"
-    exit 1
-  fi
-
-  log_info "API endpoint: ${API_ENDPOINT}"
-
-  # Extract root domain (e.g., api.recipemanager.link -> recipemanager.link)
-  ROOT_DOMAIN=$(echo "${API_ENDPOINT}" | rev | cut -d. -f1,2 | rev)
-  log_info "Looking up Route53 hosted zone for domain: ${ROOT_DOMAIN}"
-
-  # Query Route53 for the zone ID
-  ZONE_ID=$(aws route53 list-hosted-zones-by-name \
-    --dns-name "${ROOT_DOMAIN}" \
-    --query "HostedZones[?Name=='${ROOT_DOMAIN}.'].Id" \
-    --output text | sed 's|/hostedzone/||')
-
-  if [[ -z "${ZONE_ID}" ]]; then
-    log_error "Could not find Route53 hosted zone for domain: ${ROOT_DOMAIN}"
-    log_error "Please ensure the hosted zone exists in AWS Route53"
-    log_error ""
-    log_error "You can create it using:"
-    log_error "  aws route53 create-hosted-zone --name ${ROOT_DOMAIN} --caller-reference $(date +%s)"
-    exit 1
-  fi
-
-  log_info "Found Route53 Zone ID: ${ZONE_ID}"
-  log_info "Updating terraform.tfvars with Route53 Zone ID..."
-  sed -i.bak "s/REPLACE_WITH_ZONE_ID/${ZONE_ID}/g" terraform.tfvars
-  log_info "terraform.tfvars updated successfully"
-fi
 
 # Step 2: Create core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)
 log_step "Step 2/4: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
