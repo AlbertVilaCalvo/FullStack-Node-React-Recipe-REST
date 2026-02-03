@@ -176,9 +176,9 @@ Sending emails requires creating an account at https://ethereal.email. Click the
 
 You can view the emails at https://ethereal.email/messages. URLs to view each email sent are also logged at the server console.
 
-## Git pre-commit hook to run Prettier, ESLint and TypeScript checks on every commit
+## Git pre-commit hook to run Prettier, tsc, ESLint and Terraform fmt/validate on every commit
 
-To run Prettier and ESLint on every commit, run `cp pre-commit .git/hooks`.
+To run Prettier, tsc, ESLint and Terraform fmt/validate on every commit, run `cp pre-commit .git/hooks`.
 
 Note that the checks do not abort the commit, they only inform you of any issues found.
 

@@ -4,9 +4,10 @@
 # .tsx, .js, .jsx files. Prettier and ESLint only check the committed files, whereas tsc checks all project files, since
 # it's not possible to run tsc on specific files while obeying the tsconfig.json options (see
 # https://github.com/microsoft/TypeScript/issues/27379 and https://www.npmjs.com/package/tsc-files).
+# Additionally, runs `terraform fmt -check` and `terraform validate` on .tf and .tfvars files.
 # This hook always commits, even if errors are found. And it does not modify the files (ie it does not do `prettier
-# write`), it only checks if there is any issue and reports it.
-# Inspired by https://prettier.io/docs/en/precommit.html#option-6-shell-script
+# write` or `terraform fmt`), it only checks if there is any issue and reports it.
+# Inspired by https://prettier.io/docs/precommit.html#option-5-shell-script
 
 # Colors for output
 RED='\033[0;31m'
@@ -31,10 +32,11 @@ validate_precommit_hook() {
 validate_precommit_hook
 
 get_staged_files() {
-  ALL_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | awk '/\.ts$|\.tsx$|\.js$|\.jsx$|\.md$|\.yml$|\.yaml$|\.css$|\.json$/')
+  ALL_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | awk '/\.ts$|\.tsx$|\.js$|\.jsx$|\.md$|\.yml$|\.yaml$|\.html$|\.css$|\.json$|\.tf$|\.tfvars$/')
   ALL_CODE_FILES=$(echo "$ALL_FILES" | awk '/\.ts$|\.tsx$|\.js$|\.jsx$/')
   CODE_FILES_SERVER=$(echo "$ALL_CODE_FILES" | awk '/^server\//' | sed 's|^server/||')
   CODE_FILES_WEB=$(echo "$ALL_CODE_FILES" | awk '/^web\//' | sed 's|^web/||')
+  TERRAFORM_FILES=$(echo "$ALL_FILES" | awk '/\.tf$|\.tfvars$/')
 }
 
 print_title() {
@@ -63,34 +65,55 @@ print_result "Prettier"
 
 # ESLint and tsc on server
 
-cd server || exit 1
+if [ ! -z "$CODE_FILES_SERVER" ]; then
+  cd server || exit 1
 
-printf "📁 Files server\n\n%s" "$CODE_FILES_SERVER"
+  printf "📁 Files server\n\n%s" "$CODE_FILES_SERVER"
 
-print_title "ESLint server"
-echo "$CODE_FILES_SERVER" | xargs ./node_modules/.bin/eslint
-print_result "ESLint server"
+  print_title "ESLint server"
+  echo "$CODE_FILES_SERVER" | xargs ./node_modules/.bin/eslint
+  print_result "ESLint server"
 
-print_title "tsc server"
-npx tsc --noEmit
-print_result "tsc server"
+  print_title "tsc server"
+  npx tsc --noEmit
+  print_result "tsc server"
+
+  cd ..
+fi
 
 # ESLint and tsc on web
 
-cd ..
-cd web || exit 1
+if [ ! -z "$CODE_FILES_WEB" ]; then
+  cd web || exit 1
 
-printf "📁 Files web\n\n%s" "$CODE_FILES_WEB"
-[ -z "$CODE_FILES_WEB" ] && exit 0
+  printf "📁 Files web\n\n%s" "$CODE_FILES_WEB"
 
-print_title "ESLint web"
-echo "$CODE_FILES_WEB" | xargs ./node_modules/.bin/eslint
-print_result "ESLint web"
+  print_title "ESLint web"
+  echo "$CODE_FILES_WEB" | xargs ./node_modules/.bin/eslint
+  print_result "ESLint web"
 
-print_title "tsc web"
-npx tsc --noEmit
-print_result "tsc web"
+  print_title "tsc web"
+  npx tsc --noEmit
+  print_result "tsc web"
 
-cd ..
+  cd ..
+fi
+
+# Terraform fmt and validate
+
+if [ ! -z "$TERRAFORM_FILES" ]; then
+  print_title "Terraform fmt"
+  echo "$TERRAFORM_FILES" | xargs terraform fmt -check
+  print_result "Terraform fmt"
+
+  # Run terraform validate in initialized environment directories
+  # Search for .terraform directories inside the terraform directory to identify initialized root modules
+  find terraform -name ".terraform" -type d | while read -r provider_dir; do
+    dir=$(dirname "$provider_dir")
+    print_title "Terraform validate ($dir)"
+    (cd "$dir" && terraform validate)
+    print_result "Terraform validate ($dir)"
+  done
+fi
 
 exit 0
