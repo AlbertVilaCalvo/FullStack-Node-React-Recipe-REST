@@ -67,7 +67,7 @@ The server follows a three-layer architecture for organizing business logic:
 ## Terraform
 
 - Infrastructure as Code: All AWS infrastructure is defined using Terraform in the `/terraform` directory.
-- Variables: Define input variables in `variables.tf` and outputs in `outputs.tf`.
+- Variables: Define input variables in `variables.tf` and outputs in `outputs.tf`. In general, avoid default values in variables, require all variables to be explicitly set in `terraform.trfvars` files.
 - Organization: Group resources by AWS service (e.g., `s3.tf`, `rds.tf`, `eks.tf` or `cloudfront.tf`).
 - Tagging: All resources should include the default tags `Application` and `Environment`.
 - Follow Google Cloud's best practices for Terraform: https://cloud.google.com/docs/terraform/best-practices/root-modules. In particular, ensure that:

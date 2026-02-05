@@ -97,6 +97,9 @@ jobs:
         run: npm ci --no-fund --no-audit
       - name: Build React web app
         run: npm run build
+        # TODO build React in production mode
+        # env:
+        #   NODE_ENV: production
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5.1.0 # https://github.com/aws-actions/configure-aws-credentials
         with:

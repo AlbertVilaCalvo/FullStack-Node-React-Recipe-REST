@@ -1,6 +1,6 @@
 # Recipe Manager
 
-_A Full Stack app built with Node, React, PostgreSQL, REST API, AWS and GitHub Actions_
+_A Full Stack app built with Node, React, PostgreSQL, REST API, AWS, Kubernetes (EKS) and GitHub Actions_
 
 Live site: https://recipeapp.link
 
