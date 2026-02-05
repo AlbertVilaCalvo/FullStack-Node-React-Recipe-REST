@@ -228,6 +228,38 @@ fi
 log_info "Fetching AWS account ID..."
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
+log_info "Fetching secrets from AWS Secrets Manager..."
+RDS_PASSWORD=$(aws secretsmanager get-secret-value \
+  --secret-id "recipe-manager-rds-master-password-${ENVIRONMENT}" \
+  --query SecretString \
+  --output text)
+
+JWT_SECRET=$(aws secretsmanager get-secret-value \
+  --secret-id "recipe-manager-jwt-secret-${ENVIRONMENT}" \
+  --query SecretString \
+  --output text)
+
+# Validate AWS account ID and secrets
+MISSING_RESOURCES=()
+
+if [[ -z "${AWS_ACCOUNT_ID}" ]]; then
+  MISSING_RESOURCES+=("AWS_ACCOUNT_ID")
+fi
+
+if [[ -z "${RDS_PASSWORD}" ]]; then
+  MISSING_RESOURCES+=("RDS_PASSWORD")
+fi
+
+if [[ -z "${JWT_SECRET}" ]]; then
+  MISSING_RESOURCES+=("JWT_SECRET")
+fi
+
+if [[ ${#MISSING_RESOURCES[@]} -gt 0 ]]; then
+  log_error "Missing required resources: ${MISSING_RESOURCES[*]}"
+  log_error "Please check your AWS credentials and ensure the secrets exist in Secrets Manager."
+  exit 1
+fi
+
 CORS_ORIGINS="https://${WEB_DOMAIN},https://www.${WEB_DOMAIN}"
 
 FULL_IMAGE_URL="${ECR_REPOSITORY_URL}:${IMAGE_TAG}"
@@ -240,17 +272,6 @@ log_info "API Endpoint: ${API_ENDPOINT}"
 log_info "Web Domain: ${WEB_DOMAIN}"
 log_info "CORS origins: ${CORS_ORIGINS}"
 log_info "Full image URL: ${FULL_IMAGE_URL}"
-
-log_info "Fetching secrets from AWS Secrets Manager..."
-RDS_PASSWORD=$(aws secretsmanager get-secret-value \
-  --secret-id "recipe-manager-rds-master-password-${ENVIRONMENT}" \
-  --query SecretString \
-  --output text)
-
-JWT_SECRET=$(aws secretsmanager get-secret-value \
-  --secret-id "recipe-manager-jwt-secret-${ENVIRONMENT}" \
-  --query SecretString \
-  --output text)
 
 # Update kubectl config
 log_step "Step 2/6: Updating kubectl configuration..."
@@ -301,7 +322,7 @@ kubectl rollout status deployment/recipe-manager-api -n "${NAMESPACE}" --timeout
 kubectl config set-context "arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}" --namespace "${NAMESPACE}"
 
 # Display deployment status
-log_step "Deployment complete! Checking status..."
+log_info "Deployment complete! Checking status..."
 echo ""
 echo "=========================================="
 echo "Deployment Summary"
