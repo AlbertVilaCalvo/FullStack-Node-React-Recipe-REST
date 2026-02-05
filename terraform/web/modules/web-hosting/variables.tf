@@ -26,7 +26,7 @@ variable "aws_region" {
 # Module variables
 
 variable "domain_name" {
-  description = "Root domain name (e.g., recipemanager.com)"
+  description = "Root domain name (e.g., recipemanager.link)"
   type        = string
   validation {
     condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.domain_name))

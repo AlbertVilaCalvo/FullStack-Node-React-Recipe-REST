@@ -23,7 +23,7 @@ type EmailOptions = Required<
 async function sendEmail(options: EmailOptions): Promise<void> {
   return transporter
     .sendMail({
-      from: '"Recipe Manager" <donotreply@recipemanager.com>',
+      from: '"Recipe Manager" <donotreply@recipemanager.link>',
       to: options.to,
       subject: options.subject,
       text: options.text,
@@ -54,10 +54,10 @@ export function sendLoginAlertEmail(user: User) {
     subject: 'New login at Recipe Manager',
     text: `${hiText(user)}
 Your account was just used to log in at Recipe Manager.
-If it was not you, please contact us at hello@recipemanager.com.`,
+If it was not you, please contact us at hello@recipemanager.link.`,
     html: `${hiHtml(user)}
 <p>Your account was just used to log in at Recipe Manager.</p>
-<p>If it was not you, <a href="mailto:hello@recipemanager.com">please contact us</a>.</p>`,
+<p>If it was not you, <a href="mailto:hello@recipemanager.link">please contact us</a>.</p>`,
   }).catch((error) => {
     console.error(`sendLoginAlertEmail error`, error)
   })

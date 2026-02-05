@@ -210,7 +210,7 @@ variable "skip_final_snapshot" {
 # API Endpoint Certificate
 
 variable "api_endpoint" {
-  description = "The API endpoint domain name (e.g., api.recipemanager.com)"
+  description = "The API endpoint domain name (e.g., api.recipemanager.link)"
   type        = string
   validation {
     condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
