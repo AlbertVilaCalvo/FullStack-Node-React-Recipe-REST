@@ -167,17 +167,18 @@ if [[ -z "${AWS_REGION}" ]]; then
   log_error "Could not get aws_region from terraform.tfvars."
   exit 1
 fi
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 log_info "Cluster Name: ${CLUSTER_NAME}"
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
 log_info "AWS Region: ${AWS_REGION}"
 
 # Step 1: Delete API endpoint Route53 record
-log_step "Step 1/6: Deleting API endpoint Route53 record..."
+log_step "Step 1/8: Deleting API endpoint Route53 record..."
 terraform destroy -target=module.api_endpoint_dns_record -auto-approve || log_warn "API endpoint DNS record module not found or already destroyed"
 
 # Step 2: Delete Kubernetes resources (required to remove ALB created by Ingress)
-log_step "Step 2/6: Deleting Kubernetes resources..."
+log_step "Step 2/8: Deleting Kubernetes resources..."
 
 if [[ -n "${CLUSTER_NAME}" && -n "${AWS_REGION}" ]]; then
   # Configure kubectl
@@ -235,11 +236,11 @@ else
 fi
 
 # Step 3: Delete Karpenter NodePool
-log_step "Step 3/6: Deleting Karpenter NodePool and EC2NodeClass..."
+log_step "Step 3/8: Deleting Karpenter NodePool and EC2NodeClass..."
 terraform destroy -target=module.karpenter_nodepool -auto-approve
 
 # Step 4: Delete Kubernetes controllers (Karpenter, Load Balancer Controller)
-log_step "Step 4/6: Deleting Kubernetes controllers..."
+log_step "Step 4/8: Deleting Kubernetes controllers..."
 
 # Retry logic for network timeouts when downloading Helm charts
 MAX_RETRIES=3
@@ -264,7 +265,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
 done
 
 # Step 5: Delete all remaining resources
-log_step "Step 5/6: Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
+log_step "Step 5/8: Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
 log_info "This may take 15-20 minutes..."
 
 terraform destroy \
@@ -280,7 +281,7 @@ terraform destroy \
 log_info "Remaining resources deleted successfully"
 
 # Cleanup local Docker images
-log_step "Step 6/6: Cleaning up local Docker images..."
+log_step "Step 6/8: Cleaning up local Docker images..."
 
 # Check if Docker is available
 if command -v docker &>/dev/null && docker info >/dev/null 2>&1; then
@@ -309,9 +310,21 @@ else
 fi
 
 # Cleanup Terraform state
-log_step "Cleaning up Terraform state files..."
+log_step "Step 7/8: Cleaning up Terraform state files..."
 rm -rf .terraform terraform.tfstate*
 log_info "Terraform state files removed."
+
+# Cleanup ~/.kube/config
+log_step "Step 8/8: Removing kubeconfig context, cluster and user entries..."
+if [[ -n "${AWS_REGION}" && -n "${CLUSTER_NAME}" && -n "${AWS_ACCOUNT_ID}" ]]; then
+  CONTEXT_NAME="arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}"
+  kubectl config delete-context "${CONTEXT_NAME}" || true
+  kubectl config delete-cluster "${CONTEXT_NAME}" || true
+  kubectl config delete-user "${CONTEXT_NAME}" || true
+  log_info "Removed kubeconfig entries for ${CONTEXT_NAME} (if present)."
+else
+  log_warn "Skipping kubeconfig cleanup: missing AWS_REGION, CLUSTER_NAME or AWS_ACCOUNT_ID."
+fi
 
 # Display summary
 echo ""
