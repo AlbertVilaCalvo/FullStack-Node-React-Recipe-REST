@@ -4,7 +4,8 @@
 # .tsx, .js, .jsx files. Prettier and ESLint only check the committed files, whereas tsc checks all project files, since
 # it's not possible to run tsc on specific files while obeying the tsconfig.json options (see
 # https://github.com/microsoft/TypeScript/issues/27379 and https://www.npmjs.com/package/tsc-files).
-# Additionally, runs `terraform fmt -check` and `terraform validate` on .tf and .tfvars files.
+# Runs `terraform fmt -check` and `terraform validate` on .tf and .tfvars files.
+# Runs ShellCheck on .sh files if ShellCheck is installed.
 # This hook always commits, even if errors are found. And it does not modify the files (ie it does not do `prettier
 # write` or `terraform fmt`), it only checks if there is any issue and reports it.
 # Inspired by https://prettier.io/docs/precommit.html#option-5-shell-script
@@ -32,11 +33,12 @@ validate_precommit_hook() {
 validate_precommit_hook
 
 get_staged_files() {
-  ALL_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | awk '/\.ts$|\.tsx$|\.js$|\.jsx$|\.md$|\.yml$|\.yaml$|\.html$|\.css$|\.json$|\.tf$|\.tfvars$/')
+  ALL_FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | awk '/\.ts$|\.tsx$|\.js$|\.jsx$|\.md$|\.yml$|\.yaml$|\.html$|\.css$|\.json$|\.tf$|\.tfvars$|\.sh$/')
   ALL_CODE_FILES=$(echo "$ALL_FILES" | awk '/\.ts$|\.tsx$|\.js$|\.jsx$/')
   CODE_FILES_SERVER=$(echo "$ALL_CODE_FILES" | awk '/^server\//' | sed 's|^server/||')
   CODE_FILES_WEB=$(echo "$ALL_CODE_FILES" | awk '/^web\//' | sed 's|^web/||')
   TERRAFORM_FILES=$(echo "$ALL_FILES" | awk '/\.tf$|\.tfvars$/')
+  SHELL_FILES=$(echo "$ALL_FILES" | awk '/\.sh$/')
 }
 
 print_title() {
@@ -114,6 +116,27 @@ if [ ! -z "$TERRAFORM_FILES" ]; then
     (cd "$dir" && terraform validate)
     print_result "Terraform validate ($dir)"
   done
+fi
+
+# ShellCheck for shell scripts
+
+if [ ! -z "$SHELL_FILES" ]; then
+  print_title "ShellCheck"
+  if command -v shellcheck >/dev/null 2>&1; then
+    echo "$SHELL_FILES" | xargs shellcheck
+    SC_EXIT=$?
+    if [ $SC_EXIT -ne 0 ]; then
+      printf "${YELLOW}ShellCheck reported issues (non-fatal). Commit will proceed.${NO_COLOR}\n"
+    fi
+    if [ $SC_EXIT -eq 0 ]; then
+      true
+    else
+      false
+    fi
+    print_result "ShellCheck"
+  else
+    printf "${YELLOW}Shellcheck not found; skipping shell script linting. Install shellcheck to enable.${NO_COLOR}\n"
+  fi
 fi
 
 exit 0
