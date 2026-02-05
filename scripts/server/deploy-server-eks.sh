@@ -269,7 +269,7 @@ log_step "Step 4/6: Processing Kubernetes manifests..."
 
 # Create temporary directory for processed manifests
 TEMP_DIR=$(mktemp -d)
-trap "rm -rf ${TEMP_DIR}" EXIT
+trap 'rm -rf "${TEMP_DIR}"' EXIT
 
 # Generate manifests using kustomize
 kubectl kustomize "${KUBERNETES_DIR}/overlays/${ENVIRONMENT}" > "${TEMP_DIR}/manifests.yaml"
