@@ -168,6 +168,10 @@ if [[ -z "${AWS_REGION}" ]]; then
   exit 1
 fi
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+if [[ -z "${AWS_ACCOUNT_ID}" ]]; then
+  log_error "Could not get AWS account ID from AWS CLI."
+  exit 1
+fi
 
 log_info "Cluster Name: ${CLUSTER_NAME}"
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
@@ -180,58 +184,46 @@ terraform destroy -target=module.api_endpoint_dns_record -auto-approve || log_wa
 # Step 2: Delete Kubernetes resources (required to remove ALB created by Ingress)
 log_step "Step 2/8: Deleting Kubernetes resources..."
 
-if [[ -n "${CLUSTER_NAME}" && -n "${AWS_REGION}" ]]; then
-  # Configure kubectl
-  if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
-    log_info "Deleting Kubernetes resources in namespace ${NAMESPACE}..."
-    kubectl delete namespace "${NAMESPACE}" --ignore-not-found=true --timeout=300s || log_warn "Could not delete namespace (may not exist)"
+# Configure kubectl, delete all resources in the namespace and wait for the Load Balancer Controller to clean up AWS resources (ALB, Target Groups, Security Groups)
+if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
+  log_info "Deleting Kubernetes resources in namespace ${NAMESPACE}..."
+  kubectl delete namespace "${NAMESPACE}" --ignore-not-found=true --timeout=300s || log_warn "Could not delete namespace (may not exist)"
 
-    log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
-    log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
+  log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
+  log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
 
-    WAIT_TIMEOUT=600
-    START_TIME=$(date +%s)
+  WAIT_TIMEOUT=600
+  START_TIME=$(date +%s)
 
-    while true; do
-      CURRENT_TIME=$(date +%s)
-      ELAPSED=$((CURRENT_TIME - START_TIME))
+  while true; do
+    CURRENT_TIME=$(date +%s)
+    ELAPSED=$((CURRENT_TIME - START_TIME))
 
-      if [ $ELAPSED -gt $WAIT_TIMEOUT ]; then
-        log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for AWS resources cleanup. Proceeding anyway..."
-        break
-      fi
+    if [ $ELAPSED -gt $WAIT_TIMEOUT ]; then
+      log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for AWS resources cleanup. Proceeding anyway..."
+      break
+    fi
 
-      # Check for Load Balancers, Target Groups, and Security Groups managed by the Load Balancer Controller
-      REMAINING_RESOURCES=$(aws resourcegroupstaggingapi get-resources \
-        --region "${AWS_REGION}" \
-        --tag-filters "Key=elbv2.k8s.aws/cluster,Values=${CLUSTER_NAME}" \
-        --resource-type-filters "elasticloadbalancing:loadbalancer" "elasticloadbalancing:targetgroup" "ec2:security-group" \
-        --query 'ResourceTagMappingList[*].ResourceARN' \
-        --output text)
+    # Check for Load Balancers, Target Groups, and Security Groups managed by the Load Balancer Controller
+    REMAINING_RESOURCES=$(aws resourcegroupstaggingapi get-resources \
+      --region "${AWS_REGION}" \
+      --tag-filters "Key=elbv2.k8s.aws/cluster,Values=${CLUSTER_NAME}" \
+      --resource-type-filters "elasticloadbalancing:loadbalancer" "elasticloadbalancing:targetgroup" "ec2:security-group" \
+      --query 'ResourceTagMappingList[*].ResourceARN' \
+      --output text)
 
-      if [[ -z "${REMAINING_RESOURCES}" ]]; then
-        log_info "All Load Balancer resources (ALB, Target Groups, Security Groups) have been successfully deleted."
-        break
-      fi
+    if [[ -z "${REMAINING_RESOURCES}" ]]; then
+      log_info "All Load Balancer resources (ALB, Target Groups, Security Groups) have been successfully deleted."
+      break
+    fi
 
-      log_info "Resources still remaining... checking again in 10s (Elapsed: ${ELAPSED}s)"
-      sleep 10
-    done
-  else
-    log_error "Could not connect to EKS cluster."
-    log_error "The Ingress creates an ALB that must be deleted before destroying the VPC."
-    log_error ""
-    log_error "Please manually delete the Application Load Balancer and try again:"
-    log_error "  1. Go to AWS Console > EC2 > Load Balancers"
-    log_error "  2. Find and delete the ALB, the target group and the security groups"
-    log_error "  3. Wait for the ALB to be fully deleted"
-    log_error "  4. Run this script again"
-    exit 1
-  fi
+    log_info "Resources still remaining... checking again in 10s (Elapsed: ${ELAPSED}s)"
+    sleep 10
+  done
 else
-  log_warn "Could not retrieve cluster name or region from Terraform outputs."
-  log_warn "Kubernetes resources may not be cleaned up. If Terraform destroy fails,"
-  log_warn "manually delete the ALB from AWS Console and retry."
+  log_error "Could not connect to EKS cluster"
+  log_error "Make sure the cluster is up and you have the correct AWS credentials configured"
+  log_error "Then run this script again"
   exit 1
 fi
 
@@ -316,15 +308,11 @@ log_info "Terraform state files removed."
 
 # Cleanup ~/.kube/config
 log_step "Step 8/8: Removing kubeconfig context, cluster and user entries..."
-if [[ -n "${AWS_REGION}" && -n "${CLUSTER_NAME}" && -n "${AWS_ACCOUNT_ID}" ]]; then
-  CONTEXT_NAME="arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}"
-  kubectl config delete-context "${CONTEXT_NAME}" || true
-  kubectl config delete-cluster "${CONTEXT_NAME}" || true
-  kubectl config delete-user "${CONTEXT_NAME}" || true
-  log_info "Removed kubeconfig entries for ${CONTEXT_NAME} (if present)."
-else
-  log_warn "Skipping kubeconfig cleanup: missing AWS_REGION, CLUSTER_NAME or AWS_ACCOUNT_ID."
-fi
+CLUSTER_ARN="arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}"
+kubectl config delete-context "${CLUSTER_ARN}" || true
+kubectl config delete-cluster "${CLUSTER_ARN}" || true
+kubectl config delete-user "${CLUSTER_ARN}" || true
+log_info "Removed kubeconfig entries for ${CLUSTER_ARN} (if present)."
 
 # Display summary
 echo ""
