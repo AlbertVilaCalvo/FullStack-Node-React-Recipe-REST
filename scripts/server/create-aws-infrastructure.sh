@@ -57,6 +57,24 @@ log_step() {
   echo -e "${BLUE}[STEP]${NC} $1"
 }
 
+get_terraform_output() {
+  local output_name="$1"
+  terraform -chdir="${TERRAFORM_DIR}" output -raw "${output_name}"
+}
+
+get_tfvars_value() {
+  local key="$1"
+  local tfvars_file="${TERRAFORM_DIR}/terraform.tfvars"
+
+  if [[ ! -f "${tfvars_file}" ]]; then
+    log_error "terraform.tfvars not found at ${tfvars_file}"
+    return 1
+  fi
+
+  # Extract value between quotes, handling optional spaces
+  grep "^\s*${key}\s*=" "${tfvars_file}" | head -n1 | sed -E 's/^[^"]*"([^"]*)".*$/\1/'
+}
+
 # ============================================================================
 # Validation
 # ============================================================================
@@ -115,11 +133,11 @@ echo ""
 cd "${TERRAFORM_DIR}"
 
 # Step 1: Initialize Terraform
-log_step "Step 1/4: Initializing Terraform..."
+log_step "Step 1/5: Initializing Terraform..."
 terraform init
 
 # Step 2: Create core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)
-log_step "Step 2/4: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
+log_step "Step 2/5: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
 log_info "This may take 15-20 minutes..."
 terraform apply \
   -target=module.vpc \
@@ -132,7 +150,7 @@ terraform apply \
   -auto-approve
 
 # Step 3: Install Kubernetes controllers (Load Balancer Controller, Karpenter)
-log_step "Step 3/4: Installing Load Balancer Controller and Karpenter..."
+log_step "Step 3/5: Installing Load Balancer Controller and Karpenter..."
 log_info "This may take 5-10 minutes..."
 
 # Retry logic for network timeouts when downloading Helm charts
@@ -166,8 +184,20 @@ done
 
 # Step 4: Create Karpenter NodePool and EC2NodeClass
 # The Karpenter CRDs need to be installed before creating the NodePool and EC2NodeClass
-log_step "Step 4/4: Creating Karpenter NodePool and EC2NodeClass..."
+log_step "Step 4/5: Creating Karpenter NodePool and EC2NodeClass..."
 terraform apply -target=module.karpenter_nodepool -auto-approve
+
+# Step 5: Update kubectl config
+log_step "Step 5/5: Updating kubectl configuration..."
+AWS_REGION=$(get_tfvars_value "aws_region")
+CLUSTER_NAME=$(get_terraform_output "cluster_name")
+if [[ -n "${AWS_REGION}" && -n "${CLUSTER_NAME}" ]]; then
+  aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
+else
+  log_warn "Could not get aws_region from terraform.tfvars or cluster_name from Terraform outputs."
+  log_info "You can manually update your kubeconfig with the following command:"
+  log_info "aws eks update-kubeconfig --region <aws_region> --name <cluster_name>"
+fi
 
 # Display summary
 echo ""
