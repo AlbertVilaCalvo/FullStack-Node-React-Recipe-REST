@@ -62,7 +62,7 @@ log_step() {
 
 get_terraform_output() {
   local output_name="$1"
-  terraform -chdir="${TERRAFORM_DIR}" output -raw "${output_name}" 2>/dev/null || echo ""
+  terraform -chdir="${TERRAFORM_DIR}" output -raw "${output_name}"
 }
 
 get_tfvars_value() {
