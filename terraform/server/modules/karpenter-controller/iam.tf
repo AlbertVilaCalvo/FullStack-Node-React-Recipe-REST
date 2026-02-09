@@ -19,14 +19,14 @@ resource "aws_iam_role" "karpenter_controller" {
   })
 }
 
-resource "aws_eks_pod_identity_association" "karpenter" {
+resource "aws_eks_pod_identity_association" "karpenter_controller" {
   cluster_name    = var.cluster_name
   namespace       = var.namespace
   service_account = local.service_account_name
   role_arn        = aws_iam_role.karpenter_controller.arn
 
   tags = {
-    Name = "${var.app_name}-pod-identity-association-karpenter-${var.environment}"
+    Name = "${var.app_name}-pod-identity-association-karpenter-controller-${var.environment}"
   }
 }
 

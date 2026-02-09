@@ -7,7 +7,7 @@ locals {
 
 resource "helm_release" "karpenter" {
   depends_on = [
-    aws_eks_pod_identity_association.karpenter,
+    aws_eks_pod_identity_association.karpenter_controller,
     aws_iam_role_policy_attachment.karpenter_controller
   ]
 
