@@ -25,8 +25,12 @@ resource "helm_release" "aws_load_balancer_controller" {
       region                      = var.aws_region
       vpcId                       = var.vpc_id
       enableServiceMutatorWebhook = false
-      # Allow scheduling on the bootstrap nodes of the node group
-      # (same nodes used by Karpenter controller)
+      # Allow scheduling on the bootstrap nodes of the managed node group.
+      # Note we don't set nodeSelector here like we do for the Karpenter
+      # controller (see karpenter-controller.tf) to allow the Load Balancer Controller
+      # to run on any node, including Karpenter-provisioned nodes once they exist.
+      # We only need to tolerate the managed node group nodes, not force the LBC to run
+      # only on the managed node group nodes.
       tolerations = [{
         key      = "karpenter.sh/controller"
         operator = "Exists"
