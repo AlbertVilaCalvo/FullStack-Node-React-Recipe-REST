@@ -25,6 +25,11 @@ variable "aws_region" {
 
 # ALB Controller module variables
 
+variable "chart_version" {
+  description = "Version of the AWS Load Balancer Controller Helm chart"
+  type        = string
+}
+
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
@@ -32,10 +37,5 @@ variable "cluster_name" {
 
 variable "vpc_id" {
   description = "ID of the VPC"
-  type        = string
-}
-
-variable "chart_version" {
-  description = "Version of the AWS Load Balancer Controller Helm chart"
   type        = string
 }

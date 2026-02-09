@@ -349,24 +349,3 @@ log_info "Deployment successful!"
 log_info "API endpoint: https://${API_ENDPOINT}"
 log_info "Website URL: https://${WEB_DOMAIN}"
 echo ""
-
-# Check if the ingress has an address assigned
-INGRESS_ADDRESS=$(kubectl get ingress recipe-manager-api -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
-if [[ -n "${INGRESS_ADDRESS}" ]]; then
-  log_info "Load balancer hostname: ${INGRESS_ADDRESS}"
-  echo ""
-  log_info "Next step:"
-  echo ""
-  echo "  Create the Route53 A record for the API endpoint:"
-  echo "     cd ${TERRAFORM_DIR}"
-  echo "     terraform apply -target=module.api_endpoint_dns_record"
-  echo ""
-  log_warn "This will create a Route53 A record for ${API_ENDPOINT} pointing to the ALB."
-else
-  log_warn "Ingress address not yet assigned. It may take a few minutes for the ALB to be created."
-  log_warn "Run 'kubectl get ingress recipe-manager-api' to check the status."
-  echo ""
-  log_info "Once the ALB is created, run the following to create the Route53 A record:"
-  echo "     cd ${TERRAFORM_DIR}"
-  echo "     terraform apply -target=module.api_endpoint_dns_record"
-fi

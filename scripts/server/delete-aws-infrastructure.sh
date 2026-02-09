@@ -162,6 +162,11 @@ if [[ -z "${ECR_REPOSITORY_URL}" ]]; then
   log_error "Make sure you have run 'terraform apply' in ${TERRAFORM_DIR}"
   exit 1
 fi
+API_ENDPOINT=$(get_tfvars_value "api_endpoint")
+if [[ -z "${API_ENDPOINT}" ]]; then
+  log_warn "Could not get api_endpoint from terraform.tfvars."
+  exit 1
+fi
 AWS_REGION=$(get_tfvars_value "aws_region")
 if [[ -z "${AWS_REGION}" ]]; then
   log_error "Could not get aws_region from terraform.tfvars."
@@ -175,14 +180,26 @@ fi
 
 log_info "Cluster Name: ${CLUSTER_NAME}"
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
+log_info "API Endpoint: ${API_ENDPOINT}"
 log_info "AWS Region: ${AWS_REGION}"
 
-# Step 1: Delete API endpoint Route53 record
-log_step "Step 1/8: Deleting API endpoint Route53 record..."
-terraform destroy -target=module.api_endpoint_dns_record -auto-approve || log_warn "API endpoint DNS record module not found or already destroyed"
+# Extract root domain (e.g., api.recipemanager.link -> recipemanager.link)
+ROOT_DOMAIN=$(echo "${API_ENDPOINT}" | rev | cut -d. -f1,2 | rev)
+log_info "Root Domain: ${ROOT_DOMAIN}"
+# Query Route53 for the zone ID
+log_info "Looking up Route53 hosted zone ID for domain: ${ROOT_DOMAIN}"
+ZONE_ID=$(aws route53 list-hosted-zones-by-name \
+  --dns-name "${ROOT_DOMAIN}" \
+  --query "HostedZones[?Name=='${ROOT_DOMAIN}.'].Id" \
+  --output text | sed 's|/hostedzone/||')
+if [[ -z "${ZONE_ID}" ]]; then
+  log_error "Could not get Zone ID for ${ROOT_DOMAIN}. Check if the Hosted Zone exists."
+  exit 1
+fi
+log_info "Hosted Zone ID: ${ZONE_ID}"
 
-# Step 2: Delete Kubernetes resources (required to remove ALB created by Ingress)
-log_step "Step 2/8: Deleting Kubernetes resources..."
+# Step 1: Delete Kubernetes resources (required to remove ALB created by Ingress)
+log_step "Step 1/7 : Deleting Kubernetes resources..."
 
 # Configure kubectl, delete all resources in the namespace and wait for the Load Balancer Controller to clean up AWS resources (ALB, Target Groups, Security Groups)
 if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
@@ -205,19 +222,33 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
     fi
 
     # Check for Load Balancers, Target Groups, and Security Groups managed by the Load Balancer Controller
-    REMAINING_RESOURCES=$(aws resourcegroupstaggingapi get-resources \
+    REMAINING_ALB_RESOURCES=$(aws resourcegroupstaggingapi get-resources \
       --region "${AWS_REGION}" \
       --tag-filters "Key=elbv2.k8s.aws/cluster,Values=${CLUSTER_NAME}" \
       --resource-type-filters "elasticloadbalancing:loadbalancer" "elasticloadbalancing:targetgroup" "ec2:security-group" \
       --query 'ResourceTagMappingList[*].ResourceARN' \
       --output text)
 
-    if [[ -z "${REMAINING_RESOURCES}" ]]; then
-      log_info "All Load Balancer resources (ALB, Target Groups, Security Groups) have been successfully deleted."
+    # Check for DNS A record
+    # There is also a TXT record created by ExternalDNS for ownership tracking, but we only check for the A record which points to the ALB
+    REMAINING_DNS_RECORD=$(aws route53 list-resource-record-sets \
+      --hosted-zone-id "${ZONE_ID}" \
+      --query "ResourceRecordSets[?Name=='${API_ENDPOINT}.' && Type=='A'].Name" \
+      --output text)
+
+    if [[ -z "${REMAINING_ALB_RESOURCES}" && -z "${REMAINING_DNS_RECORD}" ]]; then
+      log_info "All Load Balancer resources and DNS records have been successfully deleted."
       break
     fi
 
-    log_info "Resources still remaining... checking again in 10s (Elapsed: ${ELAPSED}s)"
+    if [[ -n "${REMAINING_DNS_RECORD}" ]]; then
+      log_info "DNS A Record for ${API_ENDPOINT} still exists..."
+    fi
+    if [[ -n "${REMAINING_ALB_RESOURCES}" ]]; then
+      log_info "Load Balancer resources still remaining..."
+    fi
+
+    log_info "Checking again in 10s (Elapsed: ${ELAPSED}s)"
     sleep 10
   done
 else
@@ -227,12 +258,12 @@ else
   exit 1
 fi
 
-# Step 3: Delete Karpenter NodePool
-log_step "Step 3/8: Deleting Karpenter NodePool and EC2NodeClass..."
+# Step 2: Delete Karpenter NodePool
+log_step "Step 2/7 : Deleting Karpenter NodePool and EC2NodeClass..."
 terraform destroy -target=module.karpenter_nodepool -auto-approve
 
-# Step 4: Delete Kubernetes controllers (Karpenter, Load Balancer Controller)
-log_step "Step 4/8: Deleting Kubernetes controllers..."
+# Step 3: Delete Kubernetes controllers (Karpenter, Load Balancer Controller) Helm charts
+log_step "Step 3/7 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter) Helm charts..."
 
 # Retry logic for network timeouts when downloading Helm charts
 MAX_RETRIES=3
@@ -240,6 +271,7 @@ RETRY_COUNT=0
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
   if terraform destroy \
     -target=module.karpenter_controller \
+    -target=module.external_dns \
     -target=module.lb_controller \
     -auto-approve; then
     log_info "Kubernetes controllers deleted successfully"
@@ -256,8 +288,8 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
   fi
 done
 
-# Step 5: Delete all remaining resources
-log_step "Step 5/8: Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
+# Step 4: Delete all remaining resources
+log_step "Step 4/7 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
 log_info "This may take 15-20 minutes..."
 
 terraform destroy \
@@ -272,8 +304,8 @@ terraform destroy \
 
 log_info "Remaining resources deleted successfully"
 
-# Cleanup local Docker images
-log_step "Step 6/8: Cleaning up local Docker images..."
+# Step 5: Cleanup local Docker images
+log_step "Step 5/7 : Cleaning up local Docker images..."
 
 # Check if Docker is available
 if command -v docker &>/dev/null && docker info >/dev/null 2>&1; then
@@ -301,13 +333,13 @@ else
   log_warn "Docker is not available. Skipping Docker image cleanup."
 fi
 
-# Cleanup Terraform state
-log_step "Step 7/8: Cleaning up Terraform state files..."
+# Step 6: Cleanup Terraform state
+log_step "Step 6/7 : Cleaning up Terraform state files..."
 rm -rf .terraform terraform.tfstate*
 log_info "Terraform state files removed."
 
-# Cleanup ~/.kube/config
-log_step "Step 8/8: Removing kubeconfig context, cluster and user entries..."
+# Step 7: Cleanup ~/.kube/config
+log_step "Step 7/7 : Removing kubeconfig context, cluster and user entries..."
 CLUSTER_ARN="arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}"
 kubectl config delete-context "${CLUSTER_ARN}" || true
 kubectl config delete-cluster "${CLUSTER_ARN}" || true

@@ -1,23 +1,26 @@
-# Load Balancer Controller and Karpenter Controller Helm charts must be applied AFTER the EKS
-# cluster is created, otherwise you get errors like "Kubernetes cluster unreachable: the server
-# has asked for the client to provide credentials".
+# Load Balancer Controller, ExternalDNS and Karpenter Controller Helm charts must be applied
+# AFTER the EKS cluster is created, otherwise you get errors like "Kubernetes cluster unreachable:
+# the server has asked for the client to provide credentials".
 # And the Karpenter NodePool and the EC2NodeClass must be applied AFTER the Karpenter Helm chart
 # is installed, otherwise you get this error: "API did not recognize GroupVersionKind from manifest
 # (CRD may not be installed) ... no matches for kind "EC2NodeClass" in group "karpenter.k8s.aws"".
-# The api_endpoint_dns_record module depends on the ALB created by the Ingress, which is created by
-# kubectl after the lb_controller is deployed.
 # Do this:
-# 1. terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.api_endpoint_certificate -target=module.app_secrets
-# 2. terraform apply -target=module.lb_controller -target=module.karpenter_controller (EKS cluster created -> install Helm charts)
-# 3. terraform apply -target=module.karpenter_nodepool (Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass)
-# 4. Deploy the Kubernetes manifests with kubectl (creates the ALB via Ingress).
-# 5. terraform apply -target=module.api_endpoint_dns_record (creates Route53 A record pointing to ALB)
+# 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
+#    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.api_endpoint_certificate -target=module.app_secrets
+# 2. EKS cluster created -> install Helm charts:
+#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.karpenter_controller
+# 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
+#    terraform apply -target=module.karpenter_nodepool
+# 4. Deploy the Kubernetes manifests with kubectl -> LBC creates the ALB via Ingress, ExternalDNS automatically creates Route53 A record for API endpoint.
 
 data "aws_caller_identity" "current" {}
 
 locals {
   cluster_name = "${var.app_name}-eks-${var.environment}"
 }
+
+# Infrastructure
+# **************
 
 module "vpc" {
   source = "../../modules/vpc"
@@ -122,6 +125,9 @@ module "app_secrets" {
   secretsmanager_secret_recovery_days = var.secretsmanager_secret_recovery_days
 }
 
+# Helm charts
+# ***********
+
 module "lb_controller" {
   source = "../../modules/lb-controller"
 
@@ -129,9 +135,23 @@ module "lb_controller" {
   environment = var.environment
   aws_region  = var.aws_region
 
-  cluster_name  = module.eks.cluster_name
-  vpc_id        = module.vpc.vpc_id
   chart_version = var.lb_controller_chart_version
+
+  cluster_name = module.eks.cluster_name
+  vpc_id       = module.vpc.vpc_id
+}
+
+module "external_dns" {
+  source = "../../modules/external-dns"
+
+  app_name    = var.app_name
+  environment = var.environment
+  aws_region  = var.aws_region
+
+  chart_version = var.external_dns_chart_version
+
+  cluster_name = module.eks.cluster_name
+  api_endpoint = var.api_endpoint
 }
 
 module "karpenter_controller" {
@@ -141,13 +161,16 @@ module "karpenter_controller" {
   environment = var.environment
   aws_region  = var.aws_region
 
+  chart_version = var.karpenter_chart_version
+
+  namespace          = var.karpenter_namespace
   cluster_name       = module.eks.cluster_name
   cluster_endpoint   = module.eks.cluster_endpoint
   node_iam_role_name = module.eks.node_group_iam_role_name
-
-  chart_version = var.karpenter_chart_version
-  namespace     = var.karpenter_namespace
 }
+
+# Karpenter NodePool and EC2NodeClass
+# ***********************************
 
 module "karpenter_nodepool" {
   # Karpenter CRDs need to be installed before creating the NodePool and EC2NodeClass
@@ -163,15 +186,4 @@ module "karpenter_nodepool" {
   cpu_limit         = var.karpenter_cpu_limit
   memory_limit      = var.karpenter_memory_limit
   consolidate_after = var.karpenter_consolidate_after
-}
-
-# TODO explore using ExternalDNS and the external-dns.alpha.kubernetes.io/hostname annotation in the
-# Ingress resource to create the Route53 record automatically from the Ingress instead of via Terraform.
-# See https://github.com/kubernetes-sigs/external-dns/blob/master/docs/faq.md and
-# https://kubernetes-sigs.github.io/external-dns/latest/
-module "api_endpoint_dns_record" {
-  source = "../../modules/api-endpoint-dns-record"
-
-  api_endpoint       = var.api_endpoint
-  load_balancer_name = "recipe-manager-api-lb-prod"
 }

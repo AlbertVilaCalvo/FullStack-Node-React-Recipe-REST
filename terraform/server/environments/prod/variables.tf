@@ -233,6 +233,13 @@ variable "lb_controller_chart_version" {
   type        = string
 }
 
+# ExternalDNS
+
+variable "external_dns_chart_version" {
+  description = "Version of the ExternalDNS Helm chart"
+  type        = string
+}
+
 # Karpenter Controller
 
 variable "karpenter_chart_version" {

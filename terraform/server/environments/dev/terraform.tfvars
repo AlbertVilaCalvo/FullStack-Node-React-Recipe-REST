@@ -43,6 +43,9 @@ secretsmanager_secret_recovery_days = 0 # Use 0 if you recreate infrastructure t
 # Load Balancer Controller
 lb_controller_chart_version = "1.17.1"
 
+# ExternalDNS
+external_dns_chart_version = "1.20.0"
+
 # Karpenter Controller
 karpenter_chart_version = "1.8.3"
 karpenter_namespace     = "kube-system"

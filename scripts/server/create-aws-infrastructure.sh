@@ -149,8 +149,8 @@ terraform apply \
   -target=module.app_secrets \
   -auto-approve
 
-# Step 3: Install Kubernetes controllers (Load Balancer Controller, Karpenter)
-log_step "Step 3/5: Installing Load Balancer Controller and Karpenter..."
+# Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter) using Helm
+log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS and Karpenter Helm charts..."
 log_info "This may take 5-10 minutes..."
 
 # Retry logic for network timeouts when downloading Helm charts
@@ -166,6 +166,7 @@ RETRY_COUNT=0
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
   if terraform apply \
     -target=module.lb_controller \
+    -target=module.external_dns \
     -target=module.karpenter_controller \
     -auto-approve; then
     log_info "Kubernetes controllers installed successfully"
@@ -218,11 +219,3 @@ echo ""
 echo "  2. Deploy the server application (apply Kubernetes manifests):"
 echo "     ./scripts/server/deploy-server-eks.sh ${ENVIRONMENT} <image_tag>"
 echo ""
-echo "  3. After deploying the application, create the Route53 A record:"
-echo "     cd ${TERRAFORM_DIR}"
-echo "     terraform apply -target=module.api_endpoint_dns_record"
-echo ""
-
-log_warn "Note: The Route53 A record should only be created AFTER deploying the"
-log_warn "Kubernetes manifests, as it depends on the ALB created by the Ingress."
-log_warn "The ACM certificate has already been created and validated."

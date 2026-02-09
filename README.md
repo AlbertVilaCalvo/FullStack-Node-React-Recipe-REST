@@ -43,7 +43,8 @@ Live site: https://recipeapp.link
 
 - Ingress with AWS Load Balancer Controller.
 - Karpenter for automatic provisioning of nodes based on workload.
-- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller.
+- ExternalDNS for automatic Route53 DNS record management.
+- Managed Node Group that runs CoreDNS, Karpenter controller, Load Balancer Controller and ExternalDNS.
 - Pod Identity.
 - Kustomize for managing Kubernetes manifests.
 
@@ -224,7 +225,7 @@ This script will:
 
 - Initialize Terraform
 - Create VPC, EKS cluster, RDS database, ECR repository, Pod Identity, ACM certificate for the API endpoint and application secrets (JWT, email credentials)
-- Install Load Balancer Controller and Karpenter
+- Install Load Balancer Controller, ExternalDNS and Karpenter
 - Create Karpenter NodePool and EC2NodeClass
 - Display next steps
 
@@ -264,19 +265,9 @@ This script will:
 - Fetch configuration from Terraform outputs, terraform.tfvars file, AWS Secrets Manager, etc.
 - Process Kubernetes manifests using Kustomize and replace placeholders
 - Apply the manifests to deploy the server to EKS and wait for the deployment to complete
+- When the Ingress is created, the Load Balancer Controller provisions an Application Load Balancer and ExternalDNS creates the Route53 A record for the API endpoint pointing to the ALB.
 
-#### 4. Create Route53 A Record
-
-After deploying the application, create the Route53 A record for the API endpoint:
-
-```shell
-cd terraform/server/environments/dev  # Or prod
-terraform apply -target=module.api_endpoint_dns_record
-```
-
-This creates a Route53 A record (api.recipemanager.link) pointing to the Application Load Balancer created by the Ingress. The ACM certificate was already created and validated during infrastructure setup in step 1.
-
-#### 5. Delete AWS Infrastructure
+#### 4. Delete AWS Infrastructure
 
 To delete all AWS infrastructure:
 

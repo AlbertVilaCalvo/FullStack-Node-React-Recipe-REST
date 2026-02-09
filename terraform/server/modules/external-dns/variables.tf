@@ -23,15 +23,10 @@ variable "aws_region" {
   }
 }
 
-# Karpenter Controller module variables
+# ExternalDNS module variables
 
 variable "chart_version" {
-  description = "Version of the Karpenter Helm chart"
-  type        = string
-}
-
-variable "namespace" {
-  description = "Kubernetes namespace where Karpenter controller is deployed (kube-system or karpenter)"
+  description = "Version of the ExternalDNS Helm chart"
   type        = string
 }
 
@@ -40,14 +35,11 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "cluster_endpoint" {
-  description = "Endpoint of the EKS cluster"
+variable "api_endpoint" {
+  description = "The API endpoint domain name (e.g., api.recipemanager.link). Used for domain filtering."
   type        = string
-}
-
-# Instead of reusing the existing node role, could also create a new one.
-# See https://karpenter.sh/docs/reference/cloudformation/#node-authorization
-variable "node_iam_role_name" {
-  description = "Name of the IAM role for EKS nodes (used by Karpenter to launch nodes)"
-  type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
+    error_message = "The API endpoint must be a valid domain name."
+  }
 }
