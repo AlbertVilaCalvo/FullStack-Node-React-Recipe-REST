@@ -11,7 +11,7 @@ single_nat_gateway = false # High availability for prod
 # EKS
 kubernetes_version      = "1.34"
 endpoint_public_access  = true
-public_access_cidrs     = ["0.0.0.0/0"]
+public_access_cidrs     = [] # Set your IP address (84.39.22.200/32) or CIDR block here
 node_instance_types     = ["t3.medium", "t3a.medium", "t3.large", "t3a.large"]
 node_group_min_size     = 2
 node_group_max_size     = 5
