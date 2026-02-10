@@ -148,7 +148,14 @@ cd "${TERRAFORM_DIR}"
 
 # Initialize Terraform
 log_info "Initializing Terraform..."
-terraform init
+if [[ ! -f "backend.config" ]]; then
+  log_error "backend.config not found at ${TERRAFORM_DIR}/backend.config"
+  log_error "Please run scripts/bootstrap/create-state-bucket.sh ${ENVIRONMENT} first to create the state bucket and backend.config file."
+  exit 1
+fi
+
+log_info "Using backend config from backend.config"
+terraform init -backend-config="backend.config"
 
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
 if [[ -z "${CLUSTER_NAME}" ]]; then
@@ -199,7 +206,7 @@ fi
 log_info "Hosted Zone ID: ${ZONE_ID}"
 
 # Step 1: Delete Kubernetes resources (required to remove ALB created by Ingress)
-log_step "Step 1/7 : Deleting Kubernetes resources..."
+log_step "Step 1/6 : Deleting Kubernetes resources..."
 
 # Configure kubectl, delete all resources in the namespace and wait for the Load Balancer Controller to clean up AWS resources (ALB, Target Groups, Security Groups)
 if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
@@ -259,11 +266,11 @@ else
 fi
 
 # Step 2: Delete Karpenter NodePool
-log_step "Step 2/7 : Deleting Karpenter NodePool and EC2NodeClass..."
+log_step "Step 2/6 : Deleting Karpenter NodePool and EC2NodeClass..."
 terraform destroy -target=module.karpenter_nodepool -auto-approve
 
 # Step 3: Delete Kubernetes controllers (Karpenter, Load Balancer Controller) Helm charts
-log_step "Step 3/7 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter) Helm charts..."
+log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter) Helm charts..."
 
 # Retry logic for network timeouts when downloading Helm charts
 MAX_RETRIES=3
@@ -289,7 +296,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
 done
 
 # Step 4: Delete all remaining resources
-log_step "Step 4/7 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
+log_step "Step 4/6 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
 log_info "This may take 15-20 minutes..."
 
 terraform destroy \
@@ -305,7 +312,7 @@ terraform destroy \
 log_info "Remaining resources deleted successfully"
 
 # Step 5: Cleanup local Docker images
-log_step "Step 5/7 : Cleaning up local Docker images..."
+log_step "Step 5/6 : Cleaning up local Docker images..."
 
 # Check if Docker is available
 if command -v docker &>/dev/null && docker info >/dev/null 2>&1; then
@@ -333,13 +340,8 @@ else
   log_warn "Docker is not available. Skipping Docker image cleanup."
 fi
 
-# Step 6: Cleanup Terraform state
-log_step "Step 6/7 : Cleaning up Terraform state files..."
-rm -rf .terraform terraform.tfstate*
-log_info "Terraform state files removed."
-
-# Step 7: Cleanup ~/.kube/config
-log_step "Step 7/7 : Removing kubeconfig context, cluster and user entries..."
+# Step 6: Cleanup ~/.kube/config
+log_step "Step 6/6 : Removing kubeconfig context, cluster and user entries..."
 CLUSTER_ARN="arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}"
 kubectl config delete-context "${CLUSTER_ARN}" || true
 kubectl config delete-cluster "${CLUSTER_ARN}" || true
@@ -353,7 +355,5 @@ echo "Infrastructure Deletion Complete!"
 echo "=========================================="
 echo ""
 
-
 log_info "All AWS infrastructure for environment '${ENVIRONMENT}' has been deleted."
-log_info "Terraform state has been completely removed."
 echo ""

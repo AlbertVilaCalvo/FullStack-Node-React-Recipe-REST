@@ -134,7 +134,14 @@ cd "${TERRAFORM_DIR}"
 
 # Step 1: Initialize Terraform
 log_step "Step 1/5: Initializing Terraform..."
-terraform init
+if [[ ! -f "backend.config" ]]; then
+  log_error "backend.config not found at ${TERRAFORM_DIR}/backend.config"
+  log_error "Please run scripts/bootstrap/create-state-bucket.sh ${ENVIRONMENT} first to create the state bucket and backend.config file."
+  exit 1
+fi
+
+log_info "Using backend config from backend.config"
+terraform init -backend-config="backend.config"
 
 # Step 2: Create core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)
 log_step "Step 2/5: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."

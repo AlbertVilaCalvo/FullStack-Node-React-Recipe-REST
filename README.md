@@ -197,6 +197,15 @@ The checks performed are:
 
 ## Deploy infrastructure with Terraform
 
+### Create S3 buckets for Terraform state
+
+Before deploying any infrastructure, you need to create the S3 buckets that Terraform will use to store its state.
+Use the provided script to do this:
+
+```shell
+./scripts/bootstrap/create-state-bucket.sh dev  # Or prod
+```
+
 ### Web (Frontend)
 
 To deploy the React frontend to S3 and CloudFront:
@@ -204,9 +213,9 @@ To deploy the React frontend to S3 and CloudFront:
 ```shell
 cd terraform/web/environments/dev # Or prod
 # Edit terraform.tfvars with your values if needed
-terraform init
-terraform plan -out tfplan
-terraform apply tfplan
+
+# Initialize using the generated backend.config file created by scripts/bootstrap/create-state-bucket.sh
+terraform init -backend-config="backend.config"
 ```
 
 ### Server (API)
