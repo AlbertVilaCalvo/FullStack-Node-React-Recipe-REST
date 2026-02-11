@@ -83,3 +83,8 @@ The server follows a three-layer architecture for organizing business logic:
 ## Docker
 
 - Do not use the `latest` tags for Docker images. Always specify a specific version.
+
+## Shell scripts
+
+- Format shell scripts with `shfmt` using the options `-i 2 -ci -bn`, like this: `shfmt -i 2 -ci -bn -w <file> <directory>`.
+- Lint shell scripts with ShellCheck, using the command `shellcheck <file>`.
