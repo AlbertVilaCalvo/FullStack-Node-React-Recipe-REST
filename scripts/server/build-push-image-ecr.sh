@@ -19,82 +19,40 @@
 
 set -euo pipefail
 
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/../lib/common.sh"
+
 # ============================================================================
 # Configuration
 # ============================================================================
 
 ENVIRONMENT="${1}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SERVER_DIR="${PROJECT_ROOT}/server"
 TERRAFORM_DIR="${PROJECT_ROOT}/terraform/server/environments/${ENVIRONMENT}"
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# ============================================================================
-# Helper Functions
-# ============================================================================
-
-log_info() {
-  echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-log_warn() {
-  echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-log_error() {
-  echo -e "${RED}[ERROR]${NC} $1"
-}
-
-log_step() {
-  echo -e "${BLUE}[STEP]${NC} $1"
-}
-
-get_terraform_output() {
-  local output_name="$1"
-  terraform -chdir="${TERRAFORM_DIR}" output -raw "${output_name}"
-}
-
-get_tfvars_value() {
-  local key="$1"
-  local tfvars_file="${TERRAFORM_DIR}/terraform.tfvars"
-
-  if [[ ! -f "${tfvars_file}" ]]; then
-    log_error "terraform.tfvars not found at ${tfvars_file}"
-    return 1
-  fi
-
-  # Extract value between quotes, handling optional spaces
-  grep "^\s*${key}\s*=" "${tfvars_file}" | head -n1 | sed -E 's/^[^"]*"([^"]*)".*$/\1/'
-}
 
 # ============================================================================
 # Validation
 # ============================================================================
 
-# Validate environment argument
-if [[ "${ENVIRONMENT}" != "dev" && "${ENVIRONMENT}" != "prod" ]]; then
-  log_error "Invalid environment: ${ENVIRONMENT}. Must be 'dev' or 'prod'."
+# Validate required argument
+if [[ -z "${ENVIRONMENT}" ]]; then
+  log_error "Environment is required."
+  log_error "Usage: ./scripts/server/delete-aws-infrastructure.sh <environment>"
+  log_error "Example: ./scripts/server/delete-aws-infrastructure.sh dev"
   exit 1
 fi
+
+# Validate environment argument
+validate_environment "${ENVIRONMENT}"
 
 # Check if Terraform directory exists
-if [[ ! -d "${TERRAFORM_DIR}" ]]; then
-  log_error "Terraform directory not found: ${TERRAFORM_DIR}"
-  exit 1
-fi
+validate_directory_exists "${TERRAFORM_DIR}"
 
 # Check if server directory exists
-if [[ ! -d "${SERVER_DIR}" ]]; then
-  log_error "Server directory not found: ${SERVER_DIR}"
-  exit 1
-fi
+validate_directory_exists "${SERVER_DIR}"
 
 # Check if Docker is running
 if ! docker info >/dev/null 2>&1; then
@@ -103,10 +61,7 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 # Check if AWS CLI is installed
-if ! command -v aws &>/dev/null; then
-  log_error "AWS CLI is not installed. Please install it and try again."
-  exit 1
-fi
+validate_command_exists aws
 
 # ============================================================================
 # Main Script
