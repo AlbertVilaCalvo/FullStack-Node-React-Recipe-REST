@@ -22,9 +22,8 @@ resource "helm_release" "aws_load_balancer_controller" {
         create = true
         name   = local.service_account_name
       }
-      region                      = var.aws_region
-      vpcId                       = var.vpc_id
-      enableServiceMutatorWebhook = false
+      region = var.aws_region
+      vpcId  = var.vpc_id
       # Allow scheduling on the bootstrap nodes of the managed node group.
       # Note we don't set nodeSelector here like we do for the Karpenter
       # controller (see karpenter-controller.tf) to allow the Load Balancer Controller
