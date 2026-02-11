@@ -14,6 +14,7 @@ The project structure is:
 - `/web`: A React single-page application frontend.
   - `/web/src/ui`: React components and pages.
 - `/terraform`: Terraform code for AWS infrastructure.
+  - `/terraform/bootstrap`: S3 buckets for Terraform state.
   - `/terraform/web`: Infrastructure for the frontend.
   - `/terraform/server`: Infrastructure for the Node.js API.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
