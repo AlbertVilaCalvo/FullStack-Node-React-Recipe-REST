@@ -21,7 +21,7 @@ NO_COLOR='\033[0m'
 # Validate that pre-commit and .git/hooks/pre-commit have the same content.
 # If content is not the same, do not commit.
 validate_precommit_hook() {
-  if ! diff pre-commit .git/hooks/pre-commit > /dev/null; then
+  if ! diff pre-commit .git/hooks/pre-commit >/dev/null; then
     printf "${RED}Error: pre-commit and .git/hooks/pre-commit have different content.${NO_COLOR}\n"
     printf "${BOLD}Commit aborted.${NO_COLOR}\n"
     printf "${YELLOW}To fix this, run: ${BOLD}cp pre-commit .git/hooks${NO_COLOR}\n"
@@ -135,7 +135,7 @@ if [ ! -z "$SHELL_FILES" ]; then
         SC_EXIT=1
         FAILED_SHELL_FILES="${FAILED_SHELL_FILES}${file}"$'\n'
       fi
-    done <<< "$SHELL_FILES"
+    done <<<"$SHELL_FILES"
 
     if [ $SC_EXIT -ne 0 ]; then
       printf "\n${YELLOW}ShellCheck reported issues${NO_COLOR}\n"
@@ -143,7 +143,7 @@ if [ ! -z "$SHELL_FILES" ]; then
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         printf "${YELLOW}shellcheck %s${NO_COLOR}\n" "$file"
-      done <<< "$FAILED_SHELL_FILES"
+      done <<<"$FAILED_SHELL_FILES"
     fi
     [ $SC_EXIT -eq 0 ] # Set the exit code for print_result
     print_result "ShellCheck"
@@ -165,7 +165,7 @@ if [ ! -z "$SHELL_FILES" ]; then
       while IFS= read -r file; do
         [ -z "$file" ] && continue
         printf "${YELLOW}shfmt -w -i 2 -ci -bn %s${NO_COLOR}\n" "$file"
-      done <<< "$UNFORMATTED_FILES"
+      done <<<"$UNFORMATTED_FILES"
     else
       SHFMT_EXIT=0
     fi

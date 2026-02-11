@@ -293,7 +293,7 @@ TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "${TEMP_DIR}"' EXIT
 
 # Generate manifests using kustomize
-kubectl kustomize "${KUBERNETES_DIR}/overlays/${ENVIRONMENT}" > "${TEMP_DIR}/manifests.yaml"
+kubectl kustomize "${KUBERNETES_DIR}/overlays/${ENVIRONMENT}" >"${TEMP_DIR}/manifests.yaml"
 
 # Replace placeholders in the generated manifests
 sed -i.bak \

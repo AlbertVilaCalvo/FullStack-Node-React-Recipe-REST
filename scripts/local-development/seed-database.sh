@@ -1,29 +1,29 @@
 #!/bin/bash
 
-set -e  # Exit on any error
+set -e # Exit on any error
 
 # Load environment variables from root .env file
 if [ -f .env ]; then
-    set -a
-    # shellcheck source=/dev/null
-    source .env
-    set +a
+  set -a
+  # shellcheck source=/dev/null
+  source .env
+  set +a
 else
-    echo "❌ .env file not found. Please run this script from the project root or ensure .env exists."
-    exit 1
+  echo "❌ .env file not found. Please run this script from the project root or ensure .env exists."
+  exit 1
 fi
 
 echo -e "🌱 Starting database seeding process...\n"
 
 if ! docker compose ps | grep -q "Up"; then
-    echo "❌ Docker Compose services are not running. Please start them first with:"
-    echo "   docker compose up --build"
-    exit 1
+  echo "❌ Docker Compose services are not running. Please start them first with:"
+  echo "   docker compose up --build"
+  exit 1
 fi
 
-if ! curl -s -f "http://localhost:${SERVER_PORT}/api/health" > /dev/null; then
-    echo "❌ Server is not responding. Please ensure Docker Compose services are running and healthy."
-    exit 1
+if ! curl -s -f "http://localhost:${SERVER_PORT}/api/health" >/dev/null; then
+  echo "❌ Server is not responding. Please ensure Docker Compose services are running and healthy."
+  exit 1
 fi
 
 echo "👤 Creating user Albert (a@a.com)..."
@@ -40,12 +40,12 @@ curl -s -X POST "http://localhost:${SERVER_PORT}/api/auth/register" \
 
 echo "🍳 Seeding recipe data..."
 
-if docker compose exec -T db psql -U "${DB_USER}" -d "${DB_NAME}" < server/database-seed.sql; then
-    echo -e "\n✅ Database seeded successfully!"
-    echo "🎉 You can now:"
-    echo "   - Visit http://localhost:${VITE_PORT} to see the web app"
-    echo "   - Login with a@a.com / 123456 or b@b.com / 123456"
+if docker compose exec -T db psql -U "${DB_USER}" -d "${DB_NAME}" <server/database-seed.sql; then
+  echo -e "\n✅ Database seeded successfully!"
+  echo "🎉 You can now:"
+  echo "   - Visit http://localhost:${VITE_PORT} to see the web app"
+  echo "   - Login with a@a.com / 123456 or b@b.com / 123456"
 else
-    echo "❌ Failed to seed database"
-    exit 1
+  echo "❌ Failed to seed database"
+  exit 1
 fi

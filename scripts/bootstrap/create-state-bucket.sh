@@ -160,11 +160,11 @@ BACKEND_CONFIG_CONTENT="bucket = \"${BUCKET_NAME}\"
 region = \"${AWS_REGION}\""
 
 # Server
-echo "${BACKEND_CONFIG_CONTENT}" > "${SERVER_DIR}/backend.config"
+echo "${BACKEND_CONFIG_CONTENT}" >"${SERVER_DIR}/backend.config"
 log_info "Created ${SERVER_DIR}/backend.config"
 
 # Web
-echo "${BACKEND_CONFIG_CONTENT}" > "${WEB_DIR}/backend.config"
+echo "${BACKEND_CONFIG_CONTENT}" >"${WEB_DIR}/backend.config"
 log_info "Created ${WEB_DIR}/backend.config"
 
 # Display summary
