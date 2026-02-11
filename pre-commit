@@ -22,10 +22,10 @@ NO_COLOR='\033[0m'
 # If content is not the same, do not commit.
 validate_precommit_hook() {
   if ! diff pre-commit .git/hooks/pre-commit >/dev/null; then
-    printf "${RED}Error: pre-commit and .git/hooks/pre-commit have different content.${NO_COLOR}\n"
-    printf "${BOLD}Commit aborted.${NO_COLOR}\n"
-    printf "${YELLOW}To fix this, run: ${BOLD}cp pre-commit .git/hooks${NO_COLOR}\n"
-    printf "${YELLOW}Then commit again.${NO_COLOR}\n"
+    echo -e "${RED}Error: pre-commit and .git/hooks/pre-commit have different content.${NO_COLOR}"
+    echo -e "${BOLD}Commit aborted.${NO_COLOR}"
+    echo -e "${YELLOW}To fix this, run: ${BOLD}cp pre-commit .git/hooks${NO_COLOR}"
+    echo -e "${YELLOW}Then commit again.${NO_COLOR}"
     exit 1
   fi
 }
@@ -42,21 +42,21 @@ get_staged_files() {
 }
 
 print_title() {
-  printf "\n\n🔍 ${BLUE}%s${NO_COLOR}\n\n" "$1"
+  echo -e "\n\n🔍 ${BLUE}$1${NO_COLOR}\n"
 }
 
 print_result() {
   ERROR_CODE=$?
   if [ $ERROR_CODE -eq 0 ]; then
-    printf "\n✅ ${GREEN}%s Success${NO_COLOR}\n\n" "$1"
+    echo -e "\n✅ ${GREEN}$1 Success${NO_COLOR}\n"
   else
-    printf "\n❌ ${RED}%s Failure${NO_COLOR}\n\n" "$1"
+    echo -e "\n❌ ${RED}$1 Failure${NO_COLOR}\n"
   fi
 }
 
 get_staged_files
 
-printf "📁 ${BLUE}Files${NO_COLOR}\n\n%s" "$ALL_FILES"
+echo -e "📁 ${BLUE}Files${NO_COLOR}\n\n$ALL_FILES"
 [ -z "$ALL_FILES" ] && exit 0
 
 # Prettier on all files
@@ -70,7 +70,7 @@ print_result "Prettier"
 if [ ! -z "$CODE_FILES_SERVER" ]; then
   cd server || exit 1
 
-  printf "📁 Files server\n\n%s" "$CODE_FILES_SERVER"
+  echo -e "📁 Files server\n\n$CODE_FILES_SERVER"
 
   print_title "ESLint server"
   echo "$CODE_FILES_SERVER" | xargs ./node_modules/.bin/eslint
@@ -88,7 +88,7 @@ fi
 if [ ! -z "$CODE_FILES_WEB" ]; then
   cd web || exit 1
 
-  printf "📁 Files web\n\n%s" "$CODE_FILES_WEB"
+  echo -e "📁 Files web\n\n$CODE_FILES_WEB"
 
   print_title "ESLint web"
   echo "$CODE_FILES_WEB" | xargs ./node_modules/.bin/eslint
@@ -104,7 +104,7 @@ fi
 # Terraform fmt and validate
 
 if [ ! -z "$TERRAFORM_FILES" ]; then
-  printf "📁 Files terraform\n\n%s" "$TERRAFORM_FILES"
+  echo -e "📁 Files terraform\n\n$TERRAFORM_FILES"
 
   print_title "Terraform fmt"
   echo "$TERRAFORM_FILES" | xargs terraform fmt -check
@@ -123,7 +123,7 @@ fi
 # ShellCheck
 
 if [ ! -z "$SHELL_FILES" ]; then
-  printf "📁 Files shell\n\n%s" "$SHELL_FILES"
+  echo -e "📁 Files shell\n\n$SHELL_FILES"
 
   print_title "ShellCheck"
   if command -v shellcheck >/dev/null 2>&1; then
@@ -138,17 +138,17 @@ if [ ! -z "$SHELL_FILES" ]; then
     done <<<"$SHELL_FILES"
 
     if [ $SC_EXIT -ne 0 ]; then
-      printf "\n${YELLOW}ShellCheck reported issues${NO_COLOR}\n"
-      printf "${YELLOW}To check individual files, run:${NO_COLOR}\n"
+      echo -e "\n${YELLOW}ShellCheck reported issues${NO_COLOR}"
+      echo -e "${YELLOW}To check individual files, run:${NO_COLOR}"
       while IFS= read -r file; do
         [ -z "$file" ] && continue
-        printf "${YELLOW}shellcheck %s${NO_COLOR}\n" "$file"
+        echo -e "${YELLOW}shellcheck $file${NO_COLOR}"
       done <<<"$FAILED_SHELL_FILES"
     fi
     [ $SC_EXIT -eq 0 ] # Set the exit code for print_result
     print_result "ShellCheck"
   else
-    printf "${YELLOW}Shellcheck not found; skipping shell script linting. Install shellcheck to enable.${NO_COLOR}\n"
+    echo -e "${YELLOW}Shellcheck not found; skipping shell script linting. Install shellcheck to enable.${NO_COLOR}"
   fi
 fi
 
@@ -160,11 +160,11 @@ if [ ! -z "$SHELL_FILES" ]; then
     UNFORMATTED_FILES=$(echo "$SHELL_FILES" | xargs shfmt -l -i 2 -ci -bn)
     if [ ! -z "$UNFORMATTED_FILES" ]; then
       SHFMT_EXIT=1
-      printf "${YELLOW}shfmt found files that need formatting${NO_COLOR}\n"
-      printf "${YELLOW}To format these files, run:${NO_COLOR}\n"
+      echo -e "${YELLOW}shfmt found files that need formatting${NO_COLOR}"
+      echo -e "${YELLOW}To format these files, run:${NO_COLOR}"
       while IFS= read -r file; do
         [ -z "$file" ] && continue
-        printf "${YELLOW}shfmt -w -i 2 -ci -bn %s${NO_COLOR}\n" "$file"
+        echo -e "${YELLOW}shfmt -w -i 2 -ci -bn $file${NO_COLOR}"
       done <<<"$UNFORMATTED_FILES"
     else
       SHFMT_EXIT=0
@@ -172,7 +172,7 @@ if [ ! -z "$SHELL_FILES" ]; then
     [ $SHFMT_EXIT -eq 0 ] # Set the exit code for print_result
     print_result "shfmt"
   else
-    printf "${YELLOW}shfmt not found; skipping shell script formatting check. Install shfmt to enable.${NO_COLOR}\n"
+    echo -e "${YELLOW}shfmt not found; skipping shell script formatting check. Install shfmt to enable.${NO_COLOR}"
   fi
 fi
 
