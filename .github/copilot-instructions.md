@@ -48,8 +48,9 @@ The server follows a three-layer architecture for organizing business logic:
 - Secrets Manager for application secrets (RDS master password, JWT secret).
 - EKS Kubernetes cluster includes:
   - Ingress with AWS Load Balancer Controller.
-  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller etc.
   - Karpenter for automatic provisioning of nodes based on workload. App pods run on Karpenter provisioned nodes.
+  - ExternalDNS for automatic Route53 DNS record management.
+  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS etc.
   - Pod Identity for authentication.
   - Kustomize for managing Kubernetes manifests.
 

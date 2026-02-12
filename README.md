@@ -44,7 +44,7 @@ Live site: https://recipeapp.link
 - Ingress with AWS Load Balancer Controller.
 - Karpenter for automatic provisioning of nodes based on workload.
 - ExternalDNS for automatic Route53 DNS record management.
-- Managed Node Group that runs CoreDNS, Karpenter controller, Load Balancer Controller and ExternalDNS.
+- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller and ExternalDNS.
 - Pod Identity.
 - Kustomize for managing Kubernetes manifests.
 
