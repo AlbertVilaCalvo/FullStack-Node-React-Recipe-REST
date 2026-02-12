@@ -27,5 +27,14 @@ module.exports = {
   rules: {
     'import/no-default-export': 'error',
   },
+  overrides: [
+    // Allow require() in .js files (e.g. in jest.setup.js)
+    {
+      files: ['*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+  ],
   ignorePatterns: ['build/'],
 }
