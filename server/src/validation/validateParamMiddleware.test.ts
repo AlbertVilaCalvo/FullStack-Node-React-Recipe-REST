@@ -2,7 +2,6 @@ import * as HttpMocks from 'node-mocks-http'
 import { StatusCode } from '../misc/StatusCode'
 import { validateParamRecipeId } from './validateParamMiddleware'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 const next = jest.fn(() => {})
 
 describe('validateParamRecipeId', () => {

@@ -35,6 +35,14 @@ module.exports = {
         '@typescript-eslint/no-var-requires': 'off',
       },
     },
+    // Allow empty functions (() => {}) for test files, because they are common in tests
+    // for mock implementations, empty callbacks for the next middleware, etc.
+    {
+      files: ['**/*.test.ts'],
+      rules: {
+        '@typescript-eslint/no-empty-function': 'off',
+      },
+    },
   ],
   ignorePatterns: ['build/'],
 }

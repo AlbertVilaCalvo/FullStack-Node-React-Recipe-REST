@@ -15,7 +15,6 @@ const USER: User = {
   email_verified: true,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 const next = jest.fn(() => {})
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,6 +106,11 @@ describe('AuthMiddleware.requireLoggedUser', () => {
   })
 
   test('should return 401 if the auth token user is not found', async () => {
+    // Suppress console.error "requireLoggedUser - user not found - payload: [object Object]"
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+
     const authToken = Token.generateAuthToken(USER.id)
     const req = HttpMocks.createRequest({
       method: 'POST',
@@ -123,6 +127,8 @@ describe('AuthMiddleware.requireLoggedUser', () => {
     await requireLoggedUser(req, res, next)
 
     expect401(res)
+
+    consoleErrorSpy.mockRestore()
   })
 
   test('should return 500 if the database query for user throws Error', async () => {

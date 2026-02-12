@@ -21,7 +21,6 @@ const RECIPE: Recipe = {
   user_id: USER.id,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 const next = () => {}
 
 describe('RecipeController.createRecipe', () => {
@@ -65,6 +64,11 @@ describe('RecipeController.createRecipe', () => {
   })
 
   test('should return 500 if req.user is not set', async () => {
+    // Suppress console.error "req.user is undefined at RecipeController.createRecipe" at assertUser
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+
     const req = HttpMocks.createRequest({
       method: 'POST',
       url: '/recipes',
@@ -79,6 +83,8 @@ describe('RecipeController.createRecipe', () => {
 
     expect(res._isEndCalled()).toBe(true)
     expect(res.statusCode).toBe(StatusCode.INTERNAL_SERVER_ERROR_500)
+
+    consoleErrorSpy.mockRestore()
   })
 
   test('should save the recipe to the database', async () => {
