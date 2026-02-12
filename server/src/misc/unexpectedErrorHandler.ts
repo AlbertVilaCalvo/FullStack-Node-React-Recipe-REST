@@ -8,6 +8,7 @@ import { StatusCode } from './StatusCode'
  * Important: this error handler does not get invoked if the error is thrown in
  * an `async` function or callback unless you wrap the code with a try-catch
  * and call next(error).
+ * See https://stackoverflow.com/questions/56973265/what-does-express-async-handler-do
  */
 export const unexpectedErrorHandler: ErrorRequestHandler = (
   err,
