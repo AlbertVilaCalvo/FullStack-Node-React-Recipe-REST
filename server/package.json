@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "tsx watch --env-file=../.env src/index.ts",
     "build": "npx tsc",
-    "serve": "npx tsc && node build/index.js",
+    "serve": "npx tsc && node --env-file=../.env build/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "jest",
     "test-watch": "jest --watch",
