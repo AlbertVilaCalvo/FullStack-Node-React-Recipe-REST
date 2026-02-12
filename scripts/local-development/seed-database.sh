@@ -21,7 +21,7 @@ fi
 log_info "Starting database seeding process..."
 echo ""
 
-if ! docker compose ps | grep -q "Up"; then
+if ! docker compose ps | grep "Up" >/dev/null; then
   log_error "Docker Compose services are not running. Please start them first with:"
   echo "   docker compose up --build"
   exit 1
@@ -36,7 +36,7 @@ log_info "Creating user Albert (a@a.com)..."
 if curl -s -X POST "http://localhost:${SERVER_PORT}/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}' \
-  | grep -q "token"; then
+  | grep "token" >/dev/null; then
   log_info "User Albert created successfully"
   echo ""
 else
@@ -47,7 +47,7 @@ log_info "Creating user Blanca (b@b.com)..."
 if curl -s -X POST "http://localhost:${SERVER_PORT}/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{"name":"Blanca", "email":"b@b.com", "password":"123456"}' \
-  | grep -q "token"; then
+  | grep "token" >/dev/null; then
   log_info "User Blanca created successfully"
   echo ""
 else
