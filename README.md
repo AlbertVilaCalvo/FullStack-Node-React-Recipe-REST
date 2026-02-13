@@ -2,7 +2,7 @@
 
 _A Full Stack app built with Node, React, PostgreSQL, REST API, AWS, Kubernetes (EKS) and GitHub Actions_
 
-Live site: https://recipeapp.link
+Live site: https://recipemanager.link
 
 ## Technologies used
 

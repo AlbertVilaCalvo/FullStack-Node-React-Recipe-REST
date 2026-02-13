@@ -12,6 +12,7 @@
 # 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
 #    terraform apply -target=module.karpenter_nodepool
 # 4. Deploy the Kubernetes manifests with kubectl -> LBC creates the ALB via Ingress, ExternalDNS automatically creates Route53 A record for API endpoint.
+# This can be solved with Terraform Stacks, see https://developer.hashicorp.com/terraform/tutorials/cloud/stacks-eks-deferred
 
 data "aws_caller_identity" "current" {}
 
