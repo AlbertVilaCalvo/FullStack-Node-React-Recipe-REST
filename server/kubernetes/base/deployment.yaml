@@ -29,13 +29,14 @@ spec:
                 name: recipe-manager-api-config
             - secretRef:
                 name: recipe-manager-api-secrets
+          # From https://x.com/thockin/status/1134193838841401345
+          # Memory limit == Memory request, No CPU limit
           resources:
             requests:
               memory: '256Mi'
-              cpu: '250m'
+              cpu: '125m'
             limits:
-              memory: '512Mi'
-              cpu: '500m'
+              memory: '256Mi'
           livenessProbe:
             httpGet:
               path: /api/health
