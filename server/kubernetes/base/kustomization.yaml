@@ -4,9 +4,10 @@ kind: Kustomization
 resources:
   - configmap.yaml
   - deployment.yaml
+  - external-secret.yaml
   - ingress.yaml
   - namespace.yaml
-  - secret.yaml
+  - secret-store.yaml
   - service.yaml
   - serviceaccount.yaml
 

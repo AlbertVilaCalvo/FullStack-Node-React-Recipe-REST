@@ -213,6 +213,7 @@ log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, 
 retry_with_backoff 3 "Kubernetes controllers deleted successfully" "delete Kubernetes controllers" \
   terraform destroy \
   -target=module.karpenter_controller \
+  -target=module.external_secrets \
   -target=module.external_dns \
   -target=module.lb_controller \
   -auto-approve

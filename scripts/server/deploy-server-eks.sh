@@ -81,7 +81,7 @@ validate_command_exists aws
 log_info "Deploying server to environment: ${ENVIRONMENT}"
 log_info "Image tag: ${IMAGE_TAG}"
 
-log_step "Step 1/6: Fetching all required values from Terraform outputs, terraform.tfvars, AWS Secrets Manager..."
+log_step "Step 1/6: Fetching all required values from Terraform outputs and terraform.tfvars..."
 log_info "Fetching configuration from Terraform outputs..."
 
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
@@ -135,8 +135,6 @@ log_info "Fetching configuration from terraform.tfvars..."
 API_ENDPOINT=$(get_tfvars_value "api_endpoint")
 WEB_DOMAIN=$(get_tfvars_value "web_domain")
 AWS_REGION=$(get_tfvars_value "aws_region")
-EMAIL_USER=$(get_tfvars_value "email_user")
-EMAIL_PASSWORD=$(get_tfvars_value "email_password")
 
 # Validate required terraform.tfvars values
 MISSING_TFVARS=()
@@ -153,14 +151,6 @@ if [[ -z "${AWS_REGION}" ]]; then
   MISSING_TFVARS+=("aws_region")
 fi
 
-if [[ -z "${EMAIL_USER}" ]]; then
-  MISSING_TFVARS+=("email_user")
-fi
-
-if [[ -z "${EMAIL_PASSWORD}" ]]; then
-  MISSING_TFVARS+=("email_password")
-fi
-
 if [[ ${#MISSING_TFVARS[@]} -gt 0 ]]; then
   log_error "Missing required Terraform values in terraform.tfvars: ${MISSING_TFVARS[*]}"
   exit 1
@@ -169,35 +159,8 @@ fi
 log_info "Fetching AWS account ID..."
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
-log_info "Fetching secrets from AWS Secrets Manager..."
-RDS_PASSWORD=$(aws secretsmanager get-secret-value \
-  --secret-id "recipe-manager-rds-master-password-${ENVIRONMENT}" \
-  --query SecretString \
-  --output text)
-
-JWT_SECRET=$(aws secretsmanager get-secret-value \
-  --secret-id "recipe-manager-jwt-secret-${ENVIRONMENT}" \
-  --query SecretString \
-  --output text)
-
-# Validate AWS account ID and secrets
-MISSING_RESOURCES=()
-
 if [[ -z "${AWS_ACCOUNT_ID}" ]]; then
-  MISSING_RESOURCES+=("AWS_ACCOUNT_ID")
-fi
-
-if [[ -z "${RDS_PASSWORD}" ]]; then
-  MISSING_RESOURCES+=("RDS_PASSWORD")
-fi
-
-if [[ -z "${JWT_SECRET}" ]]; then
-  MISSING_RESOURCES+=("JWT_SECRET")
-fi
-
-if [[ ${#MISSING_RESOURCES[@]} -gt 0 ]]; then
-  log_error "Missing required resources: ${MISSING_RESOURCES[*]}"
-  log_error "Please check your AWS credentials and ensure the secrets exist in Secrets Manager."
+  log_error "Failed to fetch AWS account ID. Please check your AWS credentials."
   exit 1
 fi
 
@@ -244,11 +207,9 @@ sed -i.bak \
   -e "s|REPLACE_WITH_RDS_ADDRESS|${RDS_ADDRESS}|g" \
   -e "s|REPLACE_WITH_RDS_DATABASE_NAME|${RDS_DATABASE_NAME}|g" \
   -e "s|REPLACE_WITH_RDS_USERNAME|${RDS_USERNAME}|g" \
-  -e "s|REPLACE_WITH_RDS_PASSWORD|${RDS_PASSWORD}|g" \
   -e "s|REPLACE_WITH_CORS_ORIGINS|${CORS_ORIGINS}|g" \
-  -e "s|REPLACE_WITH_JWT_SECRET|${JWT_SECRET}|g" \
-  -e "s|REPLACE_WITH_EMAIL_USER|${EMAIL_USER}|g" \
-  -e "s|REPLACE_WITH_EMAIL_PASSWORD|${EMAIL_PASSWORD}|g" \
+  -e "s|REPLACE_WITH_AWS_REGION|${AWS_REGION}|g" \
+  -e "s|REPLACE_WITH_ENVIRONMENT|${ENVIRONMENT}|g" \
   "${TEMP_DIR}/manifests.yaml"
 
 # Apply the manifests

@@ -8,7 +8,7 @@
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
 #    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.api_endpoint_certificate -target=module.app_secrets
 # 2. EKS cluster created -> install Helm charts:
-#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.karpenter_controller
+#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller
 # 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
 #    terraform apply -target=module.karpenter_nodepool
 # 4. Deploy the Kubernetes manifests with kubectl -> LBC creates the ALB via Ingress, ExternalDNS automatically creates Route53 A record for API endpoint.
@@ -124,6 +124,9 @@ module "app_secrets" {
   environment = var.environment
 
   secretsmanager_secret_recovery_days = var.secretsmanager_secret_recovery_days
+
+  email_user     = var.email_user
+  email_password = var.email_password
 }
 
 # Helm charts
@@ -153,6 +156,25 @@ module "external_dns" {
 
   cluster_name = module.eks.cluster_name
   api_endpoint = var.api_endpoint
+}
+
+module "external_secrets" {
+  source = "../../modules/external-secrets"
+
+  app_name    = var.app_name
+  environment = var.environment
+  aws_region  = var.aws_region
+
+  chart_version = var.external_secrets_chart_version
+
+  cluster_name = module.eks.cluster_name
+
+  secrets_manager_secret_arns = [
+    module.rds.secrets_manager_secret_rds_credentials_arn,
+    module.app_secrets.jwt_secret_arn,
+    module.app_secrets.email_user_secret_arn,
+    module.app_secrets.email_password_secret_arn,
+  ]
 }
 
 module "karpenter_controller" {
