@@ -206,6 +206,41 @@ fi
 log_step "Step 2/6 : Deleting Karpenter NodePool and EC2NodeClass..."
 terraform destroy -target=module.karpenter_nodepool -auto-approve
 
+# Wait for Karpenter nodes to be terminated
+# We need to wait for Karpenter nodes to be terminated before deleting the Karpenter Controller.
+# Karpenter nodes have network interfaces (ENIs) in the subnets and rely on the security groups, preventing Terraform from deleting those resources ("DependencyViolation").
+# │ Error: deleting EC2 Subnet (subnet-0eb3dfb352a9a3fd6): operation error EC2: DeleteSubnet, https response error StatusCode: 400, RequestID: 96639fb7-f5c4-4f24-bd10-34147a3bd29b, api error DependencyViolation: The subnet 'subnet-0eb3dfb352a9a3fd6' has dependencies and cannot be deleted.
+# │ Error: deleting Security Group (sg-0a92c40198639dbf3): operation error EC2: DeleteSecurityGroup, https response error StatusCode: 400, RequestID: 48902171-2278-4a1e-af1d-7b358c76a262, api error DependencyViolation: resource sg-0a92c40198639dbf3 has a dependent object
+log_info "Waiting for Karpenter-provisioned EC2 instances to terminate..."
+
+WAIT_TIMEOUT=600
+START_TIME=$(date +%s)
+while true; do
+  CURRENT_TIME=$(date +%s)
+  ELAPSED=$((CURRENT_TIME - START_TIME))
+
+  if [ $ELAPSED -gt $WAIT_TIMEOUT ]; then
+    log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for Karpenter nodes to terminate. Proceeding anyway..."
+    break
+  fi
+
+  # Check for EC2 instances with Karpenter tags
+  KARPENTER_INSTANCES=$(aws ec2 describe-instances \
+    --region "${AWS_REGION}" \
+    --filters "Name=tag:karpenter.sh/nodepool,Values=*" "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+    --query 'Reservations[*].Instances[*].InstanceId' \
+    --output text)
+
+  if [[ -z "${KARPENTER_INSTANCES}" ]]; then
+    log_info "All Karpenter-provisioned instances have been terminated."
+    break
+  fi
+
+  log_info "Karpenter instances still terminating: ${KARPENTER_INSTANCES}"
+  log_info "Checking again in 10s (Elapsed: ${ELAPSED}s)"
+  sleep 10
+done
+
 # Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts
 log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts..."
 

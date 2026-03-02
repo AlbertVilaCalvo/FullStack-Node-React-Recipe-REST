@@ -32,6 +32,10 @@ resource "aws_subnet" "private_nodes" {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"         # Used by Load Balancer Controller to discover cluster subnets
     "karpenter.sh/discovery"                    = var.cluster_name # Used by Karpenter to discover subnets for provisioning EC2 instances, see subnetSelectorTerms in karpenter-nodepool.tf
   }
+
+  timeouts {
+    delete = "10m"
+  }
 }
 
 # Private Subnets - For EKS Control Plane ENIs (/28 = 16 IPs each)

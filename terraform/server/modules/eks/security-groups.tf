@@ -33,6 +33,10 @@ resource "aws_security_group" "node" {
     "kubernetes.io/cluster/${local.cluster_name}" = "owned"
     "karpenter.sh/discovery"                      = local.cluster_name
   }
+
+  timeouts {
+    delete = "10m"
+  }
 }
 
 # Node outbound
