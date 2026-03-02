@@ -50,6 +50,9 @@ external_dns_chart_version = "1.20.0"
 karpenter_chart_version = "1.8.3"
 karpenter_namespace     = "kube-system"
 
+# External Secrets Operator
+eso_chart_version = "2.0.1"
+
 # Karpenter NodePool
 # If you use spot and on-demand, you need at least 5 instance types, otherwise you get this error:
 #   failed while checking on-demand fallback

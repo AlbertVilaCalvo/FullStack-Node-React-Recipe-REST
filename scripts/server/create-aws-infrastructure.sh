@@ -93,8 +93,8 @@ terraform apply \
   -target=module.app_secrets \
   -auto-approve
 
-# Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter) using Helm
-log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS and Karpenter Helm charts..."
+# Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter, ESO) using Helm
+log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS, Karpenter and External Secrets Operator Helm charts..."
 log_info "This may take 5-10 minutes..."
 
 # Retry logic for network timeouts when downloading Helm charts
@@ -110,6 +110,7 @@ retry_with_backoff 3 "Kubernetes controllers installed successfully" "install Ku
   -target=module.lb_controller \
   -target=module.external_dns \
   -target=module.karpenter_controller \
+  -target=module.external_secrets \
   -auto-approve
 
 # Step 4: Create Karpenter NodePool and EC2NodeClass

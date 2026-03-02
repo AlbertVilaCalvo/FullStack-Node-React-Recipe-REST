@@ -50,6 +50,9 @@ external_dns_chart_version = "1.20.0"
 karpenter_chart_version = "1.8.3"
 karpenter_namespace     = "kube-system"
 
+# External Secrets Operator
+eso_chart_version = "2.0.1"
+
 # Karpenter NodePool
 karpenter_instance_types    = ["t3.small", "t3a.small", "t3.medium", "t3a.medium", "t3.large", "t3a.large", "t3.xlarge", "t3a.xlarge"]
 karpenter_capacity_types    = ["on-demand"]

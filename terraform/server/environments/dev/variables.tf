@@ -252,6 +252,13 @@ variable "karpenter_namespace" {
   type        = string
 }
 
+# External Secrets Operator
+
+variable "eso_chart_version" {
+  description = "Version of the External Secrets Operator Helm chart"
+  type        = string
+}
+
 # Karpenter NodePool Configuration
 
 variable "karpenter_instance_types" {

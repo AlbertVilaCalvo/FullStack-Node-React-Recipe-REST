@@ -206,8 +206,8 @@ fi
 log_step "Step 2/6 : Deleting Karpenter NodePool and EC2NodeClass..."
 terraform destroy -target=module.karpenter_nodepool -auto-approve
 
-# Step 3: Delete Kubernetes controllers (Karpenter, Load Balancer Controller) Helm charts
-log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter) Helm charts..."
+# Step 3: Delete Kubernetes controllers (Karpenter, Load Balancer Controller, ESO) Helm charts
+log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter, ESO) Helm charts..."
 
 # Retry logic for network timeouts when downloading Helm charts
 retry_with_backoff 3 "Kubernetes controllers deleted successfully" "delete Kubernetes controllers" \
@@ -215,6 +215,7 @@ retry_with_backoff 3 "Kubernetes controllers deleted successfully" "delete Kuber
   -target=module.karpenter_controller \
   -target=module.external_dns \
   -target=module.lb_controller \
+  -target=module.external_secrets \
   -auto-approve
 
 # Step 4: Delete all remaining resources

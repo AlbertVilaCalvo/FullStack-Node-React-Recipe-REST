@@ -7,11 +7,12 @@
 # Do this:
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
 #    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.api_endpoint_certificate -target=module.app_secrets
-# 2. EKS cluster created -> install Helm charts:
-#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.karpenter_controller
+# 2. EKS cluster created -> install Helm charts (LBC, ExternalDNS, Karpenter, ESO):
+#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.karpenter_controller -target=module.external_secrets
 # 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
 #    terraform apply -target=module.karpenter_nodepool
 # 4. Deploy the Kubernetes manifests with kubectl -> LBC creates the ALB via Ingress, ExternalDNS automatically creates Route53 A record for API endpoint.
+#    ESO reads the SecretStore and ExternalSecret manifests and syncs the app secrets from AWS Secrets Manager into a Kubernetes Secret.
 # This can be solved with Terraform Stacks, see https://developer.hashicorp.com/terraform/tutorials/cloud/stacks-eks-deferred
 
 data "aws_caller_identity" "current" {}
@@ -101,11 +102,10 @@ module "pod_identity" {
   app_name    = var.app_name
   environment = var.environment
 
-  cluster_name                               = module.eks.cluster_name
-  namespace                                  = "recipe-manager"
-  service_account_name                       = "recipe-manager-api"
-  secrets_manager_secret_rds_credentials_arn = module.rds.secrets_manager_secret_rds_credentials_arn
-  enable_s3_access                           = false
+  cluster_name         = module.eks.cluster_name
+  namespace            = "recipe-manager"
+  service_account_name = "recipe-manager-api"
+  enable_s3_access     = false
 }
 
 module "api_endpoint_certificate" {
@@ -124,6 +124,9 @@ module "app_secrets" {
   environment = var.environment
 
   secretsmanager_secret_recovery_days = var.secretsmanager_secret_recovery_days
+
+  email_user     = var.email_user
+  email_password = var.email_password
 }
 
 # Helm charts
@@ -168,6 +171,22 @@ module "karpenter_controller" {
   cluster_name       = module.eks.cluster_name
   cluster_endpoint   = module.eks.cluster_endpoint
   node_iam_role_name = module.eks.node_group_iam_role_name
+}
+
+module "external_secrets" {
+  source = "../../modules/external-secrets"
+
+  app_name    = var.app_name
+  environment = var.environment
+  aws_region  = var.aws_region
+
+  chart_version = var.eso_chart_version
+
+  cluster_name              = module.eks.cluster_name
+  rds_password_secret_arn   = module.rds.secrets_manager_secret_rds_credentials_arn
+  jwt_secret_arn            = module.app_secrets.jwt_secret_arn
+  email_user_secret_arn     = module.app_secrets.email_user_secret_arn
+  email_password_secret_arn = module.app_secrets.email_password_secret_arn
 }
 
 # Karpenter NodePool and EC2NodeClass

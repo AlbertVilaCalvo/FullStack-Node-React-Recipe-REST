@@ -45,12 +45,13 @@ The server follows a three-layer architecture for organizing business logic:
 - EKS cluster for server deployment.
 - RDS PostgreSQL database.
 - ECR for Docker image storage.
-- Secrets Manager for application secrets (RDS master password, JWT secret).
+- Secrets Manager for application secrets (RDS master password, JWT secret, email credentials).
 - EKS Kubernetes cluster includes:
   - Ingress with AWS Load Balancer Controller.
   - Karpenter for automatic provisioning of nodes based on workload. App pods run on Karpenter provisioned nodes.
   - ExternalDNS for automatic Route53 DNS record management.
-  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS etc.
+  - External Secrets Operator (ESO) for syncing secrets from AWS Secrets Manager into Kubernetes Secrets. ESO runs in the `external-secrets` namespace and uses Pod Identity to access Secrets Manager. A `SecretStore` and `ExternalSecret` manifest in the `recipe-manager` namespace instruct ESO to sync the four application secrets (DB_PASSWORD, JWT_SECRET, EMAIL_USER, EMAIL_PASSWORD) into the `recipe-manager-api-secrets` Kubernetes Secret.
+  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS and ESO.
   - Pod Identity for authentication.
   - Kustomize for managing Kubernetes manifests.
 

@@ -1,29 +1,6 @@
-# Policy for Secrets Manager access
-
-resource "aws_iam_policy" "secrets_manager" {
-  name        = "${var.app_name}-secrets-manager-policy-${var.environment}"
-  description = "Allow Secrets Manager access for ${var.app_name} in ${var.environment} environment"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:GetSecretValue"
-        ]
-        Resource = [
-          var.secrets_manager_secret_rds_credentials_arn
-        ]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "secrets_manager" {
-  role       = aws_iam_role.server_pod.name
-  policy_arn = aws_iam_policy.secrets_manager.arn
-}
+# Secrets Manager access is handled by the External Secrets Operator (ESO).
+# The ESO controller reads secrets from AWS Secrets Manager and creates the
+# corresponding Kubernetes Secrets. The app pod no longer needs direct access.
 
 # Policy for S3 access (optional, for future file uploads)
 
