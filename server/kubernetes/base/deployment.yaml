@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: recipe-manager-api
-  namespace: recipe-manager
-  labels:
-    app: recipe-manager
 spec:
   replicas: 2
   selector:

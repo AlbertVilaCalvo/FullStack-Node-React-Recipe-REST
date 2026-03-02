@@ -2,9 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: recipe-manager-api
-  namespace: recipe-manager
-  labels:
-    app: recipe-manager
   annotations:
     # ALB Ingress Controller annotations
     alb.ingress.kubernetes.io/scheme: internet-facing
