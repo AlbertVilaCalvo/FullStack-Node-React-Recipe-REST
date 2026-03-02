@@ -37,14 +37,15 @@ Live site: https://recipemanager.link
 - EKS cluster for server deployment.
 - RDS PostgreSQL database.
 - ECR for Docker image storage.
-- Secrets Manager for application secrets (RDS master password, JWT secret).
+- Secrets Manager for application secrets (RDS master password, JWT secret, email credentials).
 
 ### Kubernetes (EKS)
 
 - Ingress with AWS Load Balancer Controller.
 - Karpenter for automatic provisioning of nodes based on workload.
 - ExternalDNS for automatic Route53 DNS record management.
-- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller and ExternalDNS.
+- External Secrets Operator for syncing secrets from AWS Secrets Manager to Kubernetes Secrets.
+- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS and External Secrets Operator.
 - Pod Identity.
 - Kustomize for managing Kubernetes manifests.
 

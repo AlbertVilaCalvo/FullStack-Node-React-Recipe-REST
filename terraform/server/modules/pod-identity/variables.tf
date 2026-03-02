@@ -31,11 +31,6 @@ variable "service_account_name" {
   type        = string
 }
 
-variable "secrets_manager_secret_rds_credentials_arn" {
-  description = "The ARN of the Secrets Manager secret containing RDS credentials"
-  type        = string
-}
-
 variable "enable_s3_access" {
   description = "Enable S3 access for file uploads"
   type        = bool
