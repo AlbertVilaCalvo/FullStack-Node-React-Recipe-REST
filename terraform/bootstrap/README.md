@@ -8,13 +8,13 @@ Use the provided script to create the state bucket for your environment and auto
 
 For the Development environment:
 
-```bash
+```shell
 ./scripts/bootstrap/create-state-bucket.sh dev
 ```
 
 For the Production environment:
 
-```bash
+```shell
 ./scripts/bootstrap/create-state-bucket.sh prod
 ```
 
@@ -30,6 +30,6 @@ The `backend.config` file contains the bucket name and AWS region, allowing subs
 
 When running `terraform init`, make sure to specify the generated `backend.config` file:
 
-```bash
+```shell
 terraform init -backend-config="backend.config"
 ```
