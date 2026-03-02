@@ -253,7 +253,7 @@ After the AWS infrastructure is created, build and push the Docker image to ECR:
 
 This script will:
 
-- Build the Docker image with a timestamp-based tag
+- Build the Docker image with a git commit SHA tag
 - Log in to ECR and push the image
 - Output the IMAGE_TAG to use for deployment
 
@@ -268,7 +268,7 @@ Deploy the server application to the EKS cluster:
 For example:
 
 ```shell
-./scripts/server/deploy-server-eks.sh dev 2026-01-15-12h00m00s
+./scripts/server/deploy-server-eks.sh dev abc1234
 ```
 
 This script will:

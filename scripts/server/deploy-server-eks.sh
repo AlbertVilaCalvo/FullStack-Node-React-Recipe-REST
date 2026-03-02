@@ -6,8 +6,8 @@
 #   ./scripts/server/deploy-server-eks.sh <environment> <image_tag>
 #
 # Usage examples:
-#   ./scripts/server/deploy-server-eks.sh dev 2026-01-15-12h00m00s   # Deploy specific tag to dev
-#   ./scripts/server/deploy-server-eks.sh prod 2026-01-15-12h00m00s  # Deploy specific tag to prod
+#   ./scripts/server/deploy-server-eks.sh dev abc1234   # Deploy specific tag to dev
+#   ./scripts/server/deploy-server-eks.sh prod abc1234  # Deploy specific tag to prod
 #
 # Arguments:
 #   environment - The deployment environment (dev or prod)

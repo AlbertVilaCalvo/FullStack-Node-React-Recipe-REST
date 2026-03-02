@@ -63,6 +63,9 @@ fi
 # Check if AWS CLI is installed
 validate_command_exists aws
 
+# Check if git is installed
+validate_command_exists git
+
 # ============================================================================
 # Main Script
 # ============================================================================
@@ -88,8 +91,8 @@ fi
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
 log_info "AWS Region: ${AWS_REGION}"
 
-# Generate image tag using timestamp
-IMAGE_TAG=$(date +%Y-%m-%d-%Hh%Mm%Ss)
+# Generate image tag using git commit SHA
+IMAGE_TAG=$(git -C "${PROJECT_ROOT}" rev-parse --short HEAD)
 log_info "Image tag: ${IMAGE_TAG}"
 
 # Log in to ECR
