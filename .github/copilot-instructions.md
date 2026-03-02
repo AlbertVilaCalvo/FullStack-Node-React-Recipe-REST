@@ -45,13 +45,15 @@ The server follows a three-layer architecture for organizing business logic:
 - EKS cluster for server deployment.
 - RDS PostgreSQL database.
 - ECR for Docker image storage.
-- Secrets Manager for application secrets (RDS master password, JWT secret).
+- Secrets Manager for application secrets (RDS master password, JWT secret, email credentials).
 - EKS Kubernetes cluster includes:
   - Ingress with AWS Load Balancer Controller.
+  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS and External Secrets Operator.
   - Karpenter for automatic provisioning of nodes based on workload. App pods run on Karpenter provisioned nodes.
   - ExternalDNS for automatic Route53 DNS record management.
+  - External Secrets Operator for syncing secrets from AWS Secrets Manager to Kubernetes Secrets.
   - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS etc.
-  - Pod Identity for authentication.
+  - Pod Identity for authentication. Do not use IAM Roles for Service Accounts (IRSA).
   - Kustomize for managing Kubernetes manifests.
 
 ## Frontend Patterns
