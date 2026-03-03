@@ -10,9 +10,9 @@ resource "helm_release" "external_secrets" {
   ]
 
   name             = "external-secrets"
-  repository       = "https://charts.external-secrets.io"
-  chart            = "external-secrets"
-  version          = var.chart_version
+  repository       = var.chart_path != null ? null : "https://charts.external-secrets.io"
+  chart            = var.chart_path != null ? var.chart_path : "external-secrets"
+  version          = var.chart_path != null ? null : var.chart_version
   namespace        = local.namespace
   create_namespace = true
 

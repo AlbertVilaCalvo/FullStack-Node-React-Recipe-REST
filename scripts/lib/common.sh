@@ -16,6 +16,7 @@
 #   - Terraform helpers: get_terraform_output, get_tfvars_value
 #   - Validation helpers: validate_environment, validate_command_exists, validate_directory_exists, validate_file_exists
 #   - Retry logic: retry_with_backoff
+#   - Helm chart helpers: download_helm_charts
 #   - Constants: SECTION_SEP
 
 set -euo pipefail
@@ -212,4 +213,72 @@ retry_with_backoff() {
       fi
     fi
   done
+}
+
+# ============================================================================
+# Helm Chart Helpers
+# ============================================================================
+
+# Download Helm charts locally to avoid network timeouts during Terraform operations
+# Note:
+#   Requires TERRAFORM_DIR to be set in the calling script
+# We download charts locally to avoid this error during Terraform apply/destroy:
+# │ Error: Error locating chart
+# │
+# │ with module.lb_controller.helm_release.aws_load_balancer_controller,
+# │ on ../../modules/lb-controller/lb-controller.tf line 6, in resource "helm_release" "aws_load_balancer_controller":
+# │ 6: resource "helm_release" "aws_load_balancer_controller" {
+# │
+# │ Unable to locate chart aws-load-balancer-controller: Get "https://aws.github.io/eks-charts/aws-load-balancer-controller-1.17.1.tgz": read tcp 192.168.1.59:51924->185.199.110.153:443: read: operation timed out
+# We do not download the Karpenter chart because it uses oci://, and the download is reliable.
+# Charts are downloaded to the environment-specific .charts/ directory.
+download_helm_charts() {
+  local charts_dir="${TERRAFORM_DIR}/.charts"
+
+  local lb_version
+  local dns_version
+  local secrets_version
+
+  lb_version="$(get_tfvars_value "lb_controller_chart_version")"
+  dns_version="$(get_tfvars_value "external_dns_chart_version")"
+  secrets_version="$(get_tfvars_value "external_secrets_chart_version")"
+
+  if [[ -z "${lb_version}" || -z "${dns_version}" || -z "${secrets_version}" ]]; then
+    log_error "Could not read chart versions from terraform.tfvars"
+    exit 1
+  fi
+
+  mkdir -p "${charts_dir}"
+
+  log_info "Downloading Helm charts directly via curl (IPv4) to bypass Helm repo/IPv6 timeouts..."
+
+  if [[ ! -f "${charts_dir}/aws-load-balancer-controller-${lb_version}.tgz" ]]; then
+    log_info "Downloading aws-load-balancer-controller-${lb_version}.tgz"
+    if ! curl -4 -fsSLo "${charts_dir}/aws-load-balancer-controller-${lb_version}.tgz" "https://aws.github.io/eks-charts/aws-load-balancer-controller-${lb_version}.tgz"; then
+      log_warn "Failed to download aws-load-balancer-controller-${lb_version}.tgz. Terraform will download it from the Helm repository."
+      rm -f "${charts_dir}/aws-load-balancer-controller-${lb_version}.tgz"
+    fi
+  else
+    log_info "aws-load-balancer-controller-${lb_version}.tgz already downloaded."
+  fi
+
+  if [[ ! -f "${charts_dir}/external-dns-${dns_version}.tgz" ]]; then
+    log_info "Downloading external-dns-${dns_version}.tgz"
+    if ! curl -4 -fsSLo "${charts_dir}/external-dns-${dns_version}.tgz" "https://github.com/kubernetes-sigs/external-dns/releases/download/external-dns-helm-chart-${dns_version}/external-dns-${dns_version}.tgz"; then
+      log_warn "Failed to download external-dns-${dns_version}.tgz. Terraform will download it from the Helm repository."
+      rm -f "${charts_dir}/external-dns-${dns_version}.tgz"
+    fi
+  else
+    log_info "external-dns-${dns_version}.tgz already downloaded."
+  fi
+
+  if [[ ! -f "${charts_dir}/external-secrets-${secrets_version}.tgz" ]]; then
+    log_info "Downloading external-secrets-${secrets_version}.tgz"
+    if ! curl -4 -fsSLo "${charts_dir}/external-secrets-${secrets_version}.tgz" "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-${secrets_version}/external-secrets-${secrets_version}.tgz"; then
+      log_warn "Failed to download external-secrets-${secrets_version}.tgz. Terraform will download it from the Helm repository."
+      rm -f "${charts_dir}/external-secrets-${secrets_version}.tgz"
+    fi
+  else
+    log_info "external-secrets-${secrets_version}.tgz already downloaded."
+  fi
 }

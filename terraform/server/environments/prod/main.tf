@@ -19,6 +19,10 @@ data "aws_caller_identity" "current" {}
 locals {
   cluster_name = "${var.app_name}-eks-${var.environment}"
   namespace    = "recipe-manager"
+
+  lb_controller_chart_path    = fileexists("${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null
+  external_dns_chart_path     = fileexists("${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz") ? "${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz" : null
+  external_secrets_chart_path = fileexists("${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz") ? "${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz" : null
 }
 
 # Infrastructure
@@ -140,6 +144,7 @@ module "lb_controller" {
   aws_region  = var.aws_region
 
   chart_version = var.lb_controller_chart_version
+  chart_path    = local.lb_controller_chart_path
 
   cluster_name = module.eks.cluster_name
   vpc_id       = module.vpc.vpc_id
@@ -153,6 +158,7 @@ module "external_dns" {
   aws_region  = var.aws_region
 
   chart_version = var.external_dns_chart_version
+  chart_path    = local.external_dns_chart_path
 
   cluster_name = module.eks.cluster_name
   api_endpoint = var.api_endpoint
@@ -165,6 +171,7 @@ module "external_secrets" {
   environment = var.environment
 
   chart_version = var.external_secrets_chart_version
+  chart_path    = local.external_secrets_chart_path
 
   cluster_name = module.eks.cluster_name
 

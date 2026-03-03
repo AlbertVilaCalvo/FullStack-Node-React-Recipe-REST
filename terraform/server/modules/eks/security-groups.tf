@@ -90,6 +90,11 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_to_node_10250" {
 # The LBC webhook service runs on port 9443 on the nodes (via a pod).
 # The Kubernetes API server (running in the control plane) needs to reach this webhook
 # to validate Ingress resources.
+# There are two webhooks:
+# 1. A mutating webhook (Service Mutator). Is disabled by setting enableServiceMutatorWebhook false in lb-controller.tf.
+# 2. A validating webhook. Validates Ingress and TargetGroupBinding resources on every create/update.
+# Without this rule, creating or updating Ingress resources would fail.
+# https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/installation/#network-configuration
 resource "aws_vpc_security_group_ingress_rule" "cluster_to_node_9443" {
   security_group_id = aws_security_group.node.id
   description       = "Cluster to node 9443 (LBC Webhook)"
