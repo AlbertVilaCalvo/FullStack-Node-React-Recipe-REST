@@ -213,3 +213,92 @@ retry_with_backoff() {
     fi
   done
 }
+
+# ============================================================================
+# Helm Chart Download Helper Functions
+# ============================================================================
+
+# Download a Helm chart archive to a local directory
+# Arguments:
+#   $1 - Chart reference (e.g., aws-load-balancer-controller or oci://public.ecr.aws/karpenter/karpenter)
+#   $2 - Chart version
+#   $3 - Destination directory
+#   $4 - Optional chart repository URL for non-OCI charts
+# Returns:
+#   0 on success, exits with 1 on failure
+download_helm_chart() {
+  local chart_ref="$1"
+  local chart_version="$2"
+  local destination_dir="$3"
+  local repository_url="${4:-}"
+
+  local chart_name
+  chart_name="$(basename "${chart_ref}")"
+  local chart_archive_path="${destination_dir}/${chart_name}-${chart_version}.tgz"
+
+  mkdir -p "${destination_dir}"
+
+  if [[ -f "${chart_archive_path}" ]]; then
+    log_info "Using cached chart archive: ${chart_archive_path}"
+    return 0
+  fi
+
+  log_info "Downloading Helm chart ${chart_name} ${chart_version}..."
+  if [[ -n "${repository_url}" ]]; then
+    helm pull "${chart_ref}" --repo "${repository_url}" --version "${chart_version}" --destination "${destination_dir}"
+  else
+    helm pull "${chart_ref}" --version "${chart_version}" --destination "${destination_dir}"
+  fi
+
+  validate_file_exists "${chart_archive_path}" "Failed to download Helm chart archive: ${chart_archive_path}"
+}
+
+# Download all server Helm charts locally and export Terraform variables to use local charts
+# Requires:
+#   TERRAFORM_DIR to be set in the calling script
+# Exports:
+#   HELM_CHARTS_DIR
+#   TF_VAR_use_local_helm_charts
+#   TF_VAR_lb_controller_local_chart_path
+#   TF_VAR_external_dns_local_chart_path
+#   TF_VAR_external_secrets_local_chart_path
+#   TF_VAR_karpenter_local_chart_path
+download_helm_charts() {
+  local charts_dir="${TERRAFORM_DIR}/.helm-charts"
+
+  local lb_controller_chart_version
+  local external_dns_chart_version
+  local external_secrets_chart_version
+  local karpenter_chart_version
+
+  lb_controller_chart_version="$(get_tfvars_value "lb_controller_chart_version")"
+  external_dns_chart_version="$(get_tfvars_value "external_dns_chart_version")"
+  external_secrets_chart_version="$(get_tfvars_value "external_secrets_chart_version")"
+  karpenter_chart_version="$(get_tfvars_value "karpenter_chart_version")"
+
+  if [[ -z "${lb_controller_chart_version}" || -z "${external_dns_chart_version}" || -z "${external_secrets_chart_version}" || -z "${karpenter_chart_version}" ]]; then
+    log_error "Could not read one or more Helm chart versions from terraform.tfvars"
+    exit 1
+  fi
+
+  log_info "Preparing local Helm chart cache in ${charts_dir}"
+
+  download_helm_chart "aws-load-balancer-controller" "${lb_controller_chart_version}" "${charts_dir}" "https://aws.github.io/eks-charts"
+  download_helm_chart "external-dns" "${external_dns_chart_version}" "${charts_dir}" "https://kubernetes-sigs.github.io/external-dns"
+  download_helm_chart "external-secrets" "${external_secrets_chart_version}" "${charts_dir}" "https://charts.external-secrets.io"
+  download_helm_chart "oci://public.ecr.aws/karpenter/karpenter" "${karpenter_chart_version}" "${charts_dir}"
+
+  export HELM_CHARTS_DIR="${charts_dir}"
+  export TF_VAR_use_local_helm_charts=true
+  export TF_VAR_lb_controller_local_chart_path="${charts_dir}/aws-load-balancer-controller-${lb_controller_chart_version}.tgz"
+  export TF_VAR_external_dns_local_chart_path="${charts_dir}/external-dns-${external_dns_chart_version}.tgz"
+  export TF_VAR_external_secrets_local_chart_path="${charts_dir}/external-secrets-${external_secrets_chart_version}.tgz"
+  export TF_VAR_karpenter_local_chart_path="${charts_dir}/karpenter-${karpenter_chart_version}.tgz"
+
+  validate_file_exists "${TF_VAR_lb_controller_local_chart_path}"
+  validate_file_exists "${TF_VAR_external_dns_local_chart_path}"
+  validate_file_exists "${TF_VAR_external_secrets_local_chart_path}"
+  validate_file_exists "${TF_VAR_karpenter_local_chart_path}"
+
+  log_info "Local Helm charts are ready and Terraform local-chart variables are configured"
+}

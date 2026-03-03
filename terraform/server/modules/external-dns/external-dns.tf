@@ -18,6 +18,10 @@
 locals {
   service_account_name = "external-dns"
   namespace            = "external-dns"
+  local_chart_enabled  = var.use_local_chart && trimspace(var.local_chart_path) != ""
+  chart_reference      = local.local_chart_enabled ? var.local_chart_path : "external-dns"
+  chart_repository     = local.local_chart_enabled ? null : "https://kubernetes-sigs.github.io/external-dns"
+  chart_version        = local.local_chart_enabled ? null : var.chart_version
 }
 
 data "aws_route53_zone" "api_endpoint" {
@@ -33,9 +37,9 @@ resource "helm_release" "external_dns" {
   ]
 
   name             = "external-dns"
-  repository       = "https://kubernetes-sigs.github.io/external-dns"
-  chart            = "external-dns"
-  version          = var.chart_version
+  repository       = local.chart_repository
+  chart            = local.chart_reference
+  version          = local.chart_version
   namespace        = local.namespace
   create_namespace = true
 

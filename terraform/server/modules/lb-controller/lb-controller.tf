@@ -1,6 +1,10 @@
 locals {
   service_account_name = "aws-load-balancer-controller"
   namespace            = "aws-load-balancer-controller"
+  local_chart_enabled  = var.use_local_chart && trimspace(var.local_chart_path) != ""
+  chart_reference      = local.local_chart_enabled ? var.local_chart_path : "aws-load-balancer-controller"
+  chart_repository     = local.local_chart_enabled ? null : "https://aws.github.io/eks-charts"
+  chart_version        = local.local_chart_enabled ? null : var.chart_version
 }
 
 resource "helm_release" "aws_load_balancer_controller" {
@@ -10,9 +14,9 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 
   name             = "aws-load-balancer-controller"
-  repository       = "https://aws.github.io/eks-charts"
-  chart            = "aws-load-balancer-controller"
-  version          = var.chart_version
+  repository       = local.chart_repository
+  chart            = local.chart_reference
+  version          = local.chart_version
   namespace        = local.namespace
   create_namespace = true
 

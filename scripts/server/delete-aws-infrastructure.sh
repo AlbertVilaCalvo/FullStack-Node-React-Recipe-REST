@@ -94,6 +94,10 @@ validate_file_exists "${TERRAFORM_DIR}/backend.config" "backend.config not found
 log_info "Using backend config from backend.config"
 terraform init -backend-config="backend.config"
 
+# Download Helm charts locally to avoid chart repository/network fetch failures during terraform destroy
+log_info "Downloading Helm charts locally..."
+download_helm_charts
+
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
 if [[ -z "${CLUSTER_NAME}" ]]; then
   log_error "Could not get cluster_name from Terraform outputs."

@@ -254,6 +254,36 @@ variable "karpenter_chart_version" {
   type        = string
 }
 
+variable "use_local_helm_charts" {
+  description = "Whether to install Helm charts from local archives instead of remote repositories"
+  type        = bool
+  default     = false
+}
+
+variable "lb_controller_local_chart_path" {
+  description = "Absolute path to local AWS Load Balancer Controller Helm chart archive (.tgz)"
+  type        = string
+  default     = ""
+}
+
+variable "external_dns_local_chart_path" {
+  description = "Absolute path to local ExternalDNS Helm chart archive (.tgz)"
+  type        = string
+  default     = ""
+}
+
+variable "external_secrets_local_chart_path" {
+  description = "Absolute path to local External Secrets Operator Helm chart archive (.tgz)"
+  type        = string
+  default     = ""
+}
+
+variable "karpenter_local_chart_path" {
+  description = "Absolute path to local Karpenter Helm chart archive (.tgz)"
+  type        = string
+  default     = ""
+}
+
 # Karpenter NodePool Configuration
 
 variable "karpenter_instance_types" {

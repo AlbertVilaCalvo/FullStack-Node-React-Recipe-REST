@@ -80,6 +80,10 @@ validate_file_exists "${TERRAFORM_DIR}/backend.config" "backend.config not found
 log_info "Using backend config from backend.config"
 terraform init -backend-config="backend.config"
 
+# Download Helm charts locally to avoid chart repository/network fetch failures during terraform apply
+log_info "Downloading Helm charts locally..."
+download_helm_charts
+
 # Step 2: Create core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)
 log_step "Step 2/5: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
 log_info "This may take 15-20 minutes..."

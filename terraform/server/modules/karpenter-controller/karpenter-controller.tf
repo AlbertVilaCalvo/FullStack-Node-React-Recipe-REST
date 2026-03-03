@@ -4,6 +4,10 @@ locals {
   service_account_name = "karpenter"
   namespace            = "karpenter"
   account_id           = data.aws_caller_identity.current.account_id
+  local_chart_enabled  = var.use_local_chart && trimspace(var.local_chart_path) != ""
+  chart_reference      = local.local_chart_enabled ? var.local_chart_path : "karpenter"
+  chart_repository     = local.local_chart_enabled ? null : "oci://public.ecr.aws/karpenter"
+  chart_version        = local.local_chart_enabled ? null : var.chart_version
 }
 
 resource "helm_release" "karpenter" {
@@ -13,9 +17,9 @@ resource "helm_release" "karpenter" {
   ]
 
   name             = "karpenter"
-  repository       = "oci://public.ecr.aws/karpenter"
-  chart            = "karpenter"
-  version          = var.chart_version
+  repository       = local.chart_repository
+  chart            = local.chart_reference
+  version          = local.chart_version
   namespace        = local.namespace
   create_namespace = true
 

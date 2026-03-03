@@ -1,6 +1,10 @@
 locals {
   service_account_name = "external-secrets"
   namespace            = "external-secrets"
+  local_chart_enabled  = var.use_local_chart && trimspace(var.local_chart_path) != ""
+  chart_reference      = local.local_chart_enabled ? var.local_chart_path : "external-secrets"
+  chart_repository     = local.local_chart_enabled ? null : "https://charts.external-secrets.io"
+  chart_version        = local.local_chart_enabled ? null : var.chart_version
 }
 
 resource "helm_release" "external_secrets" {
@@ -10,9 +14,9 @@ resource "helm_release" "external_secrets" {
   ]
 
   name             = "external-secrets"
-  repository       = "https://charts.external-secrets.io"
-  chart            = "external-secrets"
-  version          = var.chart_version
+  repository       = local.chart_repository
+  chart            = local.chart_reference
+  version          = local.chart_version
   namespace        = local.namespace
   create_namespace = true
 

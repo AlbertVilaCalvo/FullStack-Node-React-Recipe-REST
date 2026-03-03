@@ -21,6 +21,16 @@ variable "chart_version" {
   type        = string
 }
 
+variable "use_local_chart" {
+  description = "Whether to install the Helm chart from a local archive path instead of the remote repository"
+  type        = bool
+}
+
+variable "local_chart_path" {
+  description = "Absolute path to a local Helm chart archive (.tgz). Used only when use_local_chart is true"
+  type        = string
+}
+
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string

@@ -139,7 +139,9 @@ module "lb_controller" {
   environment = var.environment
   aws_region  = var.aws_region
 
-  chart_version = var.lb_controller_chart_version
+  chart_version    = var.lb_controller_chart_version
+  use_local_chart  = var.use_local_helm_charts
+  local_chart_path = var.lb_controller_local_chart_path
 
   cluster_name = module.eks.cluster_name
   vpc_id       = module.vpc.vpc_id
@@ -152,7 +154,9 @@ module "external_dns" {
   environment = var.environment
   aws_region  = var.aws_region
 
-  chart_version = var.external_dns_chart_version
+  chart_version    = var.external_dns_chart_version
+  use_local_chart  = var.use_local_helm_charts
+  local_chart_path = var.external_dns_local_chart_path
 
   cluster_name = module.eks.cluster_name
   api_endpoint = var.api_endpoint
@@ -164,7 +168,9 @@ module "external_secrets" {
   app_name    = var.app_name
   environment = var.environment
 
-  chart_version = var.external_secrets_chart_version
+  chart_version    = var.external_secrets_chart_version
+  use_local_chart  = var.use_local_helm_charts
+  local_chart_path = var.external_secrets_local_chart_path
 
   cluster_name = module.eks.cluster_name
 
@@ -183,7 +189,9 @@ module "karpenter_controller" {
   environment = var.environment
   aws_region  = var.aws_region
 
-  chart_version = var.karpenter_chart_version
+  chart_version    = var.karpenter_chart_version
+  use_local_chart  = var.use_local_helm_charts
+  local_chart_path = var.karpenter_local_chart_path
 
   cluster_name       = module.eks.cluster_name
   cluster_endpoint   = module.eks.cluster_endpoint
