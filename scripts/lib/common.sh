@@ -176,6 +176,59 @@ validate_file_exists() {
 }
 
 # ============================================================================
+# Helm Chart Download
+# ============================================================================
+
+# Pre-download all Kubernetes controller Helm charts sequentially to a local directory.
+# This avoids the TCP read timeouts that occur when Terraform's Helm provider (which uses
+# Go's HTTP client) downloads charts in parallel from GitHub CDN during terraform apply/destroy.
+# The helm CLI is unaffected by these timeouts and downloads charts reliably.
+# Arguments:
+#   $1 - Directory to download charts to
+#   $2 - LB Controller chart version
+#   $3 - ExternalDNS chart version
+#   $4 - External Secrets chart version
+#   $5 - Karpenter chart version
+download_helm_charts() {
+  local charts_dir="$1"
+  local lb_controller_version="$2"
+  local external_dns_version="$3"
+  local external_secrets_version="$4"
+  local karpenter_version="$5"
+
+  mkdir -p "${charts_dir}"
+
+  # Add Helm repositories (--force-update is idempotent)
+  log_info "Adding Helm repositories..."
+  helm repo add eks https://aws.github.io/eks-charts --force-update
+  helm repo add external-dns-chart https://kubernetes-sigs.github.io/external-dns --force-update
+  helm repo add external-secrets https://charts.external-secrets.io --force-update
+  helm repo update
+
+  # Download each chart sequentially, skipping if already cached
+  local -a charts=(
+    "aws-load-balancer-controller|eks/aws-load-balancer-controller|${lb_controller_version}"
+    "external-dns|external-dns-chart/external-dns|${external_dns_version}"
+    "external-secrets|external-secrets/external-secrets|${external_secrets_version}"
+    "karpenter|oci://public.ecr.aws/karpenter/karpenter|${karpenter_version}"
+  )
+  for entry in "${charts[@]}"; do
+    local chart_name="${entry%%|*}"
+    local rest="${entry#*|}"
+    local chart_ref="${rest%%|*}"
+    local chart_version="${rest##*|}"
+    local chart_file="${charts_dir}/${chart_name}-${chart_version}.tgz"
+    if [[ -f "${chart_file}" ]]; then
+      log_info "Chart ${chart_name}-${chart_version} already cached, skipping."
+    else
+      log_info "Downloading ${chart_name} chart version ${chart_version}..."
+      helm pull "${chart_ref}" --version "${chart_version}" --destination "${charts_dir}"
+      log_info "Chart ${chart_name} downloaded."
+    fi
+  done
+}
+
+# ============================================================================
 # Retry Logic
 # ============================================================================
 

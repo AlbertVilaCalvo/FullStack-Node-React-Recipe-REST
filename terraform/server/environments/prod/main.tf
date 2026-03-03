@@ -19,6 +19,17 @@ data "aws_caller_identity" "current" {}
 locals {
   cluster_name = "${var.app_name}-eks-${var.environment}"
   namespace    = "recipe-manager"
+
+  # Charts are pre-downloaded to .helm-charts/ at the project root by create/delete scripts
+  # to avoid TCP read timeouts in Terraform's Helm provider (Go HTTP client) against GitHub CDN.
+  # fileexists() falls back to null when charts haven't been downloaded (e.g. manual terraform apply),
+  # in which case the Helm provider downloads them directly as normal.
+  helm_charts_dir = "${abspath("${path.root}/../../../.")}/.helm-charts"
+
+  lb_controller_chart_path    = fileexists("${local.helm_charts_dir}/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${local.helm_charts_dir}/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null
+  external_dns_chart_path     = fileexists("${local.helm_charts_dir}/external-dns-${var.external_dns_chart_version}.tgz") ? "${local.helm_charts_dir}/external-dns-${var.external_dns_chart_version}.tgz" : null
+  external_secrets_chart_path = fileexists("${local.helm_charts_dir}/external-secrets-${var.external_secrets_chart_version}.tgz") ? "${local.helm_charts_dir}/external-secrets-${var.external_secrets_chart_version}.tgz" : null
+  karpenter_chart_path        = fileexists("${local.helm_charts_dir}/karpenter-${var.karpenter_chart_version}.tgz") ? "${local.helm_charts_dir}/karpenter-${var.karpenter_chart_version}.tgz" : null
 }
 
 # Infrastructure
@@ -140,6 +151,7 @@ module "lb_controller" {
   aws_region  = var.aws_region
 
   chart_version = var.lb_controller_chart_version
+  chart_path    = local.lb_controller_chart_path
 
   cluster_name = module.eks.cluster_name
   vpc_id       = module.vpc.vpc_id
@@ -153,6 +165,7 @@ module "external_dns" {
   aws_region  = var.aws_region
 
   chart_version = var.external_dns_chart_version
+  chart_path    = local.external_dns_chart_path
 
   cluster_name = module.eks.cluster_name
   api_endpoint = var.api_endpoint
@@ -165,6 +178,7 @@ module "external_secrets" {
   environment = var.environment
 
   chart_version = var.external_secrets_chart_version
+  chart_path    = local.external_secrets_chart_path
 
   cluster_name = module.eks.cluster_name
 
@@ -184,6 +198,7 @@ module "karpenter_controller" {
   aws_region  = var.aws_region
 
   chart_version = var.karpenter_chart_version
+  chart_path    = local.karpenter_chart_path
 
   cluster_name       = module.eks.cluster_name
   cluster_endpoint   = module.eks.cluster_endpoint

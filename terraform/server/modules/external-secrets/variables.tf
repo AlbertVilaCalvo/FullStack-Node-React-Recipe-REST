@@ -21,6 +21,12 @@ variable "chart_version" {
   type        = string
 }
 
+variable "chart_path" {
+  description = "Path to a pre-downloaded local chart .tgz file. When set, overrides the remote repository URL so that no network download occurs during terraform apply."
+  type        = string
+  default     = null
+}
+
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string

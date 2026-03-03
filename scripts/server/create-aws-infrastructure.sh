@@ -93,26 +93,26 @@ terraform apply \
   -target=module.app_secrets \
   -auto-approve
 
-# Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) using Helm
-log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS, External Secrets Operator and Karpenter Helm charts..."
+# Step 3: Pre-download Helm charts and install Kubernetes controllers
+# Terraform's Helm provider uses Go's HTTP client which times out when fetching
+# charts from GitHub CDN (185.199.x.x). Pre-downloading sequentially with the
+# helm CLI (which is unaffected) eliminates all remote fetches during terraform apply.
+log_step "Step 3/5: Pre-downloading Helm charts and installing Kubernetes controllers..."
 log_info "This may take 5-10 minutes..."
 
-# Retry logic for network timeouts when downloading Helm charts
-# │ Error: Error locating chart
-# │
-# │ with module.lb_controller.helm_release.aws_load_balancer_controller,
-# │ on ../../modules/lb-controller/lb-controller.tf line 6, in resource "helm_release" "aws_load_balancer_controller":
-# │ 6: resource "helm_release" "aws_load_balancer_controller" {
-# │
-# │ Unable to locate chart aws-load-balancer-controller: Get "https://aws.github.io/eks-charts/aws-load-balancer-controller-1.17.1.tgz": read tcp 192.168.1.59:51924->185.199.110.153:443: read: operation timed out
-retry_with_backoff 3 "Load Balancer Controller installed successfully" "install Load Balancer Controller" \
-  terraform apply -target=module.lb_controller -auto-approve
-retry_with_backoff 3 "ExternalDNS installed successfully" "install ExternalDNS" \
-  terraform apply -target=module.external_dns -auto-approve
-retry_with_backoff 3 "External Secrets Operator installed successfully" "install External Secrets Operator" \
-  terraform apply -target=module.external_secrets -auto-approve
-retry_with_backoff 3 "Karpenter installed successfully" "install Karpenter" \
-  terraform apply -target=module.karpenter_controller -auto-approve
+download_helm_charts \
+  "${PROJECT_ROOT}/.helm-charts" \
+  "$(get_tfvars_value "lb_controller_chart_version")" \
+  "$(get_tfvars_value "external_dns_chart_version")" \
+  "$(get_tfvars_value "external_secrets_chart_version")" \
+  "$(get_tfvars_value "karpenter_chart_version")"
+
+terraform apply \
+  -target=module.lb_controller \
+  -target=module.external_dns \
+  -target=module.external_secrets \
+  -target=module.karpenter_controller \
+  -auto-approve
 
 # Step 4: Create Karpenter NodePool and EC2NodeClass
 # The Karpenter CRDs need to be installed before creating the NodePool and EC2NodeClass

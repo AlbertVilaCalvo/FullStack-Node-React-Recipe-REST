@@ -1,2 +1,5 @@
 node_modules
 .env
+
+# Pre-downloaded Helm charts (used by create-aws-infrastructure.sh to avoid parallel download timeouts)
+.helm-charts/

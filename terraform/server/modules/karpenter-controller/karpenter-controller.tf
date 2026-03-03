@@ -13,9 +13,9 @@ resource "helm_release" "karpenter" {
   ]
 
   name             = "karpenter"
-  repository       = "oci://public.ecr.aws/karpenter"
-  chart            = "karpenter"
-  version          = var.chart_version
+  repository       = var.chart_path != null ? null : "oci://public.ecr.aws/karpenter"
+  chart            = var.chart_path != null ? var.chart_path : "karpenter"
+  version          = var.chart_path != null ? null : var.chart_version
   namespace        = local.namespace
   create_namespace = true
 

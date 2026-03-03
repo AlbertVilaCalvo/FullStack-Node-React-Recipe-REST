@@ -244,9 +244,16 @@ done
 # Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts
 log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts..."
 
-# Retry logic for network timeouts when downloading Helm charts
-retry_with_backoff 3 "Kubernetes controllers deleted successfully" "delete Kubernetes controllers" \
-  terraform destroy \
+# Pre-download charts so Terraform's Helm provider uses local files rather than fetching
+# from GitHub CDN (which times out due to Go HTTP client issues in terraform destroy too).
+download_helm_charts \
+  "${PROJECT_ROOT}/.helm-charts" \
+  "$(get_tfvars_value "lb_controller_chart_version")" \
+  "$(get_tfvars_value "external_dns_chart_version")" \
+  "$(get_tfvars_value "external_secrets_chart_version")" \
+  "$(get_tfvars_value "karpenter_chart_version")"
+
+terraform destroy \
   -target=module.lb_controller \
   -target=module.external_dns \
   -target=module.external_secrets \
