@@ -2,6 +2,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   service_account_name = "karpenter"
+  namespace            = "karpenter"
   account_id           = data.aws_caller_identity.current.account_id
 }
 
@@ -11,11 +12,12 @@ resource "helm_release" "karpenter" {
     aws_iam_role_policy_attachment.karpenter_controller
   ]
 
-  name       = "karpenter"
-  repository = "oci://public.ecr.aws/karpenter"
-  chart      = "karpenter"
-  version    = var.chart_version
-  namespace  = var.namespace
+  name             = "karpenter"
+  repository       = "oci://public.ecr.aws/karpenter"
+  chart            = "karpenter"
+  version          = var.chart_version
+  namespace        = local.namespace
+  create_namespace = true
 
   values = [yamlencode({
     serviceAccount = {

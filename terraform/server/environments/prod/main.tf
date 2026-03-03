@@ -18,6 +18,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   cluster_name = "${var.app_name}-eks-${var.environment}"
+  namespace    = "recipe-manager"
 }
 
 # Infrastructure
@@ -102,7 +103,7 @@ module "pod_identity" {
   environment = var.environment
 
   cluster_name         = module.eks.cluster_name
-  namespace            = "recipe-manager"
+  namespace            = local.namespace
   service_account_name = "recipe-manager-api"
   enable_s3_access     = false
 }
@@ -184,7 +185,6 @@ module "karpenter_controller" {
 
   chart_version = var.karpenter_chart_version
 
-  namespace          = var.karpenter_namespace
   cluster_name       = module.eks.cluster_name
   cluster_endpoint   = module.eks.cluster_endpoint
   node_iam_role_name = module.eks.node_group_iam_role_name

@@ -254,11 +254,6 @@ variable "karpenter_chart_version" {
   type        = string
 }
 
-variable "karpenter_namespace" {
-  description = "Kubernetes namespace where Karpenter controller is deployed (kube-system or karpenter)"
-  type        = string
-}
-
 # Karpenter NodePool Configuration
 
 variable "karpenter_instance_types" {

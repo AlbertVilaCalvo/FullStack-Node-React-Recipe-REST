@@ -1,6 +1,6 @@
 locals {
   service_account_name = "aws-load-balancer-controller"
-  namespace            = "kube-system"
+  namespace            = "aws-load-balancer-controller"
 }
 
 resource "helm_release" "aws_load_balancer_controller" {
@@ -9,11 +9,12 @@ resource "helm_release" "aws_load_balancer_controller" {
     aws_iam_role_policy_attachment.lb_controller
   ]
 
-  name       = "aws-load-balancer-controller"
-  repository = "https://aws.github.io/eks-charts"
-  chart      = "aws-load-balancer-controller"
-  version    = var.chart_version
-  namespace  = local.namespace
+  name             = "aws-load-balancer-controller"
+  repository       = "https://aws.github.io/eks-charts"
+  chart            = "aws-load-balancer-controller"
+  version          = var.chart_version
+  namespace        = local.namespace
+  create_namespace = true
 
   values = [
     yamlencode({

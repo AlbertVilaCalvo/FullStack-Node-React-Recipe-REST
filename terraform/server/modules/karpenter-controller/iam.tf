@@ -21,7 +21,7 @@ resource "aws_iam_role" "karpenter_controller" {
 
 resource "aws_eks_pod_identity_association" "karpenter_controller" {
   cluster_name    = var.cluster_name
-  namespace       = var.namespace
+  namespace       = local.namespace
   service_account = local.service_account_name
   role_arn        = aws_iam_role.karpenter_controller.arn
 

@@ -51,7 +51,6 @@ external_secrets_chart_version = "2.0.1"
 
 # Karpenter Controller
 karpenter_chart_version = "1.8.3"
-karpenter_namespace     = "kube-system"
 
 # Karpenter NodePool
 karpenter_instance_types    = ["t3.small", "t3a.small", "t3.medium", "t3a.medium", "t3.large", "t3a.large", "t3.xlarge", "t3a.xlarge"]

@@ -30,11 +30,6 @@ variable "chart_version" {
   type        = string
 }
 
-variable "namespace" {
-  description = "Kubernetes namespace where Karpenter controller is deployed (kube-system or karpenter)"
-  type        = string
-}
-
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string

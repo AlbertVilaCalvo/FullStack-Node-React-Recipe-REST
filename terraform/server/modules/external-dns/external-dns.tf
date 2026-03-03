@@ -12,9 +12,12 @@
 #   Value/Route traffic to: recipe-manager-api-lb-dev-1822519741.us-east-1.elb.amazonaws.com.
 #   TTL: -
 
+# We could install ExternalDNS as a community add-on, see https://docs.aws.amazon.com/eks/latest/userguide/community-addons.html
+# But it would have AmazonRoute53FullAccess permissions, which is more than we need.
+
 locals {
   service_account_name = "external-dns"
-  namespace            = "kube-system"
+  namespace            = "external-dns"
 }
 
 data "aws_route53_zone" "api_endpoint" {
@@ -29,11 +32,12 @@ resource "helm_release" "external_dns" {
     aws_iam_role_policy_attachment.external_dns
   ]
 
-  name       = "external-dns"
-  repository = "https://kubernetes-sigs.github.io/external-dns"
-  chart      = "external-dns"
-  version    = var.chart_version
-  namespace  = local.namespace
+  name             = "external-dns"
+  repository       = "https://kubernetes-sigs.github.io/external-dns"
+  chart            = "external-dns"
+  version          = var.chart_version
+  namespace        = local.namespace
+  create_namespace = true
 
   values = [
     yamlencode({

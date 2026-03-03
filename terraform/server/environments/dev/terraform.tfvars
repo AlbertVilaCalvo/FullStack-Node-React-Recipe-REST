@@ -51,7 +51,6 @@ external_secrets_chart_version = "2.0.1"
 
 # Karpenter Controller
 karpenter_chart_version = "1.8.3"
-karpenter_namespace     = "kube-system"
 
 # Karpenter NodePool
 # If you use spot and on-demand, you need at least 5 instance types, otherwise you get this error:
