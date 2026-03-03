@@ -97,6 +97,9 @@ terraform apply \
 log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS, External Secrets Operator and Karpenter Helm charts..."
 log_info "This may take 5-10 minutes..."
 
+# Download Helm charts locally to avoid network timeouts during Terraform apply
+download_helm_charts "${ENVIRONMENT}"
+
 # Retry logic for network timeouts when downloading Helm charts
 # │ Error: Error locating chart
 # │

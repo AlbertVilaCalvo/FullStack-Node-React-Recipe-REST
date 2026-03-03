@@ -140,6 +140,7 @@ module "lb_controller" {
   aws_region  = var.aws_region
 
   chart_version = var.lb_controller_chart_version
+  chart_path    = "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz"
 
   cluster_name = module.eks.cluster_name
   vpc_id       = module.vpc.vpc_id
@@ -153,6 +154,7 @@ module "external_dns" {
   aws_region  = var.aws_region
 
   chart_version = var.external_dns_chart_version
+  chart_path    = "${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz"
 
   cluster_name = module.eks.cluster_name
   api_endpoint = var.api_endpoint
@@ -165,6 +167,7 @@ module "external_secrets" {
   environment = var.environment
 
   chart_version = var.external_secrets_chart_version
+  chart_path    = "${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz"
 
   cluster_name = module.eks.cluster_name
 

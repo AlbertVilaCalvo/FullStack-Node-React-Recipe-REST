@@ -10,9 +10,9 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 
   name             = "aws-load-balancer-controller"
-  repository       = "https://aws.github.io/eks-charts"
-  chart            = "aws-load-balancer-controller"
-  version          = var.chart_version
+  repository       = var.chart_path != null ? null : "https://aws.github.io/eks-charts"
+  chart            = var.chart_path != null ? var.chart_path : "aws-load-balancer-controller"
+  version          = var.chart_path != null ? null : var.chart_version
   namespace        = local.namespace
   create_namespace = true
 

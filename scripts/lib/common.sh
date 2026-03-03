@@ -213,3 +213,58 @@ retry_with_backoff() {
     fi
   done
 }
+
+# ============================================================================
+# Helm Chart Helpers
+# ============================================================================
+
+# Download Helm charts locally to avoid network timeouts during Terraform operations
+# Arguments:
+#   $1 - Environment name
+download_helm_charts() {
+  local environment="$1"
+  local env_tf_dir="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/terraform/server/environments/${environment}"
+  local charts_dir="${env_tf_dir}/.charts"
+
+  local original_tf_dir="${TERRAFORM_DIR:-}"
+  TERRAFORM_DIR="${env_tf_dir}"
+
+  local lb_version
+  lb_version=$(get_tfvars_value "lb_controller_chart_version")
+  local dns_version
+  dns_version=$(get_tfvars_value "external_dns_chart_version")
+  local secrets_version
+  secrets_version=$(get_tfvars_value "external_secrets_chart_version")
+
+  TERRAFORM_DIR="${original_tf_dir}"
+
+  if [[ -z "${lb_version}" || -z "${dns_version}" || -z "${secrets_version}" ]]; then
+    log_error "Could not read chart versions from terraform.tfvars"
+    exit 1
+  fi
+
+  mkdir -p "${charts_dir}"
+
+  log_info "Downloading Helm charts directly via curl (IPv4) to bypass Helm repo/IPv6 timeouts..."
+
+  if [[ ! -f "${charts_dir}/aws-load-balancer-controller-${lb_version}.tgz" ]]; then
+    log_info "Downloading aws-load-balancer-controller-${lb_version}.tgz"
+    curl -4 -sSLo "${charts_dir}/aws-load-balancer-controller-${lb_version}.tgz" "https://aws.github.io/eks-charts/aws-load-balancer-controller-${lb_version}.tgz"
+  else
+    log_info "aws-load-balancer-controller-${lb_version}.tgz already downloaded."
+  fi
+
+  if [[ ! -f "${charts_dir}/external-dns-${dns_version}.tgz" ]]; then
+    log_info "Downloading external-dns-${dns_version}.tgz"
+    curl -4 -sSLo "${charts_dir}/external-dns-${dns_version}.tgz" "https://github.com/kubernetes-sigs/external-dns/releases/download/external-dns-helm-chart-${dns_version}/external-dns-${dns_version}.tgz"
+  else
+    log_info "external-dns-${dns_version}.tgz already downloaded."
+  fi
+
+  if [[ ! -f "${charts_dir}/external-secrets-${secrets_version}.tgz" ]]; then
+    log_info "Downloading external-secrets-${secrets_version}.tgz"
+    curl -4 -sSLo "${charts_dir}/external-secrets-${secrets_version}.tgz" "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-${secrets_version}/external-secrets-${secrets_version}.tgz"
+  else
+    log_info "external-secrets-${secrets_version}.tgz already downloaded."
+  fi
+}

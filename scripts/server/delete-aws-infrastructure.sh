@@ -244,6 +244,9 @@ done
 # Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts
 log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts..."
 
+# Download Helm charts locally to avoid network timeouts during Terraform destroy
+download_helm_charts "${ENVIRONMENT}"
+
 # Retry logic for network timeouts when downloading Helm charts
 retry_with_backoff 3 "Kubernetes controllers deleted successfully" "delete Kubernetes controllers" \
   terraform destroy \
