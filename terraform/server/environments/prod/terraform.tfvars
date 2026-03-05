@@ -9,10 +9,11 @@ availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 single_nat_gateway = false # High availability for prod
 
 # EKS
-kubernetes_version      = "1.34"
-endpoint_public_access  = true
-public_access_cidrs     = [] # Set your IP address (84.39.22.200/32) or CIDR block here
-node_instance_types     = ["t3.medium", "t3a.medium", "t3.large", "t3a.large"]
+kubernetes_version     = "1.34"
+endpoint_public_access = true
+public_access_cidrs    = [] # Set your IP address (84.39.22.200/32) or CIDR block here
+# Order matters: AWS provisions instances in the exact order listed
+node_instance_types     = ["t3a.large", "t3.large", "t3a.xlarge", "t3.xlarge"]
 node_group_min_size     = 2
 node_group_max_size     = 5
 node_group_desired_size = 3
@@ -53,7 +54,8 @@ external_secrets_chart_version = "2.0.1"
 karpenter_chart_version = "1.8.3"
 
 # Karpenter NodePool
-karpenter_instance_types    = ["t3.small", "t3a.small", "t3.medium", "t3a.medium", "t3.large", "t3a.large", "t3.xlarge", "t3a.xlarge"]
+# Order does not matter: Karpenter automatically provisions the cheapest available instance
+karpenter_instance_types    = ["t3a.small", "t3.small", "t3a.medium", "t3.medium", "t3a.large", "t3.large", "t3a.xlarge", "t3.xlarge"]
 karpenter_capacity_types    = ["on-demand"]
 karpenter_cpu_limit         = 100
 karpenter_memory_limit      = "100Gi"

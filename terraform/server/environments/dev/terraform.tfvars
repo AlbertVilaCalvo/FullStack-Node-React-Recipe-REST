@@ -9,10 +9,11 @@ availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 single_nat_gateway = true # Cost savings for dev
 
 # EKS
-kubernetes_version      = "1.34"
-endpoint_public_access  = true
-public_access_cidrs     = ["0.0.0.0/0"]
-node_instance_types     = ["t3.small", "t3a.small", "t3.medium", "t3a.medium"]
+kubernetes_version     = "1.34"
+endpoint_public_access = true
+public_access_cidrs    = ["0.0.0.0/0"]
+# Order matters: AWS provisions instances in the exact order listed
+node_instance_types     = ["t3a.medium", "t3.medium", "t3a.large", "t3.large"]
 node_group_min_size     = 1
 node_group_max_size     = 3
 node_group_desired_size = 2
@@ -57,7 +58,8 @@ karpenter_chart_version = "1.8.3"
 #   failed while checking on-demand fallback
 #   at least 5 instance types are recommended when flexible to spot but requesting on-demand, the current provisioning request only has 2 instance type options
 # AWS recommends 10, see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-best-practices.html#be-instance-type-flexible
-karpenter_instance_types    = ["t3.small", "t3a.small", "t3.medium", "t3a.medium", "t3.large", "t3a.large"]
+# Order does not matter: Karpenter automatically provisions the cheapest available instance
+karpenter_instance_types    = ["t3a.small", "t3.small", "t3a.medium", "t3.medium", "t3a.large", "t3.large"]
 karpenter_capacity_types    = ["on-demand", "spot"]
 karpenter_cpu_limit         = 50
 karpenter_memory_limit      = "50Gi"
