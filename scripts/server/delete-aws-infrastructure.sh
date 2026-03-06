@@ -206,17 +206,10 @@ fi
 log_step "Step 2/6 : Deleting Karpenter NodePool and EC2NodeClass..."
 terraform destroy -target=module.karpenter_nodepool -auto-approve
 
-# Wait for Karpenter nodes to be terminated
-# We need to wait for Karpenter nodes to be terminated before deleting the Karpenter Controller.
-# Karpenter nodes have network interfaces (ENIs) in the node subnets and rely on the node security group,
-# preventing Terraform from deleting those resources ("DependencyViolation").
-# This is the error of `terraform destroy -target=module.vpc`:
-# module.vpc.aws_subnet.private_nodes[2]: Still destroying... [id=subnet-047445e4679d13225, 10m10s elapsed]
-# module.eks.aws_security_group.node: Still destroying... [id=sg-002256ad7ce908bc7, 10m30s elapsed]
-# │ Error: deleting EC2 Subnet (subnet-0eb3dfb352a9a3fd6): operation error EC2: DeleteSubnet, https response error StatusCode: 400, RequestID: 96639fb7-f5c4-4f24-bd10-34147a3bd29b, api error DependencyViolation: The subnet 'subnet-0eb3dfb352a9a3fd6' has dependencies and cannot be deleted.
-# │ Error: deleting Security Group (sg-0a92c40198639dbf3): operation error EC2: DeleteSecurityGroup, https response error StatusCode: 400, RequestID: 48902171-2278-4a1e-af1d-7b358c76a262, api error DependencyViolation: resource sg-0a92c40198639dbf3 has a dependent object
+# Wait for Karpenter nodes to be terminated before deleting the Karpenter controller in Step 3.
+# Deleting the controller while EC2 instances are still running could leave them orphaned
+# (no controller to terminate them), causing them to keep running indefinitely, incurring costs.
 log_info "Waiting for Karpenter-provisioned EC2 instances to terminate..."
-
 WAIT_TIMEOUT=600
 START_TIME=$(date +%s)
 while true; do
@@ -245,45 +238,6 @@ while true; do
   sleep 10
 done
 
-# Delete ENIs with "available" status in Karpenter node subnets
-# After the Karpenter EC2 instances terminate, the VPC CNI plugin may leave behind orphaned ENIs
-# in the Karpenter node subnets (module.vpc.aws_subnet.private_nodes), preventing Terraform from
-# deleting the subnets and node security group (see the error above).
-# These ENIs are in "available" state.
-log_info "Cleaning up orphaned ENIs in Karpenter node subnets..."
-
-KARPENTER_SUBNET_IDS=$(aws ec2 describe-subnets \
-  --region "${AWS_REGION}" \
-  --filters "Name=tag:karpenter.sh/discovery,Values=${CLUSTER_NAME}" \
-  --query 'Subnets[*].SubnetId' \
-  --output text | tr '\t' ',')
-if [[ -z "${KARPENTER_SUBNET_IDS}" ]]; then
-  log_info "No Karpenter node subnets found. Skipping ENI cleanup."
-else
-  log_info "Found Karpenter node subnets: ${KARPENTER_SUBNET_IDS}"
-
-  # Only delete ENIs in "available" state. ENIs still "in-use" at this point belong to the EKS
-  # control plane or managed node group and are released automatically when Terraform destroys
-  # the EKS cluster in Step 4.
-  AVAILABLE_ENIS=$(aws ec2 describe-network-interfaces \
-    --region "${AWS_REGION}" \
-    --filters "Name=subnet-id,Values=${KARPENTER_SUBNET_IDS}" "Name=status,Values=available" \
-    --query 'NetworkInterfaces[*].NetworkInterfaceId' \
-    --output text)
-
-  if [[ -n "${AVAILABLE_ENIS}" ]]; then
-    for ENI_ID in ${AVAILABLE_ENIS}; do
-      log_info "Deleting orphaned ENI: ${ENI_ID}"
-      aws ec2 delete-network-interface \
-        --region "${AWS_REGION}" \
-        --network-interface-id "${ENI_ID}" || log_warn "Could not delete ENI ${ENI_ID} (may have already been deleted)"
-    done
-    log_info "Orphaned ENI cleanup complete."
-  else
-    log_info "No orphaned ENIs found in Karpenter node subnets."
-  fi
-fi
-
 # Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts
 log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts..."
 
@@ -302,6 +256,46 @@ retry_with_backoff 3 "Kubernetes controllers deleted successfully" "delete Kuber
 # Step 4: Delete all remaining resources
 log_step "Step 4/6 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
 log_info "This may take 15-20 minutes..."
+
+# Delete ENIs with "available" status in Karpenter node subnets
+# After the Karpenter NodePool and controllers are deleted, the VPC CNI plugin may have left
+# behind orphaned ENIs in the Karpenter node subnets (module.vpc.aws_subnet.private_nodes),
+# preventing Terraform from deleting the node subnets and node security group with a
+# DependencyViolation error when running `terraform destroy -target=module.vpc -target=module.eks...`
+# below. This is the error:
+#   module.vpc.aws_subnet.private_nodes[2]: Still destroying... [id=subnet-047445e4679d13225, 10m10s elapsed]
+#   module.eks.aws_security_group.node: Still destroying... [id=sg-002256ad7ce908bc7, 10m30s elapsed]
+#   │ Error: deleting EC2 Subnet (subnet-0eb3dfb352a9a3fd6): operation error EC2: DeleteSubnet, https response error StatusCode: 400, RequestID: 96639fb7-f5c4-4f24-bd10-34147a3bd29b, api error DependencyViolation: The subnet 'subnet-0eb3dfb352a9a3fd6' has dependencies and cannot be deleted.
+#   │ Error: deleting Security Group (sg-0a92c40198639dbf3): operation error EC2: DeleteSecurityGroup, https response error StatusCode: 400, RequestID: 48902171-2278-4a1e-af1d-7b358c76a262, api error DependencyViolation: resource sg-0a92c40198639dbf3 has a dependent object
+# These ENIs are in "available" status.
+log_info "Cleaning up orphaned ENIs in Karpenter node subnets..."
+KARPENTER_SUBNET_IDS=$(aws ec2 describe-subnets \
+  --region "${AWS_REGION}" \
+  --filters "Name=tag:karpenter.sh/discovery,Values=${CLUSTER_NAME}" \
+  --query 'Subnets[*].SubnetId' \
+  --output text | tr '\t' ',')
+if [[ -z "${KARPENTER_SUBNET_IDS}" ]]; then
+  log_info "No Karpenter node subnets found. Skipping ENI cleanup."
+else
+  log_info "Found Karpenter node subnets: ${KARPENTER_SUBNET_IDS}"
+  # Only delete ENIs in "available" status
+  AVAILABLE_ENIS=$(aws ec2 describe-network-interfaces \
+    --region "${AWS_REGION}" \
+    --filters "Name=subnet-id,Values=${KARPENTER_SUBNET_IDS}" "Name=status,Values=available" \
+    --query 'NetworkInterfaces[*].NetworkInterfaceId' \
+    --output text)
+  if [[ -n "${AVAILABLE_ENIS}" ]]; then
+    for ENI_ID in ${AVAILABLE_ENIS}; do
+      log_info "Deleting orphaned ENI: ${ENI_ID}"
+      aws ec2 delete-network-interface \
+        --region "${AWS_REGION}" \
+        --network-interface-id "${ENI_ID}" || log_warn "Could not delete ENI ${ENI_ID}"
+    done
+    log_info "Orphaned ENI cleanup complete."
+  else
+    log_info "No orphaned ENIs found."
+  fi
+fi
 
 terraform destroy \
   -target=module.vpc \
