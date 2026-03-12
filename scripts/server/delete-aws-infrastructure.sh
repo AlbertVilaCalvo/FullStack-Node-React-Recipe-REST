@@ -257,57 +257,73 @@ retry_with_backoff 3 "Delete Kubernetes controllers" \
 log_step "Step 4/6 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
 log_info "This may take 15-20 minutes..."
 
-# Delete ENIs with "available" status in Karpenter node subnets
-# After the Karpenter NodePool and controllers are deleted, the VPC CNI plugin may have left
-# behind orphaned ENIs in the Karpenter node subnets (module.vpc.aws_subnet.private_nodes),
-# preventing Terraform from deleting the node subnets and node security group with a
-# DependencyViolation error when running `terraform destroy -target=module.vpc -target=module.eks...`
-# below. This is the error:
+# The VPC CNI plugin (aws-node) leaves behind ENIs in Karpenter node subnets that block
+# Terraform from deleting the node security group and private_nodes subnets with a
+# DependencyViolation error:
+#
 #   module.vpc.aws_subnet.private_nodes[2]: Still destroying... [id=subnet-047445e4679d13225, 10m10s elapsed]
 #   module.eks.aws_security_group.node: Still destroying... [id=sg-002256ad7ce908bc7, 10m30s elapsed]
 #   │ Error: deleting EC2 Subnet (subnet-0eb3dfb352a9a3fd6): operation error EC2: DeleteSubnet, https response error StatusCode: 400, RequestID: 96639fb7-f5c4-4f24-bd10-34147a3bd29b, api error DependencyViolation: The subnet 'subnet-0eb3dfb352a9a3fd6' has dependencies and cannot be deleted.
 #   │ Error: deleting Security Group (sg-0a92c40198639dbf3): operation error EC2: DeleteSecurityGroup, https response error StatusCode: 400, RequestID: 48902171-2278-4a1e-af1d-7b358c76a262, api error DependencyViolation: resource sg-0a92c40198639dbf3 has a dependent object
-# These ENIs are in "available" status.
-log_info "Cleaning up orphaned ENIs in Karpenter node subnets..."
+#
+# There are two windows when these ENIs can appear:
+#
+#   1. Before terraform destroy: stale ENIs from already-terminated Karpenter instances.
+#   2. During terraform destroy: ENIs held by aws-node on *managed node group* instances
+#      are "in-use" when the pre-destroy cleanup runs. They transition to "available" when
+#      EKS terminates the managed node group — at which point Terraform is already blocked.
+#
+# Both cases are handled by running ENI cleanup before each terraform destroy attempt.
+# On the first failure, newly-released ENIs are deleted and terraform destroy is retried.
 KARPENTER_SUBNET_IDS=$(aws ec2 describe-subnets \
   --region "${AWS_REGION}" \
   --filters "Name=tag:karpenter.sh/discovery,Values=${CLUSTER_NAME}" \
   --query 'Subnets[*].SubnetId' \
   --output text | tr '\t' ',')
-if [[ -z "${KARPENTER_SUBNET_IDS}" ]]; then
-  log_info "No Karpenter node subnets found. Skipping ENI cleanup."
-else
-  log_info "Found Karpenter node subnets: ${KARPENTER_SUBNET_IDS}"
-  # Only delete ENIs in "available" status
-  AVAILABLE_ENIS=$(aws ec2 describe-network-interfaces \
-    --region "${AWS_REGION}" \
-    --filters "Name=subnet-id,Values=${KARPENTER_SUBNET_IDS}" "Name=status,Values=available" \
-    --query 'NetworkInterfaces[*].NetworkInterfaceId' \
-    --output text)
-  if [[ -n "${AVAILABLE_ENIS}" ]]; then
-    for ENI_ID in ${AVAILABLE_ENIS}; do
-      log_info "Deleting orphaned ENI: ${ENI_ID}"
-      aws ec2 delete-network-interface \
-        --region "${AWS_REGION}" \
-        --network-interface-id "${ENI_ID}" || log_warn "Could not delete ENI ${ENI_ID}"
-    done
-    log_info "Orphaned ENI cleanup complete."
-  else
-    log_info "No orphaned ENIs found."
+
+MAX_ATTEMPTS=2
+for attempt in $(seq 1 ${MAX_ATTEMPTS}); do
+  if [[ -n "${KARPENTER_SUBNET_IDS}" ]]; then
+    log_info "Cleaning up orphaned ENIs in Karpenter node subnets (attempt ${attempt}/${MAX_ATTEMPTS})..."
+    # Only delete ENIs in "available" status
+    AVAILABLE_ENIS=$(aws ec2 describe-network-interfaces \
+      --region "${AWS_REGION}" \
+      --filters "Name=subnet-id,Values=${KARPENTER_SUBNET_IDS}" "Name=status,Values=available" \
+      --query 'NetworkInterfaces[*].NetworkInterfaceId' \
+      --output text)
+    if [[ -n "${AVAILABLE_ENIS}" ]]; then
+      for ENI_ID in ${AVAILABLE_ENIS}; do
+        log_info "Deleting orphaned ENI: ${ENI_ID}"
+        aws ec2 delete-network-interface \
+          --region "${AWS_REGION}" \
+          --network-interface-id "${ENI_ID}" || log_warn "Could not delete ENI ${ENI_ID}"
+      done
+    else
+      log_info "No orphaned ENIs found."
+    fi
   fi
-fi
 
-terraform destroy \
-  -target=module.vpc \
-  -target=module.eks \
-  -target=module.rds \
-  -target=module.ecr \
-  -target=module.pod_identity \
-  -target=module.api_endpoint_certificate \
-  -target=module.app_secrets \
-  -auto-approve
+  if terraform destroy \
+    -target=module.vpc \
+    -target=module.eks \
+    -target=module.rds \
+    -target=module.ecr \
+    -target=module.pod_identity \
+    -target=module.api_endpoint_certificate \
+    -target=module.app_secrets \
+    -auto-approve; then
+    break
+  fi
 
-log_info "Remaining resources deleted successfully"
+  if [[ ${attempt} -lt ${MAX_ATTEMPTS} ]]; then
+    log_warn "terraform destroy failed (attempt ${attempt}/${MAX_ATTEMPTS}). ENIs released during EKS deletion will be cleaned up on next attempt..."
+  else
+    log_error "terraform destroy failed after ${MAX_ATTEMPTS} attempts."
+    exit 1
+  fi
+done
+
+log_info "Remaining resources (VPC, EKS, RDS, ECR...) deleted successfully"
 
 # Step 5: Cleanup local Docker images
 log_step "Step 5/6 : Cleaning up local Docker images..."
