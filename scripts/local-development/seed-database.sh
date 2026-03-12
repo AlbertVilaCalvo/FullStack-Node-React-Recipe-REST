@@ -21,7 +21,7 @@ fi
 log_info "Starting database seeding process..."
 echo ""
 
-if ! docker compose ps | grep "Up" >/dev/null; then
+if [ -z "$(docker compose ps --status running --quiet)" ]; then
   log_error "Docker Compose services are not running. Please start them first with:"
   echo "   docker compose up --build"
   exit 1
@@ -33,10 +33,10 @@ if ! curl -s -f "http://localhost:${SERVER_PORT}/api/health" >/dev/null; then
 fi
 
 log_info "Creating user Albert (a@a.com)..."
-if curl -s -X POST "http://localhost:${SERVER_PORT}/api/auth/register" \
+http_code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost:${SERVER_PORT}/api/auth/register" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}' \
-  | grep "token" >/dev/null; then
+  -d '{"name":"Albert", "email":"a@a.com", "password":"123456"}')
+if [ "${http_code}" -eq 201 ]; then
   log_info "User Albert created successfully"
   echo ""
 else
@@ -44,10 +44,10 @@ else
 fi
 
 log_info "Creating user Blanca (b@b.com)..."
-if curl -s -X POST "http://localhost:${SERVER_PORT}/api/auth/register" \
+http_code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost:${SERVER_PORT}/api/auth/register" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Blanca", "email":"b@b.com", "password":"123456"}' \
-  | grep "token" >/dev/null; then
+  -d '{"name":"Blanca", "email":"b@b.com", "password":"123456"}')
+if [ "${http_code}" -eq 201 ]; then
   log_info "User Blanca created successfully"
   echo ""
 else
