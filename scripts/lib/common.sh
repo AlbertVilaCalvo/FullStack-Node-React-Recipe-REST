@@ -180,27 +180,25 @@ validate_file_exists() {
 # Retry Logic
 # ============================================================================
 
-# Retry a command with exponential backoff
+# Retry a command with a fixed 10-second delay
 # Arguments:
 #   $1 - Maximum number of retries
-#   $2 - Success message to display on success
-#   $3 - Operation name (for error messages)
-#   $4+ - Command to execute (all remaining arguments)
+#   $2 - Operation name
+#   $3+ - Command to execute (all remaining arguments)
 # Returns:
 #   0 on success, exits with 1 on failure after max retries
 # Example:
-#   retry_with_backoff 3 "Operation succeeded" "performing operation" terraform apply -auto-approve
+#   retry_with_backoff 3 "Terraform apply" terraform apply -auto-approve
 retry_with_backoff() {
   local max_retries="$1"
-  local success_msg="$2"
-  local operation_name="$3"
-  shift 3
+  local operation_name="$2"
+  shift 2
   local command=("$@")
 
   local retry_count=0
   while [ $retry_count -lt "$max_retries" ]; do
     if "${command[@]}"; then
-      log_info "${success_msg}"
+      log_info "${operation_name} succeeded"
       return 0
     else
       retry_count=$((retry_count + 1))
@@ -208,7 +206,7 @@ retry_with_backoff() {
         log_warn "${operation_name} failed (attempt $retry_count/$max_retries). Retrying in 10 seconds..."
         sleep 10
       else
-        log_error "Failed to ${operation_name} after $max_retries attempts"
+        log_error "${operation_name} failed after $max_retries attempts"
         return 1
       fi
     fi

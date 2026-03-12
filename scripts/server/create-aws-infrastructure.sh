@@ -101,7 +101,7 @@ log_info "This may take 5-10 minutes..."
 download_helm_charts
 
 # Retry logic for network timeouts when downloading Helm charts
-retry_with_backoff 3 "Kubernetes controllers installed successfully" "install Kubernetes controllers" \
+retry_with_backoff 3 "Install Kubernetes controllers" \
   terraform apply \
   -target=module.lb_controller \
   -target=module.external_dns \

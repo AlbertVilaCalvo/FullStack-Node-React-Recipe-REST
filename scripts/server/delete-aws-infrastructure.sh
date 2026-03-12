@@ -245,7 +245,7 @@ log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, 
 download_helm_charts
 
 # Retry logic for network timeouts when downloading Helm charts
-retry_with_backoff 3 "Kubernetes controllers deleted successfully" "delete Kubernetes controllers" \
+retry_with_backoff 3 "Delete Kubernetes controllers" \
   terraform destroy \
   -target=module.lb_controller \
   -target=module.external_dns \
