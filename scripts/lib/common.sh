@@ -113,26 +113,26 @@ get_tfvars_value() {
 # Validate that the environment is either 'dev' or 'prod'
 # Arguments:
 #   $1 - Environment name
-# Exits:
+# Returns:
 #   1 if environment is invalid
 validate_environment() {
   local environment="$1"
   if [[ "${environment}" != "dev" && "${environment}" != "prod" ]]; then
     log_error "Invalid environment: ${environment}. Must be 'dev' or 'prod'."
-    exit 1
+    return 1
   fi
 }
 
 # Validate that a command exists and is executable
 # Arguments:
 #   $1 - Command name
-# Exits:
+# Returns:
 #   1 if command not found
 validate_command_exists() {
   local command_name="$1"
   if ! command -v "${command_name}" &>/dev/null; then
     log_error "${command_name} is not installed. Please install it and try again."
-    exit 1
+    return 1
   fi
 }
 
@@ -140,7 +140,7 @@ validate_command_exists() {
 # Arguments:
 #   $1 - Directory path
 #   $2 - Optional custom error message
-# Exits:
+# Returns:
 #   1 if directory not found
 validate_directory_exists() {
   local dir_path="$1"
@@ -152,7 +152,7 @@ validate_directory_exists() {
     else
       log_error "Directory not found: ${dir_path}"
     fi
-    exit 1
+    return 1
   fi
 }
 
@@ -160,7 +160,7 @@ validate_directory_exists() {
 # Arguments:
 #   $1 - File path
 #   $2 - Optional custom error message
-# Exits:
+# Returns:
 #   1 if file not found
 validate_file_exists() {
   local file_path="$1"
@@ -172,7 +172,7 @@ validate_file_exists() {
     else
       log_error "File not found: ${file_path}"
     fi
-    exit 1
+    return 1
   fi
 }
 
@@ -209,7 +209,7 @@ retry_with_backoff() {
         sleep 10
       else
         log_error "Failed to ${operation_name} after $max_retries attempts"
-        exit 1
+        return 1
       fi
     fi
   done
@@ -245,7 +245,7 @@ download_helm_charts() {
 
   if [[ -z "${lb_version}" || -z "${dns_version}" || -z "${secrets_version}" ]]; then
     log_error "Could not read chart versions from terraform.tfvars"
-    exit 1
+    return 1
   fi
 
   mkdir -p "${charts_dir}"
