@@ -70,7 +70,7 @@ validate_directory_exists "${WEB_DIR}"
 log_info "Creating Terraform state bucket for environment: ${ENVIRONMENT}"
 echo ""
 
-cd "${TERRAFORM_DIR}"
+cd "${TERRAFORM_DIR}" || exit 1
 
 # Step 1: Initialize Terraform
 log_step "Step 1/3: Initializing Terraform..."

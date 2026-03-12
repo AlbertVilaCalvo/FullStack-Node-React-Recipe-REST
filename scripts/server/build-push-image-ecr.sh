@@ -40,8 +40,8 @@ TERRAFORM_DIR="${PROJECT_ROOT}/terraform/server/environments/${ENVIRONMENT}"
 # Validate required argument
 if [[ -z "${ENVIRONMENT}" ]]; then
   log_error "Environment is required."
-  log_error "Usage: ./scripts/server/delete-aws-infrastructure.sh <environment>"
-  log_error "Example: ./scripts/server/delete-aws-infrastructure.sh dev"
+  log_error "Usage: ./scripts/server/build-push-image-ecr.sh <environment>"
+  log_error "Example: ./scripts/server/build-push-image-ecr.sh dev"
   exit 1
 fi
 

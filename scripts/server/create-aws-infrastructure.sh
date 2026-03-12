@@ -30,7 +30,7 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 # Configuration
 # ============================================================================
 
-ENVIRONMENT="${1}"
+ENVIRONMENT="${1:-}"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 TERRAFORM_DIR="${PROJECT_ROOT}/terraform/server/environments/${ENVIRONMENT}"
 
@@ -71,7 +71,7 @@ validate_command_exists kubectl
 log_info "Creating AWS infrastructure for environment: ${ENVIRONMENT}"
 echo ""
 
-cd "${TERRAFORM_DIR}"
+cd "${TERRAFORM_DIR}" || exit 1
 
 # Step 1: Initialize Terraform
 log_step "Step 1/5: Initializing Terraform..."

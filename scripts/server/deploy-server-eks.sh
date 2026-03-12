@@ -232,19 +232,19 @@ echo "=========================================="
 echo ""
 
 log_info "Deployment:"
-kubectl get deployment recipe-manager-api
+kubectl get deployment recipe-manager-api -n "${NAMESPACE}"
 
 echo ""
 log_info "Pods:"
-kubectl get pods -l app=recipe-manager
+kubectl get pods -l app=recipe-manager -n "${NAMESPACE}"
 
 echo ""
 log_info "Service:"
-kubectl get service recipe-manager-api
+kubectl get service recipe-manager-api -n "${NAMESPACE}"
 
 echo ""
 log_info "Ingress:"
-kubectl get ingress recipe-manager-api
+kubectl get ingress recipe-manager-api -n "${NAMESPACE}"
 
 echo ""
 log_info "Deployment successful!"

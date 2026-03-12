@@ -85,7 +85,7 @@ fi
 log_info "Starting infrastructure deletion for environment: ${ENVIRONMENT}"
 echo ""
 
-cd "${TERRAFORM_DIR}"
+cd "${TERRAFORM_DIR}" || exit 1
 
 # Initialize Terraform
 log_info "Initializing Terraform..."
@@ -160,7 +160,7 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
     CURRENT_TIME=$(date +%s)
     ELAPSED=$((CURRENT_TIME - START_TIME))
 
-    if [ $ELAPSED -gt $WAIT_TIMEOUT ]; then
+    if [[ $ELAPSED -gt $WAIT_TIMEOUT ]]; then
       log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for AWS resources cleanup. Proceeding anyway..."
       break
     fi
@@ -216,7 +216,7 @@ while true; do
   CURRENT_TIME=$(date +%s)
   ELAPSED=$((CURRENT_TIME - START_TIME))
 
-  if [ $ELAPSED -gt $WAIT_TIMEOUT ]; then
+  if [[ $ELAPSED -gt $WAIT_TIMEOUT ]]; then
     log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for Karpenter nodes to terminate. Proceeding anyway..."
     break
   fi
