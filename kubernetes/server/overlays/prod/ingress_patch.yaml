@@ -5,3 +5,19 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/tags: environment=prod,app=recipe-manager
     alb.ingress.kubernetes.io/load-balancer-name: recipe-manager-api-lb-prod
+    # certificate-arn is a Terraform output; injected at deploy time by deploy-server-eks.sh
+    alb.ingress.kubernetes.io/certificate-arn: DEPLOY_TIME_API_CERTIFICATE_ARN
+    # ExternalDNS annotation to create Route53 A record for the API domain to the ALB
+    external-dns.alpha.kubernetes.io/hostname: api.recipeapp.link
+spec:
+  rules:
+    - host: api.recipeapp.link
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: recipe-manager-api
+                port:
+                  number: 80

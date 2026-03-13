@@ -15,7 +15,7 @@ spec:
       serviceAccountName: recipe-manager-api
       containers:
         - name: api
-          image: REPLACE_WITH_ECR_IMAGE_URL
+          image: recipe-manager-api
           imagePullPolicy: Always
           ports:
             - name: http

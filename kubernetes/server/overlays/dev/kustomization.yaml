@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - external-secret.yaml
 
 # Labels for all resources
 labels:
@@ -11,3 +12,10 @@ labels:
 
 patches:
   - path: ingress_patch.yaml
+  - path: configmap_patch.yaml
+  - path: secret-store-patch.yaml
+
+images:
+  - name: recipe-manager-api
+    newName: DEPLOY_TIME_ECR_REPOSITORY_URL
+    newTag: DEPLOY_TIME_IMAGE_TAG

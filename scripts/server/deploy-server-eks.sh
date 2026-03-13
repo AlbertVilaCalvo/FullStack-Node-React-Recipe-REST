@@ -81,14 +81,12 @@ validate_command_exists aws
 log_info "Deploying server to environment: ${ENVIRONMENT}"
 log_info "Image tag: ${IMAGE_TAG}"
 
-log_step "Step 1/6: Fetching all required values from Terraform outputs and terraform.tfvars..."
+log_step "Step 1/5: Fetching required values from Terraform outputs and terraform.tfvars..."
 log_info "Fetching configuration from Terraform outputs..."
 
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
 ECR_REPOSITORY_URL=$(get_terraform_output "ecr_repository_url")
 RDS_ADDRESS=$(get_terraform_output "rds_address")
-RDS_DATABASE_NAME=$(get_terraform_output "rds_database_name")
-RDS_USERNAME=$(get_terraform_output "rds_username")
 API_CERTIFICATE_ARN=$(get_terraform_output "api_certificate_arn")
 
 # Validate all required Terraform outputs
@@ -104,14 +102,6 @@ fi
 
 if [[ -z "${RDS_ADDRESS}" ]]; then
   MISSING_OUTPUTS+=("rds_address")
-fi
-
-if [[ -z "${RDS_DATABASE_NAME}" ]]; then
-  MISSING_OUTPUTS+=("rds_database_name")
-fi
-
-if [[ -z "${RDS_USERNAME}" ]]; then
-  MISSING_OUTPUTS+=("rds_username")
 fi
 
 if [[ -z "${API_CERTIFICATE_ARN}" ]]; then
@@ -132,23 +122,18 @@ fi
 
 log_info "Fetching configuration from terraform.tfvars..."
 
-API_ENDPOINT=$(get_tfvars_value "api_endpoint")
-WEB_DOMAIN=$(get_tfvars_value "web_domain")
 AWS_REGION=$(get_tfvars_value "aws_region")
+API_ENDPOINT=$(get_tfvars_value "api_endpoint")
 
 # Validate required terraform.tfvars values
 MISSING_TFVARS=()
 
-if [[ -z "${API_ENDPOINT}" ]]; then
-  MISSING_TFVARS+=("api_endpoint")
-fi
-
-if [[ -z "${WEB_DOMAIN}" ]]; then
-  MISSING_TFVARS+=("web_domain")
-fi
-
 if [[ -z "${AWS_REGION}" ]]; then
   MISSING_TFVARS+=("aws_region")
+fi
+
+if [[ -z "${API_ENDPOINT}" ]]; then
+  MISSING_TFVARS+=("api_endpoint")
 fi
 
 if [[ ${#MISSING_TFVARS[@]} -gt 0 ]]; then
@@ -164,60 +149,73 @@ if [[ -z "${AWS_ACCOUNT_ID}" ]]; then
   exit 1
 fi
 
-CORS_ORIGINS="https://${WEB_DOMAIN},https://www.${WEB_DOMAIN}"
-
-FULL_IMAGE_URL="${ECR_REPOSITORY_URL}:${IMAGE_TAG}"
-
 log_info "AWS Region: ${AWS_REGION}"
 log_info "Cluster Name: ${CLUSTER_NAME}"
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
 log_info "RDS Address: ${RDS_ADDRESS}"
 log_info "API Endpoint: ${API_ENDPOINT}"
-log_info "Web Domain: ${WEB_DOMAIN}"
-log_info "CORS origins: ${CORS_ORIGINS}"
-log_info "Full image URL: ${FULL_IMAGE_URL}"
+log_info "Image tag: ${IMAGE_TAG}"
 
 # Update kubectl config
-log_step "Step 2/6: Updating kubectl configuration..."
+log_step "Step 2/5: Updating kubectl configuration..."
 aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
 
 # Verify cluster connectivity
-log_step "Step 3/6: Verifying cluster connectivity..."
+log_step "Step 3/5: Verifying cluster connectivity..."
 if ! kubectl cluster-info >/dev/null 2>&1; then
   log_error "Cannot connect to the Kubernetes cluster. Please check your AWS credentials and network connectivity."
   exit 1
 fi
 log_info "Successfully connected to cluster"
 
-# Process Kustomize overlay and apply substitutions
-log_step "Step 4/6: Processing Kubernetes manifests..."
+# Build final manifests using a temporary Kustomize overlay.
+# The committed overlay in ${KUBERNETES_DIR}/overlays/${ENVIRONMENT} contains all static
+# per-environment values. Here we layer on top of it the three remaining dynamic values
+# that are Terraform outputs and therefore unknown until infrastructure exists:
+#   - image name + tag  (ECR URL and git SHA, set via the 'images' transformer)
+#   - DB_HOST           (RDS address, set via a ConfigMap patch)
+#   - certificate-arn   (ACM cert ARN, set via an Ingress patch)
+log_step "Step 4/5: Processing Kubernetes manifests..."
 
-# Create temporary directory for processed manifests
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "${TEMP_DIR}"' EXIT
 
-# Generate manifests using kustomize
-kubectl kustomize "${KUBERNETES_DIR}/overlays/${ENVIRONMENT}" >"${TEMP_DIR}/manifests.yaml"
+cat >"${TEMP_DIR}/kustomization.yaml" <<EOF
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-# Replace placeholders in the generated manifests
-sed -i.bak \
-  -e "s|REPLACE_WITH_ECR_IMAGE_URL|${FULL_IMAGE_URL}|g" \
-  -e "s|REPLACE_WITH_API_CERTIFICATE_ARN|${API_CERTIFICATE_ARN}|g" \
-  -e "s|REPLACE_WITH_API_ENDPOINT|${API_ENDPOINT}|g" \
-  -e "s|REPLACE_WITH_RDS_ADDRESS|${RDS_ADDRESS}|g" \
-  -e "s|REPLACE_WITH_RDS_DATABASE_NAME|${RDS_DATABASE_NAME}|g" \
-  -e "s|REPLACE_WITH_RDS_USERNAME|${RDS_USERNAME}|g" \
-  -e "s|REPLACE_WITH_CORS_ORIGINS|${CORS_ORIGINS}|g" \
-  -e "s|REPLACE_WITH_AWS_REGION|${AWS_REGION}|g" \
-  -e "s|REPLACE_WITH_ENVIRONMENT|${ENVIRONMENT}|g" \
-  "${TEMP_DIR}/manifests.yaml"
+resources:
+  - ${KUBERNETES_DIR}/overlays/${ENVIRONMENT}
+
+images:
+  - name: recipe-manager-api
+    newName: ${ECR_REPOSITORY_URL}
+    newTag: ${IMAGE_TAG}
+
+patches:
+  - patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: recipe-manager-api-config
+        namespace: recipe-manager
+      data:
+        DB_HOST: '${RDS_ADDRESS}'
+  - patch: |-
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: recipe-manager-api
+        namespace: recipe-manager
+        annotations:
+          alb.ingress.kubernetes.io/certificate-arn: '${API_CERTIFICATE_ARN}'
+EOF
 
 # Apply the manifests
-log_step "Step 5/6: Applying Kubernetes manifests..."
-kubectl apply -f "${TEMP_DIR}/manifests.yaml"
+log_step "Step 5/5: Applying Kubernetes manifests..."
+kubectl kustomize --load-restrictor=none "${TEMP_DIR}" | kubectl apply -f -
 
 # Wait for deployment to roll out
-log_step "Step 6/6: Waiting for deployment to complete..."
 kubectl rollout status deployment/recipe-manager-api -n "${NAMESPACE}" --timeout=300s
 
 # Set default namespace for context to avoid specifying -n each time
@@ -249,5 +247,4 @@ kubectl get ingress recipe-manager-api -n "${NAMESPACE}"
 echo ""
 log_info "Deployment successful!"
 log_info "API endpoint: https://${API_ENDPOINT}"
-log_info "Website URL: https://${WEB_DOMAIN}"
 echo ""

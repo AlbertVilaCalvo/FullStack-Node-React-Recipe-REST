@@ -20,21 +20,11 @@ You can save the rendered output to a file.
 kubectl kustomize kubernetes/server/overlays/dev > dev-manifest.yaml
 ```
 
-The rendered output still contains placeholder strings (e.g. `REPLACE_WITH_ECR_IMAGE_URL`).
-These are substituted at deploy time by `scripts/server/deploy-server-eks.sh` using `sed`.
+The rendered output still contains two deploy-time placeholders (`DEPLOY_TIME_RDS_ADDRESS` and
+`DEPLOY_TIME_API_CERTIFICATE_ARN`) that are Terraform outputs — values that AWS generates and
+that change when infrastructure is recreated. These are injected at deploy time via a temporary
+Kustomize overlay written by `scripts/server/deploy-server-eks.sh`; they are never committed to
+Git.
 
-To see what the final manifests look like with real values substituted, you can pipe the output
-through `sed` manually:
-
-```shell
-kubectl kustomize kubernetes/server/overlays/dev | sed \
-  -e 's|REPLACE_WITH_ECR_IMAGE_URL|123456789.dkr.ecr.us-east-1.amazonaws.com/recipe-manager-api:abc1234|g' \
-  -e 's|REPLACE_WITH_API_CERTIFICATE_ARN|arn:aws:acm:us-east-1:123456789:certificate/xxxx|g' \
-  -e 's|REPLACE_WITH_API_ENDPOINT|api.recipemanager.link|g' \
-  -e 's|REPLACE_WITH_RDS_ADDRESS|db.xxxx.us-east-1.rds.amazonaws.com|g' \
-  -e 's|REPLACE_WITH_RDS_DATABASE_NAME|recipe_manager|g' \
-  -e 's|REPLACE_WITH_RDS_USERNAME|postgres|g' \
-  -e 's|REPLACE_WITH_CORS_ORIGINS|https://recipemanager.link|g' \
-  -e 's|REPLACE_WITH_AWS_REGION|us-east-1|g' \
-  -e 's|REPLACE_WITH_ENVIRONMENT|dev|g'
-```
+All other per-environment values (API endpoint, CORS origins, DB name, DB user, AWS region,
+secret key names) are committed directly in each overlay's patch files.
