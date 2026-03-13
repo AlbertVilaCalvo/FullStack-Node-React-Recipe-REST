@@ -35,6 +35,5 @@ kubectl kustomize kubernetes/server/overlays/dev | sed \
   -e 's|REPLACE_WITH_RDS_DATABASE_NAME|recipe_manager|g' \
   -e 's|REPLACE_WITH_RDS_USERNAME|postgres|g' \
   -e 's|REPLACE_WITH_CORS_ORIGINS|https://recipemanager.link|g' \
-  -e 's|REPLACE_WITH_AWS_REGION|us-east-1|g' \
-  -e 's|REPLACE_WITH_ENVIRONMENT|dev|g'
+  -e 's|REPLACE_WITH_AWS_REGION|us-east-1|g'
 ```

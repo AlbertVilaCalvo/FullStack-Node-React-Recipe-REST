@@ -209,7 +209,6 @@ sed -i.bak \
   -e "s|REPLACE_WITH_RDS_USERNAME|${RDS_USERNAME}|g" \
   -e "s|REPLACE_WITH_CORS_ORIGINS|${CORS_ORIGINS}|g" \
   -e "s|REPLACE_WITH_AWS_REGION|${AWS_REGION}|g" \
-  -e "s|REPLACE_WITH_ENVIRONMENT|${ENVIRONMENT}|g" \
   "${TEMP_DIR}/manifests.yaml"
 
 # Apply the manifests
