@@ -8,16 +8,16 @@ Use `kubectl kustomize` to render the final output of an overlay without applyin
 
 ```shell
 # Render the dev overlay
-kubectl kustomize server/kubernetes/overlays/dev
+kubectl kustomize kubernetes/server/overlays/dev
 
 # Render the prod overlay
-kubectl kustomize server/kubernetes/overlays/prod
+kubectl kustomize kubernetes/server/overlays/prod
 ```
 
 You can save the rendered output to a file.
 
 ```shell
-kubectl kustomize server/kubernetes/overlays/dev > dev-manifest.yaml
+kubectl kustomize kubernetes/server/overlays/dev > dev-manifest.yaml
 ```
 
 The rendered output still contains placeholder strings (e.g. `REPLACE_WITH_ECR_IMAGE_URL`).
@@ -27,7 +27,7 @@ To see what the final manifests look like with real values substituted, you can 
 through `sed` manually:
 
 ```shell
-kubectl kustomize server/kubernetes/overlays/dev | sed \
+kubectl kustomize kubernetes/server/overlays/dev | sed \
   -e 's|REPLACE_WITH_ECR_IMAGE_URL|123456789.dkr.ecr.us-east-1.amazonaws.com/recipe-manager-api:abc1234|g' \
   -e 's|REPLACE_WITH_API_CERTIFICATE_ARN|arn:aws:acm:us-east-1:123456789:certificate/xxxx|g' \
   -e 's|REPLACE_WITH_API_ENDPOINT|api.recipemanager.link|g' \

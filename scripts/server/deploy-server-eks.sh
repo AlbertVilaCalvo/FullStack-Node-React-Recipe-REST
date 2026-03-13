@@ -33,7 +33,7 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 ENVIRONMENT="${1}"
 IMAGE_TAG="${2}"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-KUBERNETES_DIR="${PROJECT_ROOT}/server/kubernetes"
+KUBERNETES_DIR="${PROJECT_ROOT}/kubernetes/server"
 TERRAFORM_DIR="${PROJECT_ROOT}/terraform/server/environments/${ENVIRONMENT}"
 NAMESPACE="recipe-manager"
 

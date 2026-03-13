@@ -25,7 +25,7 @@ resource "aws_iam_role" "server_pod" {
 # provide the IAM role credentials to the pods running with the specified
 # service account. The AWS SDKs and CLI running in the pod will then use these
 # credentials for AWS API calls.
-# See the ServiceAccount definition at server/kubernetes/base/serviceaccount.yaml
+# See the ServiceAccount definition at kubernetes/server/base/serviceaccount.yaml
 resource "aws_eks_pod_identity_association" "server" {
   cluster_name    = var.cluster_name
   namespace       = var.namespace
