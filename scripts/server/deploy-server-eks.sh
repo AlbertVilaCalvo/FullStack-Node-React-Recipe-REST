@@ -201,7 +201,6 @@ sed -i.bak \
   -e "s|REPLACE_WITH_RDS_DATABASE_NAME|${RDS_DATABASE_NAME}|g" \
   -e "s|REPLACE_WITH_RDS_USERNAME|${RDS_USERNAME}|g" \
   -e "s|REPLACE_WITH_CORS_ORIGINS|${CORS_ORIGINS}|g" \
-  -e "s|REPLACE_WITH_AWS_REGION|${AWS_REGION}|g" \
   "${TEMP_DIR}/manifests.yaml"
 
 # Apply the manifests
