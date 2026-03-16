@@ -89,7 +89,6 @@ ECR_REPOSITORY_URL=$(get_terraform_output "ecr_repository_url")
 RDS_ADDRESS=$(get_terraform_output "rds_address")
 RDS_DATABASE_NAME=$(get_terraform_output "rds_database_name")
 RDS_USERNAME=$(get_terraform_output "rds_username")
-API_CERTIFICATE_ARN=$(get_terraform_output "api_certificate_arn")
 
 # Validate all required Terraform outputs
 MISSING_OUTPUTS=()
@@ -112,10 +111,6 @@ fi
 
 if [[ -z "${RDS_USERNAME}" ]]; then
   MISSING_OUTPUTS+=("rds_username")
-fi
-
-if [[ -z "${API_CERTIFICATE_ARN}" ]]; then
-  MISSING_OUTPUTS+=("api_certificate_arn")
 fi
 
 if [[ ${#MISSING_OUTPUTS[@]} -gt 0 ]]; then
@@ -202,7 +197,6 @@ kubectl kustomize "${KUBERNETES_DIR}/overlays/${ENVIRONMENT}" >"${TEMP_DIR}/mani
 # Replace placeholders in the generated manifests
 sed -i.bak \
   -e "s|REPLACE_WITH_ECR_IMAGE_URL|${FULL_IMAGE_URL}|g" \
-  -e "s|REPLACE_WITH_API_CERTIFICATE_ARN|${API_CERTIFICATE_ARN}|g" \
   -e "s|REPLACE_WITH_API_ENDPOINT|${API_ENDPOINT}|g" \
   -e "s|REPLACE_WITH_RDS_ADDRESS|${RDS_ADDRESS}|g" \
   -e "s|REPLACE_WITH_RDS_DATABASE_NAME|${RDS_DATABASE_NAME}|g" \
