@@ -71,6 +71,9 @@ validate_directory_exists "${KUBERNETES_DIR}"
 # Check if kubectl is installed
 validate_command_exists kubectl
 
+# Check if kustomize is installed
+validate_command_exists kustomize
+
 # Check if AWS CLI is installed
 validate_command_exists aws
 
@@ -191,14 +194,25 @@ log_step "Step 4/6: Processing Kubernetes manifests..."
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "${TEMP_DIR}"' EXIT
 
-# Generate manifests using kustomize
-kubectl kustomize "${KUBERNETES_DIR}/overlays/${ENVIRONMENT}" >"${TEMP_DIR}/manifests.yaml"
+OVERLAY_DIR="${KUBERNETES_DIR}/overlays/${ENVIRONMENT}"
+
+# Update the image in the kustomization.yaml before generating manifests
+# This adds the following to the dev or prod kustomization.yaml:
+# images:
+#   - name: recipe-manager-api-server
+#     newName: 123456789012.dkr.ecr.us-east-1.amazonaws.com/recipe-manager-server-dev
+#     newTag: abc1234
+pushd "${OVERLAY_DIR}" >/dev/null
+kustomize edit set image recipe-manager-api-server="${FULL_IMAGE_URL}"
+popd >/dev/null
 
 # Replace placeholders in the generated manifests
 sed -i.bak \
-  -e "s|REPLACE_WITH_ECR_IMAGE_URL|${FULL_IMAGE_URL}|g" \
   -e "s|REPLACE_WITH_RDS_ADDRESS|${RDS_ADDRESS}|g" \
   "${TEMP_DIR}/manifests.yaml"
+
+# Generate manifests using kustomize
+kubectl kustomize "${OVERLAY_DIR}" >"${TEMP_DIR}/manifests.yaml"
 
 # Apply the manifests
 log_step "Step 5/6: Applying Kubernetes manifests..."

@@ -15,7 +15,8 @@ spec:
       serviceAccountName: recipe-manager-api
       containers:
         - name: api
-          image: REPLACE_WITH_ECR_IMAGE_URL
+          # Value is set with `kustomize edit set image`
+          image: recipe-manager-api-server:latest
           imagePullPolicy: Always
           ports:
             - name: http
