@@ -2,8 +2,7 @@
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/ephemeral-resources/secretsmanager_random_password
 
 ephemeral "random_password" "master_password" {
-  length = 32
-  # Special characters can cause issues when replacing REPLACE_WITH_RDS_PASSWORD with sed
+  length  = 32
   special = false
 }
 

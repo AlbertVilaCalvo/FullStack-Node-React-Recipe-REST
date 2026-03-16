@@ -27,6 +27,8 @@ spec:
                 name: recipe-manager-api-config
             - secretRef:
                 name: recipe-manager-api-secrets
+            - secretRef:
+                name: recipe-manager-api-parameters
           # From https://x.com/thockin/status/1134193838841401345
           # Memory limit == Memory request, No CPU limit
           resources:

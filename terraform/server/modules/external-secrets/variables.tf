@@ -36,3 +36,8 @@ variable "secrets_manager_secret_arns" {
   description = "List of AWS Secrets Manager secret ARNs that the External Secrets Operator is allowed to access"
   type        = list(string)
 }
+
+variable "ssm_parameter_arns" {
+  description = "List of AWS SSM Parameter Store ARNs that the External Secrets Operator is allowed to access"
+  type        = list(string)
+}

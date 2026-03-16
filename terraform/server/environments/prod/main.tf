@@ -181,6 +181,10 @@ module "external_secrets" {
     module.app_secrets.email_user_secret_arn,
     module.app_secrets.email_password_secret_arn,
   ]
+
+  ssm_parameter_arns = [
+    module.rds.ssm_parameter_arn_rds_address
+  ]
 }
 
 module "karpenter_controller" {

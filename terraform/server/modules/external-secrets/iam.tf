@@ -44,6 +44,14 @@ resource "aws_iam_policy" "external_secrets" {
           "secretsmanager:ListSecretVersionIds"
         ]
         Resource = var.secrets_manager_secret_arns
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+        Resource = var.ssm_parameter_arns
       }
     ]
   })

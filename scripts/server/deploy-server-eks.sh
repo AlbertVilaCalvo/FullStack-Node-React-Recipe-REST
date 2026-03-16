@@ -89,7 +89,6 @@ log_info "Fetching configuration from Terraform outputs..."
 
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
 ECR_REPOSITORY_URL=$(get_terraform_output "ecr_repository_url")
-RDS_ADDRESS=$(get_terraform_output "rds_address")
 RDS_DATABASE_NAME=$(get_terraform_output "rds_database_name")
 RDS_USERNAME=$(get_terraform_output "rds_username")
 
@@ -102,10 +101,6 @@ fi
 
 if [[ -z "${ECR_REPOSITORY_URL}" ]]; then
   MISSING_OUTPUTS+=("ecr_repository_url")
-fi
-
-if [[ -z "${RDS_ADDRESS}" ]]; then
-  MISSING_OUTPUTS+=("rds_address")
 fi
 
 if [[ -z "${RDS_DATABASE_NAME}" ]]; then
@@ -169,7 +164,6 @@ FULL_IMAGE_URL="${ECR_REPOSITORY_URL}:${IMAGE_TAG}"
 log_info "AWS Region: ${AWS_REGION}"
 log_info "Cluster Name: ${CLUSTER_NAME}"
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
-log_info "RDS Address: ${RDS_ADDRESS}"
 log_info "API Endpoint: ${API_ENDPOINT}"
 log_info "Web Domain: ${WEB_DOMAIN}"
 log_info "CORS origins: ${CORS_ORIGINS}"
@@ -205,11 +199,6 @@ OVERLAY_DIR="${KUBERNETES_DIR}/overlays/${ENVIRONMENT}"
 pushd "${OVERLAY_DIR}" >/dev/null
 kustomize edit set image recipe-manager-api-server="${FULL_IMAGE_URL}"
 popd >/dev/null
-
-# Replace placeholders in the generated manifests
-sed -i.bak \
-  -e "s|REPLACE_WITH_RDS_ADDRESS|${RDS_ADDRESS}|g" \
-  "${TEMP_DIR}/manifests.yaml"
 
 # Generate manifests using kustomize
 kubectl kustomize "${OVERLAY_DIR}" >"${TEMP_DIR}/manifests.yaml"
