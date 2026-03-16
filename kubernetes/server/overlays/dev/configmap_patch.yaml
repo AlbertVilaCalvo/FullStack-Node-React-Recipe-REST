@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recipe-manager-api-config
+data:
+  CORS_ORIGINS: 'https://recipemanager.link,https://www.recipemanager.link'
+  DB_NAME: 'recipe_manager_dev'

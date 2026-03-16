@@ -198,9 +198,6 @@ kubectl kustomize "${KUBERNETES_DIR}/overlays/${ENVIRONMENT}" >"${TEMP_DIR}/mani
 sed -i.bak \
   -e "s|REPLACE_WITH_ECR_IMAGE_URL|${FULL_IMAGE_URL}|g" \
   -e "s|REPLACE_WITH_RDS_ADDRESS|${RDS_ADDRESS}|g" \
-  -e "s|REPLACE_WITH_RDS_DATABASE_NAME|${RDS_DATABASE_NAME}|g" \
-  -e "s|REPLACE_WITH_RDS_USERNAME|${RDS_USERNAME}|g" \
-  -e "s|REPLACE_WITH_CORS_ORIGINS|${CORS_ORIGINS}|g" \
   "${TEMP_DIR}/manifests.yaml"
 
 # Apply the manifests

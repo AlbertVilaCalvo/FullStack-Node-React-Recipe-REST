@@ -29,8 +29,5 @@ through `sed` manually:
 ```shell
 kubectl kustomize kubernetes/server/overlays/dev | sed \
   -e 's|REPLACE_WITH_ECR_IMAGE_URL|123456789.dkr.ecr.us-east-1.amazonaws.com/recipe-manager-api:abc1234|g' \
-  -e 's|REPLACE_WITH_RDS_ADDRESS|db.xxxx.us-east-1.rds.amazonaws.com|g' \
-  -e 's|REPLACE_WITH_RDS_DATABASE_NAME|recipe_manager|g' \
-  -e 's|REPLACE_WITH_RDS_USERNAME|postgres|g' \
-  -e 's|REPLACE_WITH_CORS_ORIGINS|https://recipemanager.link|g'
+  -e 's|REPLACE_WITH_RDS_ADDRESS|db.xxxx.us-east-1.rds.amazonaws.com|g'
 ```
