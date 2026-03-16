@@ -3,5 +3,19 @@ kind: Ingress
 metadata:
   name: recipe-manager-api
   annotations:
-    alb.ingress.kubernetes.io/tags: environment=dev,app=recipe-manager
+    alb.ingress.kubernetes.io/tags: app=recipe-manager,environment=dev
     alb.ingress.kubernetes.io/load-balancer-name: recipe-manager-api-lb-dev
+    # ExternalDNS annotation to create Route53 A record for the API domain to the ALB
+    external-dns.alpha.kubernetes.io/hostname: api.recipemanager.link
+spec:
+  rules:
+    - host: api.recipemanager.link
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: recipe-manager-api
+                port:
+                  number: 80

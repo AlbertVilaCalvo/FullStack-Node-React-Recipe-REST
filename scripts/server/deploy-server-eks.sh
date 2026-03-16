@@ -197,7 +197,6 @@ kubectl kustomize "${KUBERNETES_DIR}/overlays/${ENVIRONMENT}" >"${TEMP_DIR}/mani
 # Replace placeholders in the generated manifests
 sed -i.bak \
   -e "s|REPLACE_WITH_ECR_IMAGE_URL|${FULL_IMAGE_URL}|g" \
-  -e "s|REPLACE_WITH_API_ENDPOINT|${API_ENDPOINT}|g" \
   -e "s|REPLACE_WITH_RDS_ADDRESS|${RDS_ADDRESS}|g" \
   -e "s|REPLACE_WITH_RDS_DATABASE_NAME|${RDS_DATABASE_NAME}|g" \
   -e "s|REPLACE_WITH_RDS_USERNAME|${RDS_USERNAME}|g" \
