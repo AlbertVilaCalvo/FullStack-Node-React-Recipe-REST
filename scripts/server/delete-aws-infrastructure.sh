@@ -369,5 +369,5 @@ echo "Infrastructure Deletion Complete!"
 echo "=========================================="
 echo ""
 
-log_info "All AWS infrastructure for environment '${ENVIRONMENT}' has been deleted."
+log_info "All AWS infrastructure for the '${ENVIRONMENT}' environment has been deleted."
 echo ""

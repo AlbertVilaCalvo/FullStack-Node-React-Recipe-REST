@@ -67,7 +67,7 @@ log_error() {
 # Arguments:
 #   $1 - Message to print
 log_step() {
-  echo -e "${BLUE}[STEP]${NC} $1"
+  echo -e "\n${BLUE}[STEP]${NC} $1"
 }
 
 # ============================================================================
