@@ -2,7 +2,7 @@
 
 Kustomize manifests for deploying the Recipe Manager server to EKS.
 
-## Rendering Manifests Locally
+## Render manifests locally
 
 Use `kubectl kustomize` to render the final output of an overlay without applying it.
 
@@ -36,13 +36,10 @@ images:
     newTag: abc1234
 ```
 
-The rendered output still contains placeholder strings (e.g. `REPLACE_WITH_ECR_IMAGE_URL`).
-These are substituted at deploy time by `scripts/server/deploy-server-eks.sh` using `sed`.
+## Sync Kubernetes manifests with Terraform configuration
 
-To see what the final manifests look like with real values substituted, you can pipe the output
-through `sed` manually:
+To keep the Kubernetes manifests in sync with the current infrastructure configuration in your `terraform.tfvars` files, you can run the script `scripts/server/sync-k8s-with-tfvars.sh`. Whenever you change values in your `terraform.tfvars` files (like API endpoints or database configuration), run this script to update the Kubernetes manifests (like `ingress_patch.yaml`, `configmap_patch.yaml` or `secret-store.yaml`) with the new values:
 
 ```shell
-kubectl kustomize kubernetes/server/overlays/dev | sed \
-  -e 's|REPLACE_WITH_RDS_ADDRESS|db.xxxx.us-east-1.rds.amazonaws.com|g'
+./scripts/server/sync-k8s-with-tfvars.sh dev  # Or prod
 ```

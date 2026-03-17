@@ -225,19 +225,23 @@ terraform init -backend-config="backend.config"
 
 #### 1. Create AWS Infrastructure
 
+Edit the `terraform/server/environments/dev/terraform.tfvars` or `prod/terraform.tfvars` file to adjust values to your desire before running the script. If you edit the `terraform.tfvars`, you should run the synchronization script to update the Kubernetes manifests with the new values:
+
+```shell
+./scripts/server/sync-k8s-with-tfvars.sh dev # Or prod
+```
+
 Create the AWS infrastructure (VPC, EKS, RDS, ECR, etc.):
 
 ```shell
 ./scripts/server/create-aws-infrastructure.sh dev  # Or prod
 ```
 
-Edit the `terraform/server/environments/dev/terraform.tfvars` or `prod/terraform.tfvars` file to adjust values to your desire before running the script.
-
 This script will:
 
 - Initialize Terraform
 - Create VPC, EKS cluster, RDS database, ECR repository, Pod Identity, ACM certificate for the API endpoint and application secrets (JWT, email credentials)
-- Install Load Balancer Controller, ExternalDNS and Karpenter
+- Install Load Balancer Controller, ExternalDNS, External Secrets Operator and Karpenter
 - Create Karpenter NodePool and EC2NodeClass
 - Display next steps
 
