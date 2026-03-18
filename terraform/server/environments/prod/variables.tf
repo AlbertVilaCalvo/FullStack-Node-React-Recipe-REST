@@ -207,7 +207,7 @@ variable "skip_final_snapshot" {
   type        = bool
 }
 
-# API Endpoint Certificate
+# Endpoint Certificates
 
 variable "api_endpoint" {
   description = "The API endpoint domain name (e.g., api.recipemanager.link)"
@@ -215,6 +215,15 @@ variable "api_endpoint" {
   validation {
     condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
     error_message = "The API endpoint must be a valid domain name."
+  }
+}
+
+variable "argocd_hostname" {
+  description = "The Argo CD UI hostname (e.g., argocd.recipeapp.link)"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.argocd_hostname))
+    error_message = "The Argo CD hostname must be a valid domain name."
   }
 }
 

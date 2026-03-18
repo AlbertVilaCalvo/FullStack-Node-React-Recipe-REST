@@ -50,16 +50,17 @@ resource "aws_iam_policy" "external_dns" {
           "route53:ChangeResourceRecordSets"
         ]
         Resource = [
-          "arn:aws:route53:::hostedzone/${data.aws_route53_zone.api_endpoint.zone_id}"
+          "arn:aws:route53:::hostedzone/${data.aws_route53_zone.main.zone_id}"
         ]
         Condition = {
           "ForAllValues:StringLike" = {
-            "route53:ChangeResourceRecordSetsNormalizedRecordNames" = [
-              # api.recipemanager.link A
-              var.api_endpoint,
-              # externaldns-cname-api.recipemanager.link TXT
-              "${local.external_dns_txt_prefix}*${var.api_endpoint}"
-            ]
+            # One A record + one TXT ownership record per endpoint
+            "route53:ChangeResourceRecordSetsNormalizedRecordNames" = flatten([
+              for ep in var.endpoints : [
+                ep,
+                "${local.external_dns_txt_prefix}*${ep}"
+              ]
+            ])
             "route53:ChangeResourceRecordSetsActions" = [
               "CREATE",
               "UPSERT",
@@ -79,7 +80,7 @@ resource "aws_iam_policy" "external_dns" {
           "route53:ListTagsForResources"
         ]
         Resource = [
-          "arn:aws:route53:::hostedzone/${data.aws_route53_zone.api_endpoint.zone_id}"
+          "arn:aws:route53:::hostedzone/${data.aws_route53_zone.main.zone_id}"
         ]
       },
       {

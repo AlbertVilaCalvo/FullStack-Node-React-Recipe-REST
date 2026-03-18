@@ -6,7 +6,7 @@
 # (CRD may not be installed) ... no matches for kind "EC2NodeClass" in group "karpenter.k8s.aws"".
 # Do this:
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
-#    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.api_endpoint_certificate -target=module.app_secrets
+#    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.api_endpoint_certificate -target=module.argocd_certificate -target=module.app_secrets
 # 2. EKS cluster created -> install Helm charts:
 #    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller
 # 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
@@ -118,7 +118,16 @@ module "api_endpoint_certificate" {
   app_name    = var.app_name
   environment = var.environment
 
-  api_endpoint = var.api_endpoint
+  endpoint = var.api_endpoint
+}
+
+module "argocd_certificate" {
+  source = "../../modules/api-endpoint-certificate"
+
+  app_name    = var.app_name
+  environment = var.environment
+
+  endpoint = var.argocd_hostname
 }
 
 module "app_secrets" {
@@ -161,7 +170,7 @@ module "external_dns" {
   chart_path    = local.external_dns_chart_path
 
   cluster_name = module.eks.cluster_name
-  api_endpoint = var.api_endpoint
+  endpoints    = [var.api_endpoint, var.argocd_hostname]
 }
 
 module "external_secrets" {

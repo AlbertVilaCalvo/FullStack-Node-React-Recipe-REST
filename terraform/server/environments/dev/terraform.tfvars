@@ -36,7 +36,8 @@ deletion_protection      = false
 skip_final_snapshot      = true
 
 # API Endpoint
-api_endpoint = "api.recipemanager.link"
+api_endpoint    = "api.recipemanager.link"
+argocd_hostname = "argocd.recipemanager.link"
 
 # App Secrets
 secretsmanager_secret_recovery_days = 0 # Use 0 if you recreate infrastructure to avoid "InvalidRequestException: you can't create this secret because a secret with this name is already scheduled for deletion"

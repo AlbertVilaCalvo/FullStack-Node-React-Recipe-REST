@@ -36,7 +36,8 @@ deletion_protection      = true
 skip_final_snapshot      = false
 
 # API Endpoint
-api_endpoint = "api.recipeapp.link"
+api_endpoint    = "api.recipeapp.link"
+argocd_hostname = "argocd.recipeapp.link"
 
 # App Secrets
 secretsmanager_secret_recovery_days = 30
