@@ -16,11 +16,11 @@ variable "environment" {
 
 # ACM Certificate module variables
 
-variable "api_endpoint" {
-  description = "The API endpoint domain name (e.g., api.recipemanager.link)"
+variable "domain_name" {
+  description = "The domain name for the certificate (e.g., api.recipemanager.link)"
   type        = string
   validation {
-    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
-    error_message = "The API endpoint must be a valid domain name."
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.domain_name))
+    error_message = "The domain name must be a valid domain name."
   }
 }

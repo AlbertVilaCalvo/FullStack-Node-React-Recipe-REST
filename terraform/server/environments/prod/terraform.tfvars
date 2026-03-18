@@ -38,6 +38,9 @@ skip_final_snapshot      = false
 # API Endpoint
 api_endpoint = "api.recipeapp.link"
 
+# Argo CD Endpoint
+argocd_endpoint = "argocd.recipeapp.link"
+
 # App Secrets
 secretsmanager_secret_recovery_days = 30
 

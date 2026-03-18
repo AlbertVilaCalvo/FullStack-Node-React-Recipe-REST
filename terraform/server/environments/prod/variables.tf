@@ -218,6 +218,15 @@ variable "api_endpoint" {
   }
 }
 
+variable "argocd_endpoint" {
+  description = "The Argo CD endpoint domain name (e.g., argocd.recipeapp.link)"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.argocd_endpoint))
+    error_message = "The Argo CD endpoint must be a valid domain name."
+  }
+}
+
 # App Secrets
 
 # Used in RDS master password too

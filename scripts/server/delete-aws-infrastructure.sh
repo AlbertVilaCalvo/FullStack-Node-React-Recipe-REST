@@ -309,7 +309,7 @@ for attempt in $(seq 1 ${MAX_ATTEMPTS}); do
     -target=module.rds \
     -target=module.ecr \
     -target=module.pod_identity \
-    -target=module.api_endpoint_certificate \
+    -target=module.acm_certificates \
     -target=module.app_secrets \
     -auto-approve; then
     break

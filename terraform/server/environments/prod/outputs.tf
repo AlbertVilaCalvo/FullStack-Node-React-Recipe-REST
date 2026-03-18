@@ -90,7 +90,12 @@ output "ecr_repository_url" {
 
 output "api_certificate_arn" {
   description = "ARN of the ACM certificate for the API endpoint"
-  value       = module.api_endpoint_certificate.certificate_arn
+  value       = module.acm_certificates[var.api_endpoint].certificate_arn
+}
+
+output "argocd_certificate_arn" {
+  description = "The ARN of the ACM certificate for the Argo CD endpoint"
+  value       = module.acm_certificates[var.argocd_endpoint].certificate_arn
 }
 
 # Commands

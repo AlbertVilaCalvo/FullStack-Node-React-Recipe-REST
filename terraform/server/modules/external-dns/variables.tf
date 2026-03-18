@@ -41,11 +41,11 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "api_endpoint" {
-  description = "The API endpoint domain name (e.g., api.recipemanager.link). Used for domain filtering."
-  type        = string
+variable "endpoints" {
+  description = "A list of endpoint domain names (e.g., api.recipemanager.link, argocd.recipemanager.link). Used for domain filtering."
+  type        = list(string)
   validation {
-    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
-    error_message = "The API endpoint must be a valid domain name."
+    condition     = alltrue([for e in var.endpoints : can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", e))])
+    error_message = "All endpoints must be valid domain names."
   }
 }
