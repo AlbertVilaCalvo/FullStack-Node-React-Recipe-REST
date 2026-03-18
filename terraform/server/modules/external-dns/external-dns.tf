@@ -18,11 +18,17 @@
 locals {
   service_account_name = "external-dns"
   namespace            = "external-dns"
+
+  # Extract unique root domains from all managed endpoints
+  # e.g., ["api.recipemanager.link", "argocd.recipemanager.link"] -> ["recipemanager.link"]
+  root_domains = distinct([
+    for ep in var.managed_endpoints : join(".", slice(split(".", ep), length(split(".", ep)) - 2, length(split(".", ep))))
+  ])
 }
 
-data "aws_route53_zone" "api_endpoint" {
-  # Get the root domain from the full API endpoint domain (api.recipemanager.link -> recipemanager.link)
-  name         = join(".", slice(split(".", var.api_endpoint), length(split(".", var.api_endpoint)) - 2, length(split(".", var.api_endpoint))))
+data "aws_route53_zone" "managed" {
+  for_each     = toset(local.root_domains)
+  name         = each.value
   private_zone = false
 }
 
@@ -62,7 +68,7 @@ resource "helm_release" "external_dns" {
       # --source=ingress: Watch Ingress resources for hostnames
       sources = ["ingress"]
       # --domain-filter: Make ExternalDNS see only the hosted zones matching provided domain, omit other zones
-      domainFilters = [data.aws_route53_zone.api_endpoint.name]
+      domainFilters = local.root_domains
       # --policy=sync: Allow ExternalDNS to delete records when Ingress is deleted
       policy = "sync"
       # --txt-prefix: Prefix for TXT ownership records to avoid conflicts with CNAME records
@@ -71,12 +77,12 @@ resource "helm_release" "external_dns" {
       # Must be a unique value that doesn't change for the lifetime of your cluster
       txtOwnerId = var.cluster_name
       # Extra arguments for flags that are not supported by the Helm chart
-      extraArgs = [
-        # --zone-id-filter: Only manage records in the specified hosted zone
-        "--zone-id-filter=${data.aws_route53_zone.api_endpoint.zone_id}",
+      extraArgs = concat(
+        # --zone-id-filter: Only manage records in the specified hosted zones
+        [for domain in local.root_domains : "--zone-id-filter=${data.aws_route53_zone.managed[domain].zone_id}"],
         # --exclude-record-types=AAAA: Only create A records (ALB is IPv4 only)
-        "--exclude-record-types=AAAA"
-      ]
+        ["--exclude-record-types=AAAA"]
+      )
       # Allow scheduling on the bootstrap nodes of the managed node group.
       # Note we don't set nodeSelector here like we do for the Karpenter
       # controller (see karpenter-controller.tf) to allow ExternalDNS to run on any

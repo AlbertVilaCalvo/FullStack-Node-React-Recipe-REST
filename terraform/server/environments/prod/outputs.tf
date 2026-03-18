@@ -93,6 +93,13 @@ output "api_certificate_arn" {
   value       = module.api_endpoint_certificate.certificate_arn
 }
 
+# Argo CD Endpoint
+
+output "argocd_certificate_arn" {
+  description = "ARN of the ACM certificate for the Argo CD endpoint"
+  value       = module.argocd_endpoint_certificate.certificate_arn
+}
+
 # Commands
 
 output "kubectl_config_command" {
