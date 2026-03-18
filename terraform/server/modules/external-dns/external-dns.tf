@@ -20,9 +20,10 @@ locals {
   namespace            = "external-dns"
 }
 
-data "aws_route53_zone" "api_endpoint" {
-  # Get the root domain from the full API endpoint domain (api.recipemanager.link -> recipemanager.link)
-  name         = join(".", slice(split(".", var.api_endpoint), length(split(".", var.api_endpoint)) - 2, length(split(".", var.api_endpoint))))
+data "aws_route53_zone" "main" {
+  # Get the root domain from the first endpoint (e.g. api.recipemanager.link -> recipemanager.link)
+  # All endpoints must belong to the same hosted zone.
+  name         = join(".", slice(split(".", var.endpoints[0]), length(split(".", var.endpoints[0])) - 2, length(split(".", var.endpoints[0]))))
   private_zone = false
 }
 
@@ -62,7 +63,7 @@ resource "helm_release" "external_dns" {
       # --source=ingress: Watch Ingress resources for hostnames
       sources = ["ingress"]
       # --domain-filter: Make ExternalDNS see only the hosted zones matching provided domain, omit other zones
-      domainFilters = [data.aws_route53_zone.api_endpoint.name]
+      domainFilters = [data.aws_route53_zone.main.name]
       # --policy=sync: Allow ExternalDNS to delete records when Ingress is deleted
       policy = "sync"
       # --txt-prefix: Prefix for TXT ownership records to avoid conflicts with CNAME records
@@ -73,7 +74,7 @@ resource "helm_release" "external_dns" {
       # Extra arguments for flags that are not supported by the Helm chart
       extraArgs = [
         # --zone-id-filter: Only manage records in the specified hosted zone
-        "--zone-id-filter=${data.aws_route53_zone.api_endpoint.zone_id}",
+        "--zone-id-filter=${data.aws_route53_zone.main.zone_id}",
         # --exclude-record-types=AAAA: Only create A records (ALB is IPv4 only)
         "--exclude-record-types=AAAA"
       ]

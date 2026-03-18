@@ -3,6 +3,10 @@ environment = "prod"
 aws_region  = "us-east-1"
 web_domain  = "recipeapp.link"
 
+# Endpoints
+api_endpoint    = "api.recipemanager.link"
+argocd_endpoint = "argocd.recipemanager.link"
+
 # VPC
 vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
@@ -34,9 +38,6 @@ backup_window            = "03:00-04:00"
 maintenance_window       = "Sun:04:00-Sun:05:00"
 deletion_protection      = true
 skip_final_snapshot      = false
-
-# API Endpoint
-api_endpoint = "api.recipeapp.link"
 
 # App Secrets
 secretsmanager_secret_recovery_days = 30

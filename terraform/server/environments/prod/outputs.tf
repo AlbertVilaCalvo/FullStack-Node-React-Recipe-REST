@@ -86,13 +86,6 @@ output "ecr_repository_url" {
   value       = module.ecr.repository_url
 }
 
-# API Endpoint
-
-output "api_certificate_arn" {
-  description = "ARN of the ACM certificate for the API endpoint"
-  value       = module.api_endpoint_certificate.certificate_arn
-}
-
 # Commands
 
 output "kubectl_config_command" {

@@ -3,6 +3,10 @@ environment = "dev"
 aws_region  = "us-east-1"
 web_domain  = "recipemanager.link"
 
+# Endpoints
+api_endpoint    = "api.recipemanager.link"
+argocd_endpoint = "argocd.recipemanager.link"
+
 # VPC
 vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
@@ -34,9 +38,6 @@ backup_window            = "03:00-04:00"
 maintenance_window       = "Sun:04:00-Sun:05:00"
 deletion_protection      = false
 skip_final_snapshot      = true
-
-# API Endpoint
-api_endpoint = "api.recipemanager.link"
 
 # App Secrets
 secretsmanager_secret_recovery_days = 0 # Use 0 if you recreate infrastructure to avoid "InvalidRequestException: you can't create this secret because a secret with this name is already scheduled for deletion"

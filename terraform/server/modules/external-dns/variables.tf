@@ -41,11 +41,19 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "api_endpoint" {
-  description = "The API endpoint domain name (e.g., api.recipemanager.link). Used for domain filtering."
-  type        = string
+variable "endpoints" {
+  description = "A list of endpoint domain names (e.g., api.recipemanager.link, argocd.recipemanager.link). All endpoints must belong to the same root hosted zone. Used for domain filtering."
+  type        = list(string)
   validation {
-    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
-    error_message = "The API endpoint must be a valid domain name."
+    condition     = alltrue([for e in var.endpoints : can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", e))])
+    error_message = "All endpoints must be valid domain names."
+  }
+  validation {
+    # Extract the root domain (last two components) from each endpoint and assert they're all the same.
+    # This module only supports a single Route53 hosted zone.
+    condition = length(distinct([
+      for e in var.endpoints : join(".", slice(split(".", e), length(split(".", e)) - 2, length(split(".", e))))
+    ])) == 1
+    error_message = "All endpoints must belong to the same root domain (e.g., all under recipemanager.link). Multiple hosted zones are not supported."
   }
 }

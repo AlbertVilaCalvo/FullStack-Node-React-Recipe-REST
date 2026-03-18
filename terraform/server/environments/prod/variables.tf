@@ -40,6 +40,24 @@ variable "web_domain" {
   }
 }
 
+variable "api_endpoint" {
+  description = "The API endpoint domain name (e.g., api.recipemanager.link)"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
+    error_message = "The API endpoint must be a valid domain name."
+  }
+}
+
+variable "argocd_endpoint" {
+  description = "The Argo CD endpoint domain name (e.g., argocd.recipemanager.link)"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.argocd_endpoint))
+    error_message = "The Argo CD endpoint must be a valid domain name."
+  }
+}
+
 # VPC
 
 variable "vpc_cidr" {
@@ -205,17 +223,6 @@ variable "deletion_protection" {
 variable "skip_final_snapshot" {
   description = "Skip final snapshot when deleting"
   type        = bool
-}
-
-# API Endpoint Certificate
-
-variable "api_endpoint" {
-  description = "The API endpoint domain name (e.g., api.recipemanager.link)"
-  type        = string
-  validation {
-    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
-    error_message = "The API endpoint must be a valid domain name."
-  }
 }
 
 # App Secrets

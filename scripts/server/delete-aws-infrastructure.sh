@@ -111,6 +111,11 @@ if [[ -z "${API_ENDPOINT}" ]]; then
   log_warn "Could not get api_endpoint from terraform.tfvars."
   exit 1
 fi
+ARGOCD_ENDPOINT=$(get_tfvars_value "argocd_endpoint")
+if [[ -z "${ARGOCD_ENDPOINT}" ]]; then
+  log_warn "Could not get argocd_endpoint from terraform.tfvars."
+  exit 1
+fi
 AWS_REGION=$(get_tfvars_value "aws_region")
 if [[ -z "${AWS_REGION}" ]]; then
   log_error "Could not get aws_region from terraform.tfvars."
@@ -125,6 +130,7 @@ fi
 log_info "Cluster Name: ${CLUSTER_NAME}"
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
 log_info "API Endpoint: ${API_ENDPOINT}"
+log_info "Argo CD Endpoint: ${ARGOCD_ENDPOINT}"
 log_info "AWS Region: ${AWS_REGION}"
 
 # Extract root domain (e.g., api.recipemanager.link -> recipemanager.link)
@@ -173,20 +179,28 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
       --query 'ResourceTagMappingList[*].ResourceARN' \
       --output text)
 
-    # Check for DNS A record
-    # There is also a TXT record created by ExternalDNS for ownership tracking, but we only check for the A record which points to the ALB
-    REMAINING_DNS_RECORD=$(aws route53 list-resource-record-sets \
+    # Check for DNS A records
+    # There are also TXT records created by ExternalDNS for ownership tracking, but we only check for the A records which point to the ALB
+    REMAINING_API_DNS=$(aws route53 list-resource-record-sets \
       --hosted-zone-id "${ZONE_ID}" \
       --query "ResourceRecordSets[?Name=='${API_ENDPOINT}.' && Type=='A'].Name" \
       --output text)
+    REMAINING_ARGOCD_DNS=$(aws route53 list-resource-record-sets \
+      --hosted-zone-id "${ZONE_ID}" \
+      --query "ResourceRecordSets[?Name=='${ARGOCD_ENDPOINT}.' && Type=='A'].Name" \
+      --output text)
+    REMAINING_DNS_RECORD="${REMAINING_API_DNS}${REMAINING_ARGOCD_DNS}"
 
     if [[ -z "${REMAINING_ALB_RESOURCES}" && -z "${REMAINING_DNS_RECORD}" ]]; then
       log_info "All Load Balancer resources and DNS records have been successfully deleted."
       break
     fi
 
-    if [[ -n "${REMAINING_DNS_RECORD}" ]]; then
+    if [[ -n "${REMAINING_API_DNS}" ]]; then
       log_info "DNS A Record for ${API_ENDPOINT} still exists..."
+    fi
+    if [[ -n "${REMAINING_ARGOCD_DNS}" ]]; then
+      log_info "DNS A Record for ${ARGOCD_ENDPOINT} still exists..."
     fi
     if [[ -n "${REMAINING_ALB_RESOURCES}" ]]; then
       log_info "Load Balancer resources still remaining..."
@@ -309,7 +323,7 @@ for attempt in $(seq 1 ${MAX_ATTEMPTS}); do
     -target=module.rds \
     -target=module.ecr \
     -target=module.pod_identity \
-    -target=module.api_endpoint_certificate \
+    -target=module.acm_certificates \
     -target=module.app_secrets \
     -auto-approve; then
     break
