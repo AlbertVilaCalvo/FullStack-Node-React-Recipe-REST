@@ -17,6 +17,8 @@ The project structure is:
   - `/terraform/bootstrap`: S3 buckets for Terraform state.
   - `/terraform/web`: Infrastructure for the frontend.
   - `/terraform/server`: Infrastructure for the Node.js API.
+- `kubernetes`: Kubernetes manifests.
+  - `kubernetes/server`: Manifests for the server. Uses Kustomize.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
 
