@@ -24,16 +24,16 @@ variable "hosted_zone_name" {
     error_message = "The hosted zone name must be a valid domain name."
   }
   validation {
-    condition     = var.domain_name == var.hosted_zone_name || endswith(var.domain_name, ".${var.hosted_zone_name}")
-    error_message = "The domain name must be equal to the hosted zone name or be a subdomain of it."
+    condition     = var.domain == var.hosted_zone_name || endswith(var.domain, ".${var.hosted_zone_name}")
+    error_message = "The domain must be equal to the hosted zone name or be a subdomain of it."
   }
 }
 
-variable "domain_name" {
+variable "domain" {
   description = "The domain name for the ACM certificate (e.g., api.recipemanager.link)"
   type        = string
   validation {
-    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.domain_name))
-    error_message = "The domain name must be a valid domain name."
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.domain))
+    error_message = "The domain must be a valid domain name."
   }
 }

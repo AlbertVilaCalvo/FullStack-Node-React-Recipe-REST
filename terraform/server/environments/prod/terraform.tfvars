@@ -3,10 +3,10 @@ environment = "prod"
 aws_region  = "us-east-1"
 web_domain  = "recipeapp.link"
 
-# Endpoints
+# Domains
 server_hosted_zone_name = "recipeapp.link"
-api_endpoint            = "api.recipeapp.link"
-argocd_endpoint         = "argocd.recipeapp.link"
+api_domain              = "api.recipeapp.link"
+argocd_domain           = "argocd.recipeapp.link"
 
 # VPC
 vpc_cidr           = "10.0.0.0/16"

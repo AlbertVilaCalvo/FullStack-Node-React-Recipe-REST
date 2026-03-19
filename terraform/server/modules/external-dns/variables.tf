@@ -50,16 +50,16 @@ variable "hosted_zone_name" {
   }
 }
 
-variable "endpoints" {
-  description = "A list of endpoint domain names (e.g., api.recipemanager.link, argocd.recipemanager.link). All endpoints must belong to the configured hosted zone. Used for domain filtering and IAM restrictions."
+variable "domains" {
+  description = "A list of domain names (e.g., api.recipemanager.link, argocd.recipemanager.link). All domains must belong to the configured hosted zone. Used for domain filtering and IAM restrictions."
   type        = list(string)
   validation {
-    condition     = alltrue([for e in var.endpoints : can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", e))])
-    error_message = "All endpoints must be valid domain names."
+    condition     = alltrue([for d in var.domains : can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", d))])
+    error_message = "All domains must be valid domain names."
   }
   validation {
     # This module only supports a single Route53 hosted zone.
-    condition     = alltrue([for e in var.endpoints : e == var.hosted_zone_name || endswith(e, ".${var.hosted_zone_name}")])
-    error_message = "All endpoints must be equal to the hosted zone name or be subdomains of it. Multiple hosted zones are not supported."
+    condition     = alltrue([for d in var.domains : d == var.hosted_zone_name || endswith(d, ".${var.hosted_zone_name}")])
+    error_message = "All domains must be equal to the hosted zone name or be subdomains of it. Multiple hosted zones are not supported."
   }
 }

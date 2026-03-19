@@ -114,13 +114,13 @@ module "pod_identity" {
 
 module "acm_certificates" {
   source   = "../../modules/acm-certificate"
-  for_each = toset([var.api_endpoint, var.argocd_endpoint])
+  for_each = toset([var.api_domain, var.argocd_domain])
 
   app_name    = var.app_name
   environment = var.environment
 
   hosted_zone_name = var.server_hosted_zone_name
-  domain_name      = each.value
+  domain           = each.value
 }
 
 module "app_secrets" {
@@ -164,7 +164,7 @@ module "external_dns" {
 
   cluster_name     = module.eks.cluster_name
   hosted_zone_name = var.server_hosted_zone_name
-  endpoints        = [var.api_endpoint, var.argocd_endpoint]
+  domains          = [var.api_domain, var.argocd_domain]
 }
 
 module "external_secrets" {

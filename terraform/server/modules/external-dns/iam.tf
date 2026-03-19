@@ -55,9 +55,9 @@ resource "aws_iam_policy" "external_dns" {
         Condition = {
           "ForAllValues:StringLike" = {
             "route53:ChangeResourceRecordSetsNormalizedRecordNames" = flatten([
-              for endpoint in var.endpoints : [
-                endpoint,
-                "${local.external_dns_txt_prefix}*${endpoint}"
+              for domain in var.domains : [
+                domain,
+                "${local.external_dns_txt_prefix}*${domain}"
               ]
             ])
             "route53:ChangeResourceRecordSetsActions" = [

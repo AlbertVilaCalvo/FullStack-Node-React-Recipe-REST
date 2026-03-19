@@ -49,29 +49,29 @@ variable "server_hosted_zone_name" {
   }
 }
 
-variable "api_endpoint" {
+variable "api_domain" {
   description = "The API endpoint domain name (e.g., api.recipemanager.link)"
   type        = string
   validation {
-    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_endpoint))
-    error_message = "The API endpoint must be a valid domain name."
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.api_domain))
+    error_message = "The API domain must be a valid domain name."
   }
   validation {
-    condition     = var.api_endpoint == var.server_hosted_zone_name || endswith(var.api_endpoint, ".${var.server_hosted_zone_name}")
-    error_message = "The API endpoint must be equal to the server hosted zone name or be a subdomain of it."
+    condition     = var.api_domain == var.server_hosted_zone_name || endswith(var.api_domain, ".${var.server_hosted_zone_name}")
+    error_message = "The API domain must be equal to the server hosted zone name or be a subdomain of it."
   }
 }
 
-variable "argocd_endpoint" {
-  description = "The Argo CD endpoint domain name (e.g., argocd.recipemanager.link)"
+variable "argocd_domain" {
+  description = "The Argo CD domain name (e.g., argocd.recipemanager.link)"
   type        = string
   validation {
-    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.argocd_endpoint))
-    error_message = "The Argo CD endpoint must be a valid domain name."
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.argocd_domain))
+    error_message = "The Argo CD domain must be a valid domain name."
   }
   validation {
-    condition     = var.argocd_endpoint == var.server_hosted_zone_name || endswith(var.argocd_endpoint, ".${var.server_hosted_zone_name}")
-    error_message = "The Argo CD endpoint must be equal to the server hosted zone name or be a subdomain of it."
+    condition     = var.argocd_domain == var.server_hosted_zone_name || endswith(var.argocd_domain, ".${var.server_hosted_zone_name}")
+    error_message = "The Argo CD domain must be equal to the server hosted zone name or be a subdomain of it."
   }
 }
 

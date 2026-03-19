@@ -3,10 +3,10 @@ environment = "dev"
 aws_region  = "us-east-1"
 web_domain  = "recipemanager.link"
 
-# Endpoints
+# Domains
 server_hosted_zone_name = "recipemanager.link"
-api_endpoint            = "api.recipemanager.link"
-argocd_endpoint         = "argocd.recipemanager.link"
+api_domain              = "api.recipemanager.link"
+argocd_domain           = "argocd.recipemanager.link"
 
 # VPC
 vpc_cidr           = "10.0.0.0/16"

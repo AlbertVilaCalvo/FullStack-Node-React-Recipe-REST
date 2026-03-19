@@ -9,7 +9,7 @@ data "aws_route53_zone" "main" {
 }
 
 resource "aws_acm_certificate" "cert" {
-  domain_name       = var.domain_name
+  domain_name       = var.domain
   validation_method = "DNS"
 
   lifecycle {
@@ -17,7 +17,7 @@ resource "aws_acm_certificate" "cert" {
   }
 
   tags = {
-    Name = "${var.app_name}-${replace(var.domain_name, ".", "-")}-cert-${var.environment}"
+    Name = "${var.app_name}-${replace(var.domain, ".", "-")}-cert-${var.environment}"
   }
 }
 
