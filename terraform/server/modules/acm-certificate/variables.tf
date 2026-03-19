@@ -16,6 +16,19 @@ variable "environment" {
 
 # ACM Certificate module variables
 
+variable "hosted_zone_name" {
+  description = "The Route53 hosted zone name used to validate the ACM certificate (e.g., recipemanager.link or dev.recipemanager.link)"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.hosted_zone_name))
+    error_message = "The hosted zone name must be a valid domain name."
+  }
+  validation {
+    condition     = var.domain_name == var.hosted_zone_name || endswith(var.domain_name, ".${var.hosted_zone_name}")
+    error_message = "The domain name must be equal to the hosted zone name or be a subdomain of it."
+  }
+}
+
 variable "domain_name" {
   description = "The domain name for the ACM certificate (e.g., api.recipemanager.link)"
   type        = string

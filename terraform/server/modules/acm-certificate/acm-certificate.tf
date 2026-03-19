@@ -4,8 +4,7 @@
 # the same region as the ALB (i.e. the EKS cluster region).
 
 data "aws_route53_zone" "main" {
-  # Get the root domain from the full domain (api.recipemanager.link -> recipemanager.link)
-  name         = join(".", slice(split(".", var.domain_name), length(split(".", var.domain_name)) - 2, length(split(".", var.domain_name))))
+  name         = var.hosted_zone_name
   private_zone = false
 }
 

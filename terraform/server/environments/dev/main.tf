@@ -119,7 +119,8 @@ module "acm_certificates" {
   app_name    = var.app_name
   environment = var.environment
 
-  domain_name = each.value
+  hosted_zone_name = var.server_hosted_zone_name
+  domain_name      = each.value
 }
 
 module "app_secrets" {
@@ -161,8 +162,9 @@ module "external_dns" {
   chart_version = var.external_dns_chart_version
   chart_path    = local.external_dns_chart_path
 
-  cluster_name = module.eks.cluster_name
-  endpoints    = [var.api_endpoint, var.argocd_endpoint]
+  cluster_name     = module.eks.cluster_name
+  hosted_zone_name = var.server_hosted_zone_name
+  endpoints        = [var.api_endpoint, var.argocd_endpoint]
 }
 
 module "external_secrets" {

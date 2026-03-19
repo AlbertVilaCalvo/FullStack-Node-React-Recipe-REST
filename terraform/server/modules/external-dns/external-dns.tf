@@ -21,9 +21,7 @@ locals {
 }
 
 data "aws_route53_zone" "main" {
-  # Get the root domain from the first endpoint (e.g. api.recipemanager.link -> recipemanager.link)
-  # All endpoints must belong to the same hosted zone.
-  name         = join(".", slice(split(".", var.endpoints[0]), length(split(".", var.endpoints[0])) - 2, length(split(".", var.endpoints[0]))))
+  name         = var.hosted_zone_name
   private_zone = false
 }
 
