@@ -86,6 +86,13 @@ output "ecr_repository_url" {
   value       = module.ecr.repository_url
 }
 
+# Github Actions
+
+output "github_actions_oidc_role_arn" {
+  description = "ARN of the IAM role for OIDC authentication with GitHub Actions"
+  value       = module.github_actions_oidc.role_arn
+}
+
 # Commands
 
 output "kubectl_config_command" {

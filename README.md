@@ -309,7 +309,7 @@ On that page, click the environment and add the following environment variables 
 | Environment variable               | Value                                                 |
 | ---------------------------------- | ----------------------------------------------------- |
 | `AWS_REGION`                       | `us-east-1`                                           |
-| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN` | `terraform output oidc_role_arn`                      |
+| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN` | `terraform output github_actions_oidc_role_arn`       |
 | `WEB_S3_BUCKET`                    | `terraform output website_s3_bucket_name`             |
 | `WEB_CLOUDFRONT_DISTRIBUTION_ID`   | `terraform output website_cloudfront_distribution_id` |
 | `VITE_API_BASE_URL`                | `https://api.recipemanager.link/api`                  |

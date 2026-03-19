@@ -222,3 +222,42 @@ module "karpenter_nodepool" {
   memory_limit      = var.karpenter_memory_limit
   consolidate_after = var.karpenter_consolidate_after
 }
+
+# GitHub Actions OIDC
+# *******************
+
+module "github_actions_oidc" {
+  source = "../../../modules/github-actions-oidc"
+
+  app_name    = var.app_name
+  environment = var.environment
+  aws_region  = var.aws_region
+
+  role_name            = "${var.app_name}-github-actions-server-${var.environment}"
+  github_org           = var.github_org
+  github_repo          = var.github_repo
+  create_oidc_provider = false
+  iam_role_policy_document = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "ecr:GetAuthorizationToken"
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage"
+        ]
+        Resource = module.ecr.repository_arn
+      }
+    ]
+  })
+}

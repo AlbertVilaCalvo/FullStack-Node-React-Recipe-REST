@@ -321,3 +321,23 @@ variable "email_password" {
   type        = string
   sensitive   = true
 }
+
+# GitHub Actions OIDC
+
+variable "github_org" {
+  description = "The GitHub organization name for the repository using OIDC authentication"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9_-]+$", var.github_org))
+    error_message = "The GitHub organization name must contain only alphanumeric characters, underscores, and hyphens."
+  }
+}
+
+variable "github_repo" {
+  description = "The GitHub repository name for the repository using OIDC authentication"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9._-]+$", var.github_repo))
+    error_message = "The GitHub repository name must contain only alphanumeric characters, underscores, hyphens, and periods."
+  }
+}
