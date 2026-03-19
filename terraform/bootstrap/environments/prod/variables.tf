@@ -30,3 +30,8 @@ variable "additional_default_tags" {
     error_message = "additional_default_tags must not contain the keys \"Application\" or \"Environment\" as they are already set"
   }
 }
+
+variable "create_oidc_provider" {
+  description = "Whether to create the AWS IAM OIDC provider."
+  type        = bool
+}

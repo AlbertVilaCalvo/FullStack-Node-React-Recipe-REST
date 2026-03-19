@@ -32,9 +32,3 @@ variable "iam_role_policy_document" {
   description = "IAM policy document as JSON string to attach to the role"
   type        = string
 }
-
-variable "create_oidc_provider" {
-  description = "Whether to create the AWS IAM OIDC provider."
-  type        = bool
-  default     = true
-}

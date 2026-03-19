@@ -227,16 +227,15 @@ module "karpenter_nodepool" {
 # *******************
 
 module "github_actions_oidc" {
-  source = "../../../modules/github-actions-oidc"
+  source = "../../../modules/github-actions-role"
 
   app_name    = var.app_name
   environment = var.environment
   aws_region  = var.aws_region
 
-  role_name            = "${var.app_name}-github-actions-server-${var.environment}"
-  github_org           = var.github_org
-  github_repo          = var.github_repo
-  create_oidc_provider = false
+  role_name   = "${var.app_name}-github-actions-server-${var.environment}"
+  github_org  = var.github_org
+  github_repo = var.github_repo
   iam_role_policy_document = jsonencode({
     Version = "2012-10-17"
     Statement = [
