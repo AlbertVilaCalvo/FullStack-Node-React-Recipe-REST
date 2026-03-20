@@ -66,3 +66,7 @@ karpenter_consolidate_after = "5m" # Longer wait time means less frequent node c
 # Email Configuration
 email_user     = "noreply@recipeapp.link"
 email_password = "placeholder"
+
+# GitHub Actions OIDC
+github_org  = "AlbertVilaCalvo"
+github_repo = "FullStack-Node-React-Recipe-REST"

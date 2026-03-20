@@ -200,13 +200,23 @@ The checks performed are:
 
 ## Deploy infrastructure with Terraform
 
-### Create S3 buckets for Terraform state
+### Bootstrap: Create S3 buckets for Terraform state
 
 Before deploying any infrastructure, you need to create the S3 buckets that Terraform will use to store its state.
 Use the provided script to do this:
 
 ```shell
 ./scripts/bootstrap/create-state-bucket.sh dev  # Or prod
+```
+
+### Bootstrap: GitHub Actions OIDC provider
+
+Before deploying any web or server environment, you must create the GitHub Actions OIDC identity provider once per AWS account. This is a one-time step that enables GitHub Actions workflows to authenticate with AWS without long-lived credentials.
+
+```shell
+cd terraform/bootstrap/environments/all
+terraform init
+terraform apply
 ```
 
 ### Web (Frontend)
@@ -309,7 +319,7 @@ On that page, click the environment and add the following environment variables 
 | Environment variable               | Value                                                 |
 | ---------------------------------- | ----------------------------------------------------- |
 | `AWS_REGION`                       | `us-east-1`                                           |
-| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN` | `terraform output oidc_role_arn`                      |
+| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN` | `terraform output web_github_actions_oidc_role_arn`   |
 | `WEB_S3_BUCKET`                    | `terraform output website_s3_bucket_name`             |
 | `WEB_CLOUDFRONT_DISTRIBUTION_ID`   | `terraform output website_cloudfront_distribution_id` |
 | `VITE_API_BASE_URL`                | `https://api.recipemanager.link/api`                  |
