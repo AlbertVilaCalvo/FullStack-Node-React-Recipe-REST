@@ -16,7 +16,7 @@ module "github_actions_oidc_role_web" {
       },
       {
         Effect   = "Allow"
-        Action   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+        Action   = ["s3:PutObject", "s3:DeleteObject"]
         Resource = ["${module.web_hosting.s3_bucket_arn}/*"]
       },
       {
