@@ -56,25 +56,14 @@ if [[ -z "${IMAGE_TAG}" ]]; then
   exit 1
 fi
 
-# Validate environment argument
 validate_environment "${ENVIRONMENT}"
 
-# Check if Terraform directory exists
 validate_directory_exists "${TERRAFORM_DIR}"
-
-# Check if Terraform is installed
-validate_command_exists terraform
-
-# Check if Kubernetes directory exists
 validate_directory_exists "${KUBERNETES_DIR}"
 
-# Check if kubectl is installed
+validate_command_exists terraform
 validate_command_exists kubectl
-
-# Check if kustomize is installed
 validate_command_exists kustomize
-
-# Check if AWS CLI is installed
 validate_command_exists aws
 
 # ============================================================================

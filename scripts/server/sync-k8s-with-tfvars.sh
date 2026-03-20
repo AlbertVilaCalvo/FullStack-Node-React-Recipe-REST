@@ -27,6 +27,7 @@ if [[ -z "${ENVIRONMENT}" ]]; then
 fi
 
 validate_environment "${ENVIRONMENT}"
+
 validate_directory_exists "${TERRAFORM_DIR}"
 validate_directory_exists "${KUBERNETES_DIR}"
 

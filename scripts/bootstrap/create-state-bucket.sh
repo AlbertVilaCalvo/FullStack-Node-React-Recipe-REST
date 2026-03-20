@@ -45,23 +45,14 @@ if [[ -z "${ENVIRONMENT}" ]]; then
   exit 1
 fi
 
-# Validate environment argument
 validate_environment "${ENVIRONMENT}"
 
-# Check if Terraform directory exists
 validate_directory_exists "${TERRAFORM_DIR}"
-
-# Check if Terraform is installed
-validate_command_exists terraform
-
-# Check if AWS CLI is installed
-validate_command_exists aws
-
-# Check if server environment directory exists
 validate_directory_exists "${SERVER_DIR}"
-
-# Check if web environment directory exists
 validate_directory_exists "${WEB_DIR}"
+
+validate_command_exists terraform
+validate_command_exists aws
 
 # ============================================================================
 # Main Script

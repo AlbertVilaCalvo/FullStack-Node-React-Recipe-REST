@@ -45,26 +45,19 @@ if [[ -z "${ENVIRONMENT}" ]]; then
   exit 1
 fi
 
-# Validate environment argument
 validate_environment "${ENVIRONMENT}"
 
-# Check if Terraform directory exists
 validate_directory_exists "${TERRAFORM_DIR}"
-
-# Check if server directory exists
 validate_directory_exists "${SERVER_DIR}"
+
+validate_command_exists aws
+validate_command_exists git
 
 # Check if Docker is running
 if ! docker info >/dev/null 2>&1; then
   log_error "Docker is not running. Please start Docker and try again."
   exit 1
 fi
-
-# Check if AWS CLI is installed
-validate_command_exists aws
-
-# Check if git is installed
-validate_command_exists git
 
 # ============================================================================
 # Main Script
