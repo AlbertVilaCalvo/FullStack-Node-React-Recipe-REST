@@ -115,15 +115,15 @@ fi
 
 log_info "Fetching configuration from terraform.tfvars..."
 
-API_ENDPOINT=$(get_tfvars_value "api_endpoint")
+API_DOMAIN=$(get_tfvars_value "api_domain")
 WEB_DOMAIN=$(get_tfvars_value "web_domain")
 AWS_REGION=$(get_tfvars_value "aws_region")
 
 # Validate required terraform.tfvars values
 MISSING_TFVARS=()
 
-if [[ -z "${API_ENDPOINT}" ]]; then
-  MISSING_TFVARS+=("api_endpoint")
+if [[ -z "${API_DOMAIN}" ]]; then
+  MISSING_TFVARS+=("api_domain")
 fi
 
 if [[ -z "${WEB_DOMAIN}" ]]; then
@@ -152,8 +152,8 @@ FULL_IMAGE_URL="${ECR_REPOSITORY_URL}:${IMAGE_TAG}"
 log_info "AWS Region: ${AWS_REGION}"
 log_info "Cluster Name: ${CLUSTER_NAME}"
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
-log_info "API Endpoint: ${API_ENDPOINT}"
-log_info "Web Domain: ${WEB_DOMAIN}"
+log_info "API domain: ${API_DOMAIN}"
+log_info "Web domain: ${WEB_DOMAIN}"
 log_info "Full image URL: ${FULL_IMAGE_URL}"
 
 # Update kubectl config
@@ -226,6 +226,6 @@ kubectl get ingress recipe-manager-api -n "${NAMESPACE}"
 
 echo ""
 log_info "Deployment successful!"
-log_info "API endpoint: https://${API_ENDPOINT}"
-log_info "Website URL: https://${WEB_DOMAIN}"
+log_info "API domain: https://${API_DOMAIN}"
+log_info "Website domain: https://${WEB_DOMAIN}"
 echo ""

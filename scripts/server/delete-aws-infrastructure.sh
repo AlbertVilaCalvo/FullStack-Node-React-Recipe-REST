@@ -106,14 +106,14 @@ if [[ -z "${ECR_REPOSITORY_URL}" ]]; then
   log_error "Make sure you have run 'terraform apply' in ${TERRAFORM_DIR}"
   exit 1
 fi
-API_ENDPOINT=$(get_tfvars_value "api_endpoint")
-if [[ -z "${API_ENDPOINT}" ]]; then
-  log_warn "Could not get api_endpoint from terraform.tfvars."
+API_DOMAIN=$(get_tfvars_value "api_domain")
+if [[ -z "${API_DOMAIN}" ]]; then
+  log_warn "Could not get api_domain from terraform.tfvars."
   exit 1
 fi
-ARGOCD_ENDPOINT=$(get_tfvars_value "argocd_endpoint")
-if [[ -z "${ARGOCD_ENDPOINT}" ]]; then
-  log_warn "Could not get argocd_endpoint from terraform.tfvars."
+ARGOCD_DOMAIN=$(get_tfvars_value "argocd_domain")
+if [[ -z "${ARGOCD_DOMAIN}" ]]; then
+  log_warn "Could not get argocd_domain from terraform.tfvars."
   exit 1
 fi
 AWS_REGION=$(get_tfvars_value "aws_region")
@@ -129,12 +129,12 @@ fi
 
 log_info "Cluster Name: ${CLUSTER_NAME}"
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
-log_info "API Endpoint: ${API_ENDPOINT}"
-log_info "Argo CD Endpoint: ${ARGOCD_ENDPOINT}"
+log_info "API domain: ${API_DOMAIN}"
+log_info "Argo CD domain: ${ARGOCD_DOMAIN}"
 log_info "AWS Region: ${AWS_REGION}"
 
 # Extract root domain (e.g., api.recipemanager.link -> recipemanager.link)
-ROOT_DOMAIN=$(echo "${API_ENDPOINT}" | rev | cut -d. -f1,2 | rev)
+ROOT_DOMAIN=$(echo "${API_DOMAIN}" | rev | cut -d. -f1,2 | rev)
 log_info "Root Domain: ${ROOT_DOMAIN}"
 # Query Route53 for the zone ID
 log_info "Looking up Route53 hosted zone ID for domain: ${ROOT_DOMAIN}"
@@ -183,11 +183,11 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
     # There are also TXT records created by ExternalDNS for ownership tracking, but we only check for the A records which point to the ALB
     REMAINING_API_DNS=$(aws route53 list-resource-record-sets \
       --hosted-zone-id "${ZONE_ID}" \
-      --query "ResourceRecordSets[?Name=='${API_ENDPOINT}.' && Type=='A'].Name" \
+      --query "ResourceRecordSets[?Name=='${API_DOMAIN}.' && Type=='A'].Name" \
       --output text)
     REMAINING_ARGOCD_DNS=$(aws route53 list-resource-record-sets \
       --hosted-zone-id "${ZONE_ID}" \
-      --query "ResourceRecordSets[?Name=='${ARGOCD_ENDPOINT}.' && Type=='A'].Name" \
+      --query "ResourceRecordSets[?Name=='${ARGOCD_DOMAIN}.' && Type=='A'].Name" \
       --output text)
     REMAINING_DNS_RECORD="${REMAINING_API_DNS}${REMAINING_ARGOCD_DNS}"
 
@@ -197,10 +197,10 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
     fi
 
     if [[ -n "${REMAINING_API_DNS}" ]]; then
-      log_info "DNS A Record for ${API_ENDPOINT} still exists..."
+      log_info "DNS A Record for ${API_DOMAIN} still exists..."
     fi
     if [[ -n "${REMAINING_ARGOCD_DNS}" ]]; then
-      log_info "DNS A Record for ${ARGOCD_ENDPOINT} still exists..."
+      log_info "DNS A Record for ${ARGOCD_DOMAIN} still exists..."
     fi
     if [[ -n "${REMAINING_ALB_RESOURCES}" ]]; then
       log_info "Load Balancer resources still remaining..."

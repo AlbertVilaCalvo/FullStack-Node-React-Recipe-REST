@@ -32,14 +32,14 @@ validate_directory_exists "${KUBERNETES_DIR}"
 
 log_info "Syncing Kubernetes manifests for environment: ${ENVIRONMENT}"
 
-API_ENDPOINT=$(get_tfvars_value "api_endpoint")
+API_DOMAIN=$(get_tfvars_value "api_domain")
 WEB_DOMAIN=$(get_tfvars_value "web_domain")
 AWS_REGION=$(get_tfvars_value "aws_region")
 RDS_DATABASE_NAME=$(get_tfvars_value "database_name")
 RDS_USERNAME=$(get_tfvars_value "master_username")
 
 MISSING_TFVARS=()
-if [[ -z "${API_ENDPOINT}" ]]; then MISSING_TFVARS+=("api_endpoint"); fi
+if [[ -z "${API_DOMAIN}" ]]; then MISSING_TFVARS+=("api_domain"); fi
 if [[ -z "${WEB_DOMAIN}" ]]; then MISSING_TFVARS+=("web_domain"); fi
 if [[ -z "${AWS_REGION}" ]]; then MISSING_TFVARS+=("aws_region"); fi
 if [[ -z "${RDS_DATABASE_NAME}" ]]; then MISSING_TFVARS+=("database_name"); fi
@@ -59,10 +59,10 @@ log_info "Updating manifests in ${OVERLAY_DIR} and ${BASE_DIR}..."
 
 # Update ingress_patch.yaml
 sed -i.bak \
-  -e "s|external-dns.alpha.kubernetes.io/hostname: .*|external-dns.alpha.kubernetes.io/hostname: ${API_ENDPOINT}|g" \
+  -e "s|external-dns.alpha.kubernetes.io/hostname: .*|external-dns.alpha.kubernetes.io/hostname: ${API_DOMAIN}|g" \
   "${OVERLAY_DIR}/ingress_patch.yaml"
 sed -i.bak \
-  -e "s|- host: .*|- host: ${API_ENDPOINT}|g" \
+  -e "s|- host: .*|- host: ${API_DOMAIN}|g" \
   "${OVERLAY_DIR}/ingress_patch.yaml"
 
 # Update configmap_patch.yaml
