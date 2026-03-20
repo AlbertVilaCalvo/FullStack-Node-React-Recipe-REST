@@ -23,6 +23,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile.local
+    image: recipe-manager-local-server:latest
     container_name: server
     # restart: no
     depends_on:
@@ -46,6 +47,7 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile.local
+    image: recipe-manager-local-web:latest
     container_name: web
     env_file:
       - .env
