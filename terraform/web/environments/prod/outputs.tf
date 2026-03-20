@@ -5,7 +5,7 @@ output "aws_region" {
 
 output "oidc_role_arn" {
   description = "ARN of the IAM role for OIDC authentication with GitHub Actions"
-  value       = module.github_actions_oidc.oidc_role_arn
+  value       = module.github_oidc_role_web.role_arn
 }
 
 output "website_s3_bucket_name" {

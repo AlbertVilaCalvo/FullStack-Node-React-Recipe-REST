@@ -70,3 +70,7 @@ karpenter_consolidate_after = "1m"
 # Email Configuration
 email_user     = "noreply@recipemanager.link"
 email_password = "placeholder"
+
+# GitHub Actions OIDC
+github_org  = "AlbertVilaCalvo"
+github_repo = "FullStack-Node-React-Recipe-REST"

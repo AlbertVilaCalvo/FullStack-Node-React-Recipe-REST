@@ -86,6 +86,13 @@ output "ecr_repository_url" {
   value       = module.ecr.repository_url
 }
 
+# GitHub Actions OIDC
+
+output "server_oidc_role_arn" {
+  description = "ARN of the IAM role for GitHub Actions OIDC authentication (ECR push)"
+  value       = module.github_oidc_role_server.role_arn
+}
+
 # Commands
 
 output "kubectl_config_command" {
