@@ -72,10 +72,12 @@ jobs:
   deploy_dev:
     name: Deploy React web app to the dev environment
     needs: [eslint, tests]
-    # Deploy only when pushing to the main branch or when a pull request is merged (closed) to then main branch
-    # but not when is opened or synchronize.
+    # Deploy only when:
+    # 1. Pushing to the main branch
+    # 2. A pull request is merged (closed) to the main branch
+    # 3. Manually triggered at the github.com website
     # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges
-    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    if: github.event_name == 'push' || github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     environment:
       name: dev
