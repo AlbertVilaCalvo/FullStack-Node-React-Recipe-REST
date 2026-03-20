@@ -75,18 +75,9 @@ log_info "Building Docker image for environment: ${ENVIRONMENT}"
 # Get ECR repository URL from Terraform outputs
 log_step "Step 1/5: Fetching all required values from Terraform outputs and terraform.tfvars..."
 ECR_REPOSITORY_URL=$(get_terraform_output "ecr_repository_url")
-if [[ -z "${ECR_REPOSITORY_URL}" ]]; then
-  log_error "Could not get ecr_repository_url from Terraform outputs."
-  log_error "Make sure you have run 'terraform apply' in ${TERRAFORM_DIR}"
-  exit 1
-fi
 
 # Get AWS region from terraform.tfvars
 AWS_REGION=$(get_tfvars_value "aws_region")
-if [[ -z "${AWS_REGION}" ]]; then
-  log_error "Could not get aws_region from terraform.tfvars."
-  exit 1
-fi
 
 log_info "ECR Repository URL: ${ECR_REPOSITORY_URL}"
 log_info "AWS Region: ${AWS_REGION}"

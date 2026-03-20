@@ -38,18 +38,6 @@ AWS_REGION=$(get_tfvars_value "aws_region")
 RDS_DATABASE_NAME=$(get_tfvars_value "database_name")
 RDS_USERNAME=$(get_tfvars_value "master_username")
 
-MISSING_TFVARS=()
-if [[ -z "${API_DOMAIN}" ]]; then MISSING_TFVARS+=("api_domain"); fi
-if [[ -z "${WEB_DOMAIN}" ]]; then MISSING_TFVARS+=("web_domain"); fi
-if [[ -z "${AWS_REGION}" ]]; then MISSING_TFVARS+=("aws_region"); fi
-if [[ -z "${RDS_DATABASE_NAME}" ]]; then MISSING_TFVARS+=("database_name"); fi
-if [[ -z "${RDS_USERNAME}" ]]; then MISSING_TFVARS+=("master_username"); fi
-
-if [[ ${#MISSING_TFVARS[@]} -gt 0 ]]; then
-  log_error "Missing required Terraform values in terraform.tfvars: ${MISSING_TFVARS[*]}"
-  exit 1
-fi
-
 CORS_ORIGINS="https://${WEB_DOMAIN},https://www.${WEB_DOMAIN}"
 
 BASE_DIR="${KUBERNETES_DIR}/base"

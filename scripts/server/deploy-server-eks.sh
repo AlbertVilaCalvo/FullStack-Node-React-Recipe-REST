@@ -90,54 +90,11 @@ log_info "Fetching configuration from Terraform outputs..."
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
 ECR_REPOSITORY_URL=$(get_terraform_output "ecr_repository_url")
 
-# Validate all required Terraform outputs
-MISSING_OUTPUTS=()
-
-if [[ -z "${CLUSTER_NAME}" ]]; then
-  MISSING_OUTPUTS+=("cluster_name")
-fi
-
-if [[ -z "${ECR_REPOSITORY_URL}" ]]; then
-  MISSING_OUTPUTS+=("ecr_repository_url")
-fi
-
-if [[ ${#MISSING_OUTPUTS[@]} -gt 0 ]]; then
-  log_error "Missing required Terraform outputs: ${MISSING_OUTPUTS[*]}"
-  log_error ""
-  log_error "This typically means the infrastructure has not been fully created."
-  log_error "Please ensure you have completed all infrastructure setup steps:"
-  log_error ""
-  log_error "1. Run the infrastructure creation script:"
-  log_error "   ./scripts/server/create-aws-infrastructure.sh ${ENVIRONMENT}"
-  log_error ""
-  exit 1
-fi
-
 log_info "Fetching configuration from terraform.tfvars..."
 
 API_DOMAIN=$(get_tfvars_value "api_domain")
 WEB_DOMAIN=$(get_tfvars_value "web_domain")
 AWS_REGION=$(get_tfvars_value "aws_region")
-
-# Validate required terraform.tfvars values
-MISSING_TFVARS=()
-
-if [[ -z "${API_DOMAIN}" ]]; then
-  MISSING_TFVARS+=("api_domain")
-fi
-
-if [[ -z "${WEB_DOMAIN}" ]]; then
-  MISSING_TFVARS+=("web_domain")
-fi
-
-if [[ -z "${AWS_REGION}" ]]; then
-  MISSING_TFVARS+=("aws_region")
-fi
-
-if [[ ${#MISSING_TFVARS[@]} -gt 0 ]]; then
-  log_error "Missing required Terraform values in terraform.tfvars: ${MISSING_TFVARS[*]}"
-  exit 1
-fi
 
 log_info "Fetching AWS account ID..."
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)

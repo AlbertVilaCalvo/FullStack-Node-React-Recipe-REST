@@ -118,13 +118,7 @@ terraform apply -target=module.karpenter_nodepool -auto-approve
 log_step "Step 5/5: Updating kubectl configuration..."
 AWS_REGION=$(get_tfvars_value "aws_region")
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
-if [[ -n "${AWS_REGION}" && -n "${CLUSTER_NAME}" ]]; then
-  aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
-else
-  log_warn "Could not get aws_region from terraform.tfvars or cluster_name from Terraform outputs."
-  log_info "You can manually update your kubeconfig with the following command:"
-  log_info "aws eks update-kubeconfig --region <aws_region> --name <cluster_name>"
-fi
+aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
 
 # Display summary
 echo ""

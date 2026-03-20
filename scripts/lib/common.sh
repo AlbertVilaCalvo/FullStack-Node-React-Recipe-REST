@@ -83,7 +83,20 @@ log_step() {
 #   Requires TERRAFORM_DIR to be set in the calling script
 get_terraform_output() {
   local output_name="$1"
-  terraform -chdir="${TERRAFORM_DIR}" output -raw "${output_name}"
+  local value
+
+  # Capture output. terraform output prints errors to stderr, which remains visible.
+  if ! value=$(terraform -chdir="${TERRAFORM_DIR}" output -raw "${output_name}"); then
+    log_error "Value for '${output_name}' not found in ${TERRAFORM_DIR}" >&2
+    return 1
+  fi
+
+  if [[ -z "${value}" ]]; then
+    log_error "Terraform output '${output_name}' is empty." >&2
+    return 1
+  fi
+
+  echo "${value}"
 }
 
 # Get a value from terraform.tfvars file
@@ -103,7 +116,16 @@ get_tfvars_value() {
   fi
 
   # Extract value between quotes, handling optional spaces
-  grep "^\s*${key}\s*=" "${tfvars_file}" | head -n1 | sed -E 's/^[^"]*"([^"]*)".*$/\1/'
+  local value
+  value=$(grep "^\s*${key}\s*=" "${tfvars_file}" | head -n1 | sed -E 's/^[^"]*"([^"]*)".*$/\1/' || true)
+
+  if [[ -z "${value}" ]]; then
+    # Print to stderr so it's printed even when the function call is part of an assignment
+    log_error "Value for '${key}' not found in ${tfvars_file}" >&2
+    return 1
+  fi
+
+  echo "${value}"
 }
 
 # ============================================================================

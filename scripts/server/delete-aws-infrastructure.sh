@@ -95,32 +95,11 @@ log_info "Using backend config from backend.config"
 terraform init -backend-config="backend.config"
 
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
-if [[ -z "${CLUSTER_NAME}" ]]; then
-  log_error "Could not get cluster_name from Terraform outputs."
-  log_error "Make sure you have run 'terraform apply' in ${TERRAFORM_DIR}"
-  exit 1
-fi
 ECR_REPOSITORY_URL=$(get_terraform_output "ecr_repository_url")
-if [[ -z "${ECR_REPOSITORY_URL}" ]]; then
-  log_error "Could not get ecr_repository_url from Terraform outputs."
-  log_error "Make sure you have run 'terraform apply' in ${TERRAFORM_DIR}"
-  exit 1
-fi
 API_DOMAIN=$(get_tfvars_value "api_domain")
-if [[ -z "${API_DOMAIN}" ]]; then
-  log_warn "Could not get api_domain from terraform.tfvars."
-  exit 1
-fi
 ARGOCD_DOMAIN=$(get_tfvars_value "argocd_domain")
-if [[ -z "${ARGOCD_DOMAIN}" ]]; then
-  log_warn "Could not get argocd_domain from terraform.tfvars."
-  exit 1
-fi
 AWS_REGION=$(get_tfvars_value "aws_region")
-if [[ -z "${AWS_REGION}" ]]; then
-  log_error "Could not get aws_region from terraform.tfvars."
-  exit 1
-fi
+
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 if [[ -z "${AWS_ACCOUNT_ID}" ]]; then
   log_error "Could not get AWS account ID from AWS CLI."

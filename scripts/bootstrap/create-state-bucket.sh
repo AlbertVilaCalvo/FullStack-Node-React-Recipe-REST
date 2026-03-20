@@ -84,15 +84,6 @@ terraform apply -auto-approve
 BUCKET_NAME=$(get_terraform_output "state_bucket")
 AWS_REGION=$(get_tfvars_value "aws_region")
 
-if [[ -z "${BUCKET_NAME}" ]]; then
-  log_error "Failed to get state_bucket output from Terraform."
-  exit 1
-fi
-if [[ -z "${AWS_REGION}" ]]; then
-  log_error "Failed to get aws_region from terraform.tfvars."
-  exit 1
-fi
-
 log_info "State bucket created: ${BUCKET_NAME} in ${AWS_REGION}"
 
 # Step 3: Generate backend.config content
