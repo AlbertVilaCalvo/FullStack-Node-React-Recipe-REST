@@ -324,15 +324,15 @@ if command -v docker &>/dev/null && docker info >/dev/null 2>&1; then
     log_info "No ECR-tagged images found."
   fi
 
-  # Remove recipe-manager-server:2026-01-29-12h56m33s
-  log_info "Removing recipe-manager-server images with timestamp tags..."
-  # Only match images with timestamp pattern (YYYY-MM-DD-HHhMMmSSs) to avoid deleting docker-compose images
-  SERVER_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "recipe-manager-server:[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-" || true)
+  # Remove recipe-manager-server:03c6255
+  log_info "Removing recipe-manager-server images with Git commit SHA tags..."
+  # Match images with short git commit SHA (7 hexadecimal characters)
+  SERVER_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -E "recipe-manager-server:[0-9a-f]{7}$" || true)
   if [[ -n "${SERVER_IMAGES}" ]]; then
     echo "${SERVER_IMAGES}" | xargs -r docker rmi -f 2>/dev/null || log_warn "Some server images could not be removed"
     log_info "Server images removed."
   else
-    log_info "No recipe-manager-server images with timestamp tags found."
+    log_info "No recipe-manager-server images with Git commit SHA tags found."
   fi
 else
   log_warn "Docker is not available. Skipping Docker image cleanup."
