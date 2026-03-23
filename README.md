@@ -311,18 +311,34 @@ This script will:
 
 ## Automatic deployment with GitHub Actions
 
+### Web frontend
+
 Once the AWS infrastructure is deployed, you can set up automatic deployment of the React web app to S3 and CloudFront using GitHub Actions.
 
 At the GitHub repository, go to Settings → Environments and create an environment named "dev" or "prod".
 On that page, click the environment and add the following environment variables (not secrets):
 
-| Environment variable               | Value                                                 |
-| ---------------------------------- | ----------------------------------------------------- |
-| `AWS_REGION`                       | `us-east-1`                                           |
-| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN` | `terraform output web_github_actions_oidc_role_arn`   |
-| `WEB_S3_BUCKET`                    | `terraform output website_s3_bucket_name`             |
-| `WEB_CLOUDFRONT_DISTRIBUTION_ID`   | `terraform output website_cloudfront_distribution_id` |
-| `VITE_API_BASE_URL`                | `https://api.recipemanager.link/api`                  |
+| Environment variable                   | Value                                                                            |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| `AWS_REGION`                           | `us-east-1`                                                                      |
+| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_WEB` | output of `terraform output oidc_role_arn` in `terraform/web/environments/[env]` |
+| `WEB_S3_BUCKET`                        | output of `terraform output website_s3_bucket_name`                              |
+| `WEB_CLOUDFRONT_DISTRIBUTION_ID`       | output of `terraform output website_cloudfront_distribution_id`                  |
+| `VITE_API_BASE_URL`                    | `https://api.recipemanager.link/api`                                             |
+
+### Server API
+
+The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml` on every push to `main` that touches `server/**`.
+
+At the GitHub repository, go to Settings → Environments and add the following environment variables to the "dev" and "prod" environments:
+
+| Environment variable                      | Value                                                                                      |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `AWS_REGION`                              | `us-east-1`                                                                                |
+| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER` | output of `terraform output server_oidc_role_arn` in `terraform/server/environments/[env]` |
+| `ECR_REPOSITORY_URL`                      | output of `terraform output ecr_repository_url` in `terraform/server/environments/[env]`   |
+
+**Prod deployment gate:** To require manual approval before updating the prod image tag, configure required reviewers on the "prod" environment: Settings → Environments → prod → Required reviewers.
 
 ## Manually deploy the React web app to AWS S3 and CloudFront
 

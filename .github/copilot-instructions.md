@@ -58,6 +58,8 @@ The server follows a three-layer architecture for organizing business logic:
   - Pod Identity for authentication. Do not use IAM Roles for Service Accounts (IRSA).
   - Kustomize for managing Kubernetes manifests.
 
+## Server API Endpoints
+
 ## Frontend Patterns
 
 - State Management: Global state is managed with Valtio.
@@ -69,6 +71,15 @@ The server follows a three-layer architecture for organizing business logic:
 
 - React frontend is deployed to CloudFront, using a private S3 bucket as the origin.
 - Deployment is done automatically using GitHub Actions (see `.github/workflows/web.yml`).
+
+## Server CI/CD
+
+- The server workflow is at `.github/workflows/server.yml`.
+- On push to `main` (paths: `server/**`): runs ESLint, typecheck (tsc --noEmit), and Jest; then builds the Docker image tagged with the short commit SHA (`${GITHUB_SHA::7}`) and pushes it to ECR; then commits an updated `kustomization.yaml` image tag directly to `main` using `kustomize edit set image`.
+- The `update_image_tag_prod` job uses `environment: prod` so it is gated by GitHub environment protection rules (required reviewers).
+- The kustomize commit path (`kubernetes/server/overlays/[env]/kustomization.yaml`) does not match the workflow `paths:` trigger, so image-tag commits never re-trigger the workflow.
+- GitHub Actions environment variables used: `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER` (IAM role ARN for ECR push), `ECR_REPOSITORY_URL`, `AWS_REGION`.
+- The web workflow uses `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_WEB` (note the `_WEB` suffix) to distinguish it from the server role.
 
 ## Terraform
 
