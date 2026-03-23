@@ -6,7 +6,7 @@ This is a project I'm building to learn technologies like Node.js, AWS, Terrafor
 
 ## Project Overview & Architecture
 
-Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS, with infrastructure managed using Terraform. Deployment of the website is done with GitHub Actions. The application is deployed to two different environments: dev and prod. Local development is done using Docker and Docker Compose.
+Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS, with infrastructure managed using Terraform. Deployment of the website and server are done with GitHub Actions. The application is deployed to two different environments: dev and prod. Local development is done using Docker and Docker Compose.
 
 The project structure is:
 
@@ -21,6 +21,8 @@ The project structure is:
   - `kubernetes/server`: Manifests for the server. Uses Kustomize.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
+  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
+  - `.github/workflows/web.yml`: Deploys React web app.
 
 The server follows a three-layer architecture for organizing business logic:
 

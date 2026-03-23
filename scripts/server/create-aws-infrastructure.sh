@@ -72,7 +72,7 @@ log_info "Using backend config from backend.config"
 terraform init -backend-config="backend.config"
 
 # Step 2: Create core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)
-log_step "Step 2/5: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
+log_step "Step 2/5: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
 log_info "This may take 15-20 minutes..."
 terraform apply \
   -target=module.vpc \
@@ -82,6 +82,7 @@ terraform apply \
   -target=module.pod_identity \
   -target=module.acm_certificates \
   -target=module.app_secrets \
+  -target=module.github_actions_oidc_role_server \
   -auto-approve
 
 # Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) using Helm

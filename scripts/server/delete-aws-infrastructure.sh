@@ -238,7 +238,7 @@ retry_with_backoff 3 "Delete Kubernetes controllers" \
   -auto-approve
 
 # Step 4: Delete all remaining resources
-log_step "Step 4/6 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)..."
+log_step "Step 4/6 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
 log_info "This may take 15-20 minutes..."
 
 # The VPC CNI plugin (aws-node) leaves behind ENIs in Karpenter node subnets that block
@@ -295,6 +295,7 @@ for attempt in $(seq 1 ${MAX_ATTEMPTS}); do
     -target=module.pod_identity \
     -target=module.acm_certificates \
     -target=module.app_secrets \
+    -target=module.github_actions_oidc_role_server \
     -auto-approve; then
     break
   fi
