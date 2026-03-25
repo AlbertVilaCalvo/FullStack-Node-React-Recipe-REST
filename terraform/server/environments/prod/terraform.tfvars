@@ -70,3 +70,5 @@ email_password = "placeholder"
 # GitHub Actions OIDC
 github_org  = "AlbertVilaCalvo"
 github_repo = "RecipeManager"
+
+argocd_chart_version           = "9.4.15"

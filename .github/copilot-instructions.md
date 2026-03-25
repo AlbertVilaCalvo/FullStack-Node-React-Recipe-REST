@@ -19,6 +19,7 @@ The project structure is:
   - `/terraform/server`: Infrastructure for the Node.js API.
 - `kubernetes`: Kubernetes manifests.
   - `kubernetes/server`: Manifests for the server. Uses Kustomize.
+  - `kubernetes/argocd-apps`: Argo CD Application manifests for GitOps.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
   - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Deployment to prod is gated by GitHub environment protection rules (required reviewers).

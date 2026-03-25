@@ -301,4 +301,15 @@ download_helm_charts() {
   else
     log_info "external-secrets-${secrets_version}.tgz already downloaded."
   fi
+
+  local argocd_version="9.4.15"
+  if [[ ! -f "${charts_dir}/argo-cd-${argocd_version}.tgz" ]]; then
+    log_info "Downloading argo-cd-${argocd_version}.tgz"
+    if ! curl -4 -fsSLo "${charts_dir}/argo-cd-${argocd_version}.tgz" "https://github.com/argoproj/argo-helm/releases/download/argo-cd-${argocd_version}/argo-cd-${argocd_version}.tgz"; then
+      log_warn "Failed to download argo-cd-${argocd_version}.tgz. Terraform will download it from the Helm repository."
+      rm -f "${charts_dir}/argo-cd-${argocd_version}.tgz"
+    fi
+  else
+    log_info "argo-cd-${argocd_version}.tgz already downloaded."
+  fi
 }

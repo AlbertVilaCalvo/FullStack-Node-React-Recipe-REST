@@ -47,7 +47,8 @@ Live site: https://recipemanager.link
 - External Secrets Operator for syncing secrets from AWS Secrets Manager to Kubernetes Secrets.
 - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS and External Secrets Operator.
 - Pod Identity.
-- Kustomize for managing Kubernetes manifests.
+- Kustomize
+  - Argo CD for managing Kubernetes manifests.
 
 ## Features
 

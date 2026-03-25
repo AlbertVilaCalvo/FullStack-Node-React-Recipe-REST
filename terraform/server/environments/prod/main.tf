@@ -23,6 +23,7 @@ locals {
   lb_controller_chart_path    = fileexists("${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null
   external_dns_chart_path     = fileexists("${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz") ? "${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz" : null
   external_secrets_chart_path = fileexists("${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz") ? "${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz" : null
+  argocd_chart_path           = fileexists("${path.module}/.charts/argo-cd-${var.argocd_chart_version}.tgz") ? "${path.module}/.charts/argo-cd-${var.argocd_chart_version}.tgz" : null
 }
 
 # Infrastructure
@@ -255,4 +256,18 @@ module "github_actions_oidc_role_server" {
       },
     ]
   })
+}
+
+module "argocd" {
+  chart_version = var.argocd_chart_version
+  chart_path    = local.argocd_chart_path
+  source      = "../../modules/argocd"
+  domain_name = "argocd.recipeapp.link"
+  depends_on  = [module.lb_controller, module.external_dns]
+}
+
+module "argocd_apps" {
+  source      = "../../modules/argocd-apps"
+  environment = var.environment
+  depends_on  = [module.argocd]
 }

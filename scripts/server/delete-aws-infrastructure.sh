@@ -235,6 +235,8 @@ retry_with_backoff 3 "Delete Kubernetes controllers" \
   -target=module.external_dns \
   -target=module.external_secrets \
   -target=module.karpenter_controller \
+  -target=module.argocd \
+  -target=module.argocd_apps \
   -auto-approve
 
 # Step 4: Delete all remaining resources

@@ -341,3 +341,13 @@ variable "github_repo" {
     error_message = "The GitHub repository name must contain only alphanumeric characters, underscores, hyphens, and periods."
   }
 }
+
+variable "argocd_chart_version" {
+  type        = string
+  description = "The version of the Argo CD Helm chart to install."
+}
+
+variable "argocd_chart_version" {
+  type        = string
+  description = "The version of the Argo CD Helm chart to install."
+}

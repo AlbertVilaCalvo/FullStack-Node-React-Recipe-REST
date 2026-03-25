@@ -1,0 +1,12 @@
+resources:
+  - ../../base/server
+
+patches:
+  - patch: |-
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: recipe-manager-server
+      spec:
+        source:
+          path: kubernetes/server/overlays/prod

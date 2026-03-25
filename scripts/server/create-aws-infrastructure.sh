@@ -99,6 +99,8 @@ retry_with_backoff 3 "Install Kubernetes controllers" \
   -target=module.external_dns \
   -target=module.external_secrets \
   -target=module.karpenter_controller \
+  -target=module.argocd \
+  -target=module.argocd_apps \
   -auto-approve
 
 # Step 4: Create Karpenter NodePool and EC2NodeClass
