@@ -75,8 +75,9 @@ The server follows a three-layer architecture for organizing business logic:
 ## Terraform
 
 - Infrastructure as Code: All AWS infrastructure is defined using Terraform in the `/terraform` directory.
-- Variables: Define input variables in `variables.tf` and outputs in `outputs.tf`. In general, avoid default values in variables, require all variables to be explicitly set in `terraform.trfvars` files.
-- Organization: Group resources by AWS service (e.g., `s3.tf`, `rds.tf`, `eks.tf` or `cloudfront.tf`).
+- Variables: Define input variables in `variables.tf` and outputs in `outputs.tf`. In general, avoid default values in variables; instead, require all variables to be explicitly set in `terraform.tfvars` files.
+- Organization: Group resources by AWS service (S3, RDS, EKS, CloudFront, etc.).
+- Naming: Use the following format for resource names: `${var.app_name}-<resource>-${var.environment}`.
 - Tagging: All resources should include the default tags `Application` and `Environment`, but these tags should be set using the `default_tags` in the provider configuration, not in the individual resources.
 - Follow Google Cloud's best practices for Terraform: https://cloud.google.com/docs/terraform/best-practices/root-modules. In particular, ensure that:
   - Don't include more than 100 resources in a single state.
@@ -96,3 +97,7 @@ The server follows a three-layer architecture for organizing business logic:
 
 - Format shell scripts with `shfmt` using the options `-i 2 -ci -bn`, like this: `shfmt -i 2 -ci -bn -w <file> <directory>`.
 - Lint shell scripts with ShellCheck, using the command `shellcheck <file>`.
+
+## YAML files
+
+- When editing YAML files, format them with `prettier` using the command `npm run format` or `npx prettier --write <file> <directory>`.
