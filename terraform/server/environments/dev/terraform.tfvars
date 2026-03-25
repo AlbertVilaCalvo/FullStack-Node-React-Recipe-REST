@@ -49,23 +49,11 @@ lb_controller_chart_version = "1.17.1"
 # ExternalDNS
 external_dns_chart_version = "1.20.0"
 
-# External Secrets Operator
-external_secrets_chart_version = "2.0.1"
+# Argo CD
+argocd_chart_version = "7.8.5"
 
 # Karpenter Controller
 karpenter_chart_version = "1.8.3"
-
-# Karpenter NodePool
-# If you use spot and on-demand, you need at least 5 instance types, otherwise you get this error:
-#   failed while checking on-demand fallback
-#   at least 5 instance types are recommended when flexible to spot but requesting on-demand, the current provisioning request only has 2 instance type options
-# AWS recommends 10, see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-best-practices.html#be-instance-type-flexible
-# Order does not matter: Karpenter automatically provisions the cheapest available instance
-karpenter_instance_types    = ["t3a.small", "t3.small", "t3a.medium", "t3.medium", "t3a.large", "t3.large"]
-karpenter_capacity_types    = ["on-demand", "spot"]
-karpenter_cpu_limit         = 50
-karpenter_memory_limit      = "50Gi"
-karpenter_consolidate_after = "1m"
 
 # Email Configuration
 email_user     = "noreply@recipemanager.link"

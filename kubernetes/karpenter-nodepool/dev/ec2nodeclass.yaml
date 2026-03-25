@@ -1,0 +1,17 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  amiSelectorTerms:
+    - alias: al2023@latest
+  # IAM role for Karpenter-provisioned nodes. Must match the node group IAM role created by Terraform.
+  # Pattern: ${app_name}-eks-node-role-${environment}
+  role: recipe-manager-eks-node-role-dev
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: recipe-manager-eks-dev
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: recipe-manager-eks-dev
+        kubernetes.io/cluster/recipe-manager-eks-dev: owned

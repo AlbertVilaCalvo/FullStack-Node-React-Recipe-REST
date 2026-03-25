@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: recipe-manager-server
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # External Secrets Operator (wave 1) must be running before the server pods start,
+    # otherwise the ExternalSecret resources won't sync and pod secrets will be missing.
+    argocd.argoproj.io/sync-wave: '2'
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/AlbertVilaCalvo/FullStack-Node-React-Recipe-REST.git
+    targetRevision: HEAD
+    path: kubernetes/server/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: recipe-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 5m

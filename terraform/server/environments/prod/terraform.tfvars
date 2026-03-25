@@ -49,19 +49,11 @@ lb_controller_chart_version = "1.17.1"
 # ExternalDNS
 external_dns_chart_version = "1.20.0"
 
-# External Secrets Operator
-external_secrets_chart_version = "2.0.1"
+# Argo CD
+argocd_chart_version = "7.8.5"
 
 # Karpenter Controller
 karpenter_chart_version = "1.8.3"
-
-# Karpenter NodePool
-# Order does not matter: Karpenter automatically provisions the cheapest available instance
-karpenter_instance_types    = ["t3a.small", "t3.small", "t3a.medium", "t3.medium", "t3a.large", "t3.large", "t3a.xlarge", "t3.xlarge"]
-karpenter_capacity_types    = ["on-demand"]
-karpenter_cpu_limit         = 100
-karpenter_memory_limit      = "100Gi"
-karpenter_consolidate_after = "5m" # Longer wait time means less frequent node consolidation, which reduces pod evictions and restarts
 
 # Email Configuration
 email_user     = "noreply@recipeapp.link"

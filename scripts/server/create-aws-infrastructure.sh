@@ -15,7 +15,6 @@
 # Prerequisites:
 #   - AWS CLI configured with appropriate credentials
 #   - Terraform installed
-#   - Helm installed
 #   - kubectl installed
 #   - Route53 hosted zone for the API domain exists in AWS
 
@@ -52,7 +51,6 @@ validate_directory_exists "${TERRAFORM_DIR}"
 
 validate_command_exists terraform
 validate_command_exists aws
-validate_command_exists helm
 validate_command_exists kubectl
 
 # ============================================================================
@@ -65,14 +63,17 @@ echo ""
 cd "${TERRAFORM_DIR}" || exit 1
 
 # Step 1: Initialize Terraform
-log_step "Step 1/5: Initializing Terraform..."
+log_step "Step 1/4: Initializing Terraform..."
 validate_file_exists "${TERRAFORM_DIR}/backend.config" "backend.config not found at ${TERRAFORM_DIR}/backend.config. Please run scripts/bootstrap/create-state-bucket.sh ${ENVIRONMENT} first to create the state bucket and backend.config file."
 
 log_info "Using backend config from backend.config"
 terraform init -backend-config="backend.config"
 
-# Step 2: Create core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)
-log_step "Step 2/5: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
+# Step 2: Create core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificates, App
+# Secrets, External Secrets Operator IAM role, GitHub Actions OIDC role).
+# External Secrets Operator Helm chart is managed by Argo CD (GitOps), but the IAM role and
+# Pod Identity Association are created here since they depend on Terraform-managed AWS resources.
+log_step "Step 2/4: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificates, App Secrets, ESO IAM, GitHub Actions OIDC role)..."
 log_info "This may take 15-20 minutes..."
 terraform apply \
   -target=module.vpc \
@@ -82,11 +83,14 @@ terraform apply \
   -target=module.pod_identity \
   -target=module.acm_certificates \
   -target=module.app_secrets \
+  -target=module.external_secrets \
   -target=module.github_actions_oidc_role_server \
   -auto-approve
 
-# Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) using Helm
-log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS, External Secrets Operator and Karpenter Helm charts..."
+# Step 3: Install Helm charts (Load Balancer Controller, ExternalDNS, Karpenter, Argo CD).
+# External Secrets Operator Helm chart is managed by Argo CD, so it is not installed here.
+# Argo CD depends on LBC (for ALB) and ExternalDNS (for DNS record), hence the ordering.
+log_step "Step 3/4: Installing Load Balancer Controller, ExternalDNS, Karpenter and Argo CD Helm charts..."
 log_info "This may take 5-10 minutes..."
 
 # Download Helm charts locally to avoid network timeouts during Terraform apply
@@ -97,17 +101,21 @@ retry_with_backoff 3 "Install Kubernetes controllers" \
   terraform apply \
   -target=module.lb_controller \
   -target=module.external_dns \
-  -target=module.external_secrets \
   -target=module.karpenter_controller \
+  -target=module.argocd \
   -auto-approve
 
-# Step 4: Create Karpenter NodePool and EC2NodeClass
-# The Karpenter CRDs need to be installed before creating the NodePool and EC2NodeClass
-log_step "Step 4/5: Creating Karpenter NodePool and EC2NodeClass..."
-terraform apply -target=module.karpenter_nodepool -auto-approve
+# Step 4: Create the Argo CD bootstrap Application.
+# The Argo CD Application CRDs must be installed (step 3) before this can succeed.
+# This Application watches kubernetes/argocd-apps/${ENVIRONMENT} in Git and auto-syncs:
+#   - External Secrets Operator Helm chart
+#   - Karpenter NodePool + EC2NodeClass
+#   - recipe-manager server Kubernetes manifests
+log_step "Step 4/4: Creating Argo CD bootstrap Application (triggers GitOps sync)..."
+terraform apply -target=module.argocd_apps -auto-approve
 
-# Step 5: Update kubectl config
-log_step "Step 5/5: Updating kubectl configuration..."
+# Update kubectl config
+log_info "Updating kubectl configuration..."
 AWS_REGION=$(get_tfvars_value "aws_region")
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
 aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
@@ -123,11 +131,12 @@ log_info "Infrastructure summary:"
 terraform output
 
 echo ""
-log_info "Next steps:"
+log_info "Argo CD is syncing the following from Git (kubernetes/argocd-apps/${ENVIRONMENT}):"
+echo "  - External Secrets Operator (Helm chart)"
+echo "  - Karpenter NodePool + EC2NodeClass"
+echo "  - recipe-manager server application"
 echo ""
-echo "  1. Build and push the Docker image to ECR:"
-echo "     ./scripts/server/build-push-image-ecr.sh ${ENVIRONMENT}"
-echo ""
-echo "  2. Deploy the server application (apply Kubernetes manifests):"
-echo "     ./scripts/server/deploy-server-eks.sh ${ENVIRONMENT} <image_tag>"
+log_info "Argo CD UI: https://$(get_tfvars_value "argocd_domain")"
+log_info "Initial admin password:"
+echo "  kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
 echo ""
