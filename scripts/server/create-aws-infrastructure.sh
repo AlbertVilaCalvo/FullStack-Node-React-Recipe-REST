@@ -86,19 +86,20 @@ terraform apply \
   -auto-approve
 
 # Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) using Helm
-log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS, External Secrets Operator and Karpenter Helm charts..."
+log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter and Argo CD Helm charts..."
 log_info "This may take 5-10 minutes..."
 
 # Download Helm charts locally to avoid network timeouts during Terraform apply
 download_helm_charts
 
 # Retry logic for network timeouts when downloading Helm charts
-retry_with_backoff 3 "Install Kubernetes controllers" \
+retry_with_backoff 3 "Install Kubernetes controllers and Argo CD" \
   terraform apply \
   -target=module.lb_controller \
   -target=module.external_dns \
   -target=module.external_secrets \
   -target=module.karpenter_controller \
+  -target=module.argocd \
   -auto-approve
 
 # Step 4: Create Karpenter NodePool and EC2NodeClass
@@ -122,9 +123,21 @@ echo ""
 log_info "Infrastructure summary:"
 terraform output
 
+ARGOCD_DOMAIN=$(get_tfvars_value "argocd_domain")
+
+echo ""
+log_info "Argo CD UI: https://${ARGOCD_DOMAIN}"
+log_info "Get the admin password:"
+echo "  kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" | base64 -d"
+
 echo ""
 log_info "Next steps:"
 echo ""
+echo "  GitOps workflow (Argo CD):"
+echo "  Push changes to the main branch. GitHub Actions builds the Docker image,"
+echo "  updates the image tag in kustomization.yaml, and Argo CD syncs automatically."
+echo ""
+echo "  Manual workflow:"
 echo "  1. Build and push the Docker image to ECR:"
 echo "     ./scripts/server/build-push-image-ecr.sh ${ENVIRONMENT}"
 echo ""

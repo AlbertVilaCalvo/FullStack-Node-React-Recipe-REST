@@ -55,6 +55,13 @@ external_secrets_chart_version = "2.0.1"
 # Karpenter Controller
 karpenter_chart_version = "1.8.3"
 
+# Argo CD
+argocd_chart_version = "9.4.15"
+
+# GitOps
+git_repo_url = "https://github.com/AlbertVilaCalvo/RecipeManager.git"
+git_revision = "main"
+
 # Karpenter NodePool
 # Order does not matter: Karpenter automatically provisions the cheapest available instance
 karpenter_instance_types    = ["t3a.small", "t3.small", "t3a.medium", "t3.medium", "t3a.large", "t3.large", "t3a.xlarge", "t3.xlarge"]

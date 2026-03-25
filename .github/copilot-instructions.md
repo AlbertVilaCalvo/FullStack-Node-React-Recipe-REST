@@ -19,9 +19,10 @@ The project structure is:
   - `/terraform/server`: Infrastructure for the Node.js API.
 - `kubernetes`: Kubernetes manifests.
   - `kubernetes/server`: Manifests for the server. Uses Kustomize.
+  - `kubernetes/argocd-apps`: Argo CD Application manifests (one per environment) used by the App of Apps pattern.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
-  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
+  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
   - `.github/workflows/web.yml`: Deploys React web app.
 
 The server follows a three-layer architecture for organizing business logic:
@@ -51,9 +52,10 @@ The server follows a three-layer architecture for organizing business logic:
 - ECR for Docker image storage.
 - Secrets Manager for application secrets (RDS master password, JWT secret, email credentials).
 - EKS Kubernetes cluster includes:
-  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS and External Secrets Operator.
+  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, Argo CD, ExternalDNS and External Secrets Operator.
   - Ingress with AWS Load Balancer Controller.
   - Karpenter for automatic provisioning of nodes based on workload. App pods run on Karpenter provisioned nodes.
+  - Argo CD for GitOps-based continuous deployment. Uses the App of Apps pattern with a root Application that points to `kubernetes/argocd-apps/{environment}/`.
   - ExternalDNS for automatic Route53 DNS record management.
   - External Secrets Operator for syncing secrets from AWS Secrets Manager to Kubernetes Secrets.
   - Pod Identity for authentication. Do not use IAM Roles for Service Accounts (IRSA).

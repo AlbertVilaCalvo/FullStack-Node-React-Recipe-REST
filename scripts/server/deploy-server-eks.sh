@@ -2,6 +2,10 @@
 #
 # Deploy server Kubernetes manifests to the EKS cluster
 #
+# This script is for manual/bootstrap deployments. In the GitOps workflow,
+# Argo CD handles deployment automatically when the image tag is updated
+# in the kustomization file by the GitHub Actions workflow.
+#
 # Usage:
 #   ./scripts/server/deploy-server-eks.sh <environment> <image_tag>
 #

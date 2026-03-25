@@ -258,19 +258,21 @@ download_helm_charts() {
   local lb_version
   local dns_version
   local secrets_version
+  local argocd_version
 
   lb_version="$(get_tfvars_value "lb_controller_chart_version")"
   dns_version="$(get_tfvars_value "external_dns_chart_version")"
   secrets_version="$(get_tfvars_value "external_secrets_chart_version")"
+  argocd_version="$(get_tfvars_value "argocd_chart_version")"
 
-  if [[ -z "${lb_version}" || -z "${dns_version}" || -z "${secrets_version}" ]]; then
+  if [[ -z "${lb_version}" || -z "${dns_version}" || -z "${secrets_version}" || -z "${argocd_version}" ]]; then
     log_error "Could not read chart versions from terraform.tfvars"
     return 1
   fi
 
   mkdir -p "${charts_dir}"
 
-  log_info "Downloading Helm charts directly via curl (IPv4) to bypass Helm repo/IPv6 timeouts..."
+  log_info "Downloading Helm charts to avoid network timeouts during Terraform apply..."
 
   if [[ ! -f "${charts_dir}/aws-load-balancer-controller-${lb_version}.tgz" ]]; then
     log_info "Downloading aws-load-balancer-controller-${lb_version}.tgz"
@@ -300,5 +302,16 @@ download_helm_charts() {
     fi
   else
     log_info "external-secrets-${secrets_version}.tgz already downloaded."
+  fi
+
+  # Argo CD chart uses OCI registry, so we download it with helm pull
+  if [[ ! -f "${charts_dir}/argo-cd-${argocd_version}.tgz" ]]; then
+    log_info "Downloading argo-cd-${argocd_version}.tgz"
+    if ! helm pull "oci://ghcr.io/argoproj/argo-helm/argo-cd" --version "${argocd_version}" -d "${charts_dir}"; then
+      log_warn "Failed to download argo-cd-${argocd_version}.tgz. Terraform will download it from the OCI registry."
+      rm -f "${charts_dir}/argo-cd-${argocd_version}.tgz"
+    fi
+  else
+    log_info "argo-cd-${argocd_version}.tgz already downloaded."
   fi
 }
