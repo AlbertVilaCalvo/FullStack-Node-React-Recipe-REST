@@ -55,6 +55,13 @@ external_secrets_chart_version = "2.0.1"
 # Karpenter Controller
 karpenter_chart_version = "1.8.3"
 
+# Argo CD
+argocd_chart_version = "9.4.15"
+
+# GitOps
+git_repo_url = "https://github.com/AlbertVilaCalvo/RecipeManager.git"
+git_revision = "main"
+
 # Karpenter NodePool
 # If you use spot and on-demand, you need at least 5 instance types, otherwise you get this error:
 #   failed while checking on-demand fallback

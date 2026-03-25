@@ -123,8 +123,16 @@ log_step "Step 1/6 : Deleting Kubernetes resources..."
 
 # Configure kubectl, delete all resources in the namespace and wait for the Load Balancer Controller to clean up AWS resources (ALB, Target Groups, Security Groups)
 if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
+  # Delete Argo CD Applications first to let Argo CD clean up managed resources.
+  # Argo CD must be running for finalizers to execute.
+  log_info "Deleting Argo CD Applications..."
+  kubectl delete applications --all -n argocd --timeout=300s 2>/dev/null || log_warn "Could not delete Argo CD Applications (may not exist)"
+
   log_info "Deleting Kubernetes resources in namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" --ignore-not-found=true --timeout=300s || log_warn "Could not delete namespace (may not exist)"
+
+  log_info "Deleting argocd namespace..."
+  kubectl delete namespace argocd --ignore-not-found=true --timeout=300s || log_warn "Could not delete argocd namespace (may not exist)"
 
   log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
   log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
@@ -222,19 +230,20 @@ while true; do
   sleep 10
 done
 
-# Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts
-log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts..."
+# Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) and Argo CD Helm charts
+log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) and Argo CD Helm charts..."
 
 # Download Helm charts locally to avoid network timeouts during Terraform destroy
 download_helm_charts
 
 # Retry logic for network timeouts when downloading Helm charts
-retry_with_backoff 3 "Delete Kubernetes controllers" \
+retry_with_backoff 3 "Delete Kubernetes controllers and Argo CD" \
   terraform destroy \
   -target=module.lb_controller \
   -target=module.external_dns \
   -target=module.external_secrets \
   -target=module.karpenter_controller \
+  -target=module.argocd \
   -auto-approve
 
 # Step 4: Delete all remaining resources
