@@ -63,6 +63,9 @@ karpenter_cpu_limit         = 100
 karpenter_memory_limit      = "100Gi"
 karpenter_consolidate_after = "5m" # Longer wait time means less frequent node consolidation, which reduces pod evictions and restarts
 
+# Argo CD
+argocd_chart_version = "9.4.15"
+
 # Email Configuration
 email_user     = "noreply@recipeapp.link"
 email_password = "placeholder"

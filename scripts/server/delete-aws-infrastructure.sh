@@ -118,67 +118,14 @@ if [[ -z "${ZONE_ID}" ]]; then
 fi
 log_info "Hosted Zone ID: ${ZONE_ID}"
 
-# Step 1: Delete Kubernetes resources (required to remove ALB created by Ingress)
-log_step "Step 1/6 : Deleting Kubernetes resources..."
+# Step 1: Delete application Kubernetes resources
+log_step "Step 1/7 : Deleting application Kubernetes resources..."
 
-# Configure kubectl, delete all resources in the namespace and wait for the Load Balancer Controller to clean up AWS resources (ALB, Target Groups, Security Groups)
+# Configure kubectl and delete the application namespace.
+# This removes the API Ingress, which triggers LBC to start cleaning up the API ALB.
 if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
   log_info "Deleting Kubernetes resources in namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" --ignore-not-found=true --timeout=300s || log_warn "Could not delete namespace (may not exist)"
-
-  log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
-  log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
-
-  WAIT_TIMEOUT=600
-  START_TIME=$(date +%s)
-
-  while true; do
-    CURRENT_TIME=$(date +%s)
-    ELAPSED=$((CURRENT_TIME - START_TIME))
-
-    if [[ $ELAPSED -gt $WAIT_TIMEOUT ]]; then
-      log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for AWS resources cleanup. Proceeding anyway..."
-      break
-    fi
-
-    # Check for Load Balancers, Target Groups, and Security Groups managed by the Load Balancer Controller
-    REMAINING_ALB_RESOURCES=$(aws resourcegroupstaggingapi get-resources \
-      --region "${AWS_REGION}" \
-      --tag-filters "Key=elbv2.k8s.aws/cluster,Values=${CLUSTER_NAME}" \
-      --resource-type-filters "elasticloadbalancing:loadbalancer" "elasticloadbalancing:targetgroup" "ec2:security-group" \
-      --query 'ResourceTagMappingList[*].ResourceARN' \
-      --output text)
-
-    # Check for DNS A records
-    # There are also TXT records created by ExternalDNS for ownership tracking, but we only check for the A records which point to the ALB
-    REMAINING_API_DNS=$(aws route53 list-resource-record-sets \
-      --hosted-zone-id "${ZONE_ID}" \
-      --query "ResourceRecordSets[?Name=='${API_DOMAIN}.' && Type=='A'].Name" \
-      --output text)
-    REMAINING_ARGOCD_DNS=$(aws route53 list-resource-record-sets \
-      --hosted-zone-id "${ZONE_ID}" \
-      --query "ResourceRecordSets[?Name=='${ARGOCD_DOMAIN}.' && Type=='A'].Name" \
-      --output text)
-    REMAINING_DNS_RECORD="${REMAINING_API_DNS}${REMAINING_ARGOCD_DNS}"
-
-    if [[ -z "${REMAINING_ALB_RESOURCES}" && -z "${REMAINING_DNS_RECORD}" ]]; then
-      log_info "All Load Balancer resources and DNS records have been successfully deleted."
-      break
-    fi
-
-    if [[ -n "${REMAINING_API_DNS}" ]]; then
-      log_info "DNS A Record for ${API_DOMAIN} still exists..."
-    fi
-    if [[ -n "${REMAINING_ARGOCD_DNS}" ]]; then
-      log_info "DNS A Record for ${ARGOCD_DOMAIN} still exists..."
-    fi
-    if [[ -n "${REMAINING_ALB_RESOURCES}" ]]; then
-      log_info "Load Balancer resources still remaining..."
-    fi
-
-    log_info "Checking again in 10s (Elapsed: ${ELAPSED}s)"
-    sleep 10
-  done
 else
   log_error "Could not connect to EKS cluster"
   log_error "Make sure the cluster is up and you have the correct AWS credentials configured"
@@ -186,8 +133,81 @@ else
   exit 1
 fi
 
-# Step 2: Delete Karpenter NodePool
-log_step "Step 2/6 : Deleting Karpenter NodePool and EC2NodeClass..."
+# Step 2: Delete Argo CD Applications and Argo CD Helm chart
+# Uninstalling Argo CD removes the argocd Ingress, which triggers LBC to clean up the Argo CD ALB.
+# The Application finalizer cascades resource deletion, but managed resources in the
+# recipe-manager namespace are already gone from Step 1, so the cascade completes quickly.
+log_step "Step 2/7 : Deleting Argo CD Applications and Argo CD Helm chart..."
+
+# Download Helm charts locally (includes Argo CD chart) to avoid network timeouts
+download_helm_charts
+
+# Terraform respects dependency ordering: argocd_apps (depends_on argocd) is destroyed first,
+# then the argocd Helm release is uninstalled, deleting the argocd namespace and its Ingress.
+retry_with_backoff 3 "Delete Argo CD" \
+  terraform destroy \
+  -target=module.argocd_apps \
+  -target=module.argocd \
+  -auto-approve
+
+# Wait for LBC to clean up all ALBs (both API from Step 1 and Argo CD from this step)
+# and ExternalDNS to remove Route53 A records.
+log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources (API and Argo CD ALBs)..."
+log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
+
+WAIT_TIMEOUT=600
+START_TIME=$(date +%s)
+
+while true; do
+  CURRENT_TIME=$(date +%s)
+  ELAPSED=$((CURRENT_TIME - START_TIME))
+
+  if [[ $ELAPSED -gt $WAIT_TIMEOUT ]]; then
+    log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for AWS resources cleanup. Proceeding anyway..."
+    break
+  fi
+
+  # Check for Load Balancers, Target Groups, and Security Groups managed by the Load Balancer Controller
+  REMAINING_ALB_RESOURCES=$(aws resourcegroupstaggingapi get-resources \
+    --region "${AWS_REGION}" \
+    --tag-filters "Key=elbv2.k8s.aws/cluster,Values=${CLUSTER_NAME}" \
+    --resource-type-filters "elasticloadbalancing:loadbalancer" "elasticloadbalancing:targetgroup" "ec2:security-group" \
+    --query 'ResourceTagMappingList[*].ResourceARN' \
+    --output text)
+
+  # Check for DNS A records
+  # There are also TXT records created by ExternalDNS for ownership tracking, but we only check for the A records which point to the ALB
+  REMAINING_API_DNS=$(aws route53 list-resource-record-sets \
+    --hosted-zone-id "${ZONE_ID}" \
+    --query "ResourceRecordSets[?Name=='${API_DOMAIN}.' && Type=='A'].Name" \
+    --output text)
+  REMAINING_ARGOCD_DNS=$(aws route53 list-resource-record-sets \
+    --hosted-zone-id "${ZONE_ID}" \
+    --query "ResourceRecordSets[?Name=='${ARGOCD_DOMAIN}.' && Type=='A'].Name" \
+    --output text)
+  REMAINING_DNS_RECORD="${REMAINING_API_DNS}${REMAINING_ARGOCD_DNS}"
+
+  if [[ -z "${REMAINING_ALB_RESOURCES}" && -z "${REMAINING_DNS_RECORD}" ]]; then
+    log_info "All Load Balancer resources and DNS records have been successfully deleted."
+    break
+  fi
+
+  if [[ -n "${REMAINING_API_DNS}" ]]; then
+    log_info "DNS A Record for ${API_DOMAIN} still exists..."
+  fi
+  if [[ -n "${REMAINING_ARGOCD_DNS}" ]]; then
+    log_info "DNS A Record for ${ARGOCD_DOMAIN} still exists..."
+  fi
+  if [[ -n "${REMAINING_ALB_RESOURCES}" ]]; then
+    log_info "Load Balancer resources still remaining..."
+  fi
+
+  log_info "Checking again in 10s (Elapsed: ${ELAPSED}s)"
+  sleep 10
+done
+
+# Step 3: Delete Karpenter NodePool
+log_step "Step 3/7 : Deleting Karpenter NodePool and EC2NodeClass..."
 terraform destroy -target=module.karpenter_nodepool -auto-approve
 
 # Wait for Karpenter nodes to be terminated before deleting the Karpenter controller in Step 3.
@@ -222,8 +242,8 @@ while true; do
   sleep 10
 done
 
-# Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts
-log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts..."
+# Step 4: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts
+log_step "Step 4/7 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts..."
 
 # Download Helm charts locally to avoid network timeouts during Terraform destroy
 download_helm_charts
@@ -237,8 +257,8 @@ retry_with_backoff 3 "Delete Kubernetes controllers" \
   -target=module.karpenter_controller \
   -auto-approve
 
-# Step 4: Delete all remaining resources
-log_step "Step 4/6 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
+# Step 5: Delete all remaining resources
+log_step "Step 5/7 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
 log_info "This may take 15-20 minutes..."
 
 # The VPC CNI plugin (aws-node) leaves behind ENIs in Karpenter node subnets that block
@@ -310,8 +330,8 @@ done
 
 log_info "Remaining resources (VPC, EKS, RDS, ECR...) deleted successfully"
 
-# Step 5: Cleanup local Docker images
-log_step "Step 5/6 : Cleaning up local Docker images..."
+# Step 6: Cleanup local Docker images
+log_step "Step 6/7 : Cleaning up local Docker images..."
 
 # Check if Docker is available
 if command -v docker &>/dev/null && docker info >/dev/null 2>&1; then
@@ -339,8 +359,8 @@ else
   log_warn "Docker is not available. Skipping Docker image cleanup."
 fi
 
-# Step 6: Cleanup ~/.kube/config
-log_step "Step 6/6 : Removing kubeconfig context, cluster and user entries..."
+# Step 7: Cleanup ~/.kube/config
+log_step "Step 7/7 : Removing kubeconfig context, cluster and user entries..."
 CLUSTER_ARN="arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}"
 kubectl config delete-context "${CLUSTER_ARN}" || true
 kubectl config delete-cluster "${CLUSTER_ARN}" || true

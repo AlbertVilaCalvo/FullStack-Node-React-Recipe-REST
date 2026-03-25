@@ -67,6 +67,9 @@ karpenter_cpu_limit         = 50
 karpenter_memory_limit      = "50Gi"
 karpenter_consolidate_after = "1m"
 
+# Argo CD
+argocd_chart_version = "9.4.15"
+
 # Email Configuration
 email_user     = "noreply@recipemanager.link"
 email_password = "placeholder"

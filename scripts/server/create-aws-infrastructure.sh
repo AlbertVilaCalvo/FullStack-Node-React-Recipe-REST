@@ -65,14 +65,14 @@ echo ""
 cd "${TERRAFORM_DIR}" || exit 1
 
 # Step 1: Initialize Terraform
-log_step "Step 1/5: Initializing Terraform..."
+log_step "Step 1/6: Initializing Terraform..."
 validate_file_exists "${TERRAFORM_DIR}/backend.config" "backend.config not found at ${TERRAFORM_DIR}/backend.config. Please run scripts/bootstrap/create-state-bucket.sh ${ENVIRONMENT} first to create the state bucket and backend.config file."
 
 log_info "Using backend config from backend.config"
 terraform init -backend-config="backend.config"
 
 # Step 2: Create core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets)
-log_step "Step 2/5: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
+log_step "Step 2/6: Creating core infrastructure (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
 log_info "This may take 15-20 minutes..."
 terraform apply \
   -target=module.vpc \
@@ -85,8 +85,8 @@ terraform apply \
   -target=module.github_actions_oidc_role_server \
   -auto-approve
 
-# Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) using Helm
-log_step "Step 3/5: Installing Load Balancer Controller, ExternalDNS, External Secrets Operator and Karpenter Helm charts..."
+# Step 3: Install Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter, Argo CD) using Helm
+log_step "Step 3/6: Installing Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter and Argo CD Helm charts..."
 log_info "This may take 5-10 minutes..."
 
 # Download Helm charts locally to avoid network timeouts during Terraform apply
@@ -99,15 +99,21 @@ retry_with_backoff 3 "Install Kubernetes controllers" \
   -target=module.external_dns \
   -target=module.external_secrets \
   -target=module.karpenter_controller \
+  -target=module.argocd \
   -auto-approve
 
 # Step 4: Create Karpenter NodePool and EC2NodeClass
 # The Karpenter CRDs need to be installed before creating the NodePool and EC2NodeClass
-log_step "Step 4/5: Creating Karpenter NodePool and EC2NodeClass..."
+log_step "Step 4/6: Creating Karpenter NodePool and EC2NodeClass..."
 terraform apply -target=module.karpenter_nodepool -auto-approve
 
-# Step 5: Update kubectl config
-log_step "Step 5/5: Updating kubectl configuration..."
+# Step 5: Create Argo CD root Application (App of Apps)
+# The Argo CD Application CRD (installed in Step 3) must exist before creating the Application manifest
+log_step "Step 5/6: Creating Argo CD root Application (App of Apps)..."
+terraform apply -target=module.argocd_apps -auto-approve
+
+# Step 6: Update kubectl config
+log_step "Step 6/6: Updating kubectl configuration..."
 AWS_REGION=$(get_tfvars_value "aws_region")
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
 aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
@@ -125,9 +131,11 @@ terraform output
 echo ""
 log_info "Next steps:"
 echo ""
-echo "  1. Build and push the Docker image to ECR:"
-echo "     ./scripts/server/build-push-image-ecr.sh ${ENVIRONMENT}"
+echo "  Argo CD will automatically deploy the server once you push a commit."
+echo "  Argo CD UI: https://$(get_tfvars_value "argocd_domain")"
+echo "  Get the initial admin password:"
+echo "    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
 echo ""
-echo "  2. Deploy the server application (apply Kubernetes manifests):"
-echo "     ./scripts/server/deploy-server-eks.sh ${ENVIRONMENT} <image_tag>"
+echo "  To deploy manually (skipping Argo CD):"
+echo "    ./scripts/server/deploy-server-eks.sh ${ENVIRONMENT} <image_tag>"
 echo ""

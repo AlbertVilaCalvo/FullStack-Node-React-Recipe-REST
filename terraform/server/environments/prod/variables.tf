@@ -309,6 +309,13 @@ variable "karpenter_consolidate_after" {
   type        = string
 }
 
+# Argo CD
+
+variable "argocd_chart_version" {
+  description = "Version of the Argo CD Helm chart"
+  type        = string
+}
+
 # Email Configuration
 
 variable "email_user" {

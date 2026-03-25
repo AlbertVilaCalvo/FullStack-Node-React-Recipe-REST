@@ -18,6 +18,10 @@
 #   - kubectl installed and configured
 #   - Terraform outputs available in terraform/server/environments/<environment>
 #   - Docker image already pushed to ECR (run build-push-image-ecr.sh first)
+#
+# NOTE: In the GitOps workflow, this script is NOT required. Argo CD automatically
+#       detects commits that update kustomization.yaml (done by the GitHub Actions
+#       workflow) and syncs the cluster. Use this script only for manual deployment.
 
 set -euo pipefail
 

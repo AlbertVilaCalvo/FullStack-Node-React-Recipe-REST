@@ -7,11 +7,13 @@
 # Do this:
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
 #    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.acm_certificates -target=module.app_secrets
-# 2. EKS cluster created -> install Helm charts:
-#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller
+# 2. EKS cluster created -> install Helm charts (LBC, ExternalDNS, External Secrets, Karpenter, Argo CD):
+#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller -target=module.argocd
 # 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
 #    terraform apply -target=module.karpenter_nodepool
-# 4. Deploy the Kubernetes manifests with kubectl -> LBC creates the ALB via Ingress, ExternalDNS automatically creates Route53 A record for API endpoint.
+# 4. Argo CD Application CRD installed -> create the root Argo CD Application (App of Apps):
+#    terraform apply -target=module.argocd_apps
+# 5. Argo CD syncs from Git -> deploys recipe-manager server. LBC creates the ALB via Ingress, ExternalDNS creates Route53 A records.
 # This can be solved with Terraform Stacks, see https://developer.hashicorp.com/terraform/tutorials/cloud/stacks-eks-deferred
 
 data "aws_caller_identity" "current" {}
@@ -23,6 +25,7 @@ locals {
   lb_controller_chart_path    = fileexists("${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null
   external_dns_chart_path     = fileexists("${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz") ? "${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz" : null
   external_secrets_chart_path = fileexists("${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz") ? "${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz" : null
+  argocd_chart_path           = fileexists("${path.module}/.charts/argo-cd-${var.argocd_chart_version}.tgz") ? "${path.module}/.charts/argo-cd-${var.argocd_chart_version}.tgz" : null
 }
 
 # Infrastructure
@@ -204,6 +207,18 @@ module "karpenter_controller" {
   node_iam_role_name = module.eks.node_group_iam_role_name
 }
 
+module "argocd" {
+  source = "../../modules/argocd"
+
+  app_name    = var.app_name
+  environment = var.environment
+
+  chart_version       = var.argocd_chart_version
+  chart_path          = local.argocd_chart_path
+  hostname            = var.argocd_domain
+  acm_certificate_arn = module.acm_certificates[var.argocd_domain].certificate_arn
+}
+
 # Karpenter NodePool and EC2NodeClass
 # ***********************************
 
@@ -255,4 +270,19 @@ module "github_actions_oidc_role_server" {
       },
     ]
   })
+}
+
+# Argo CD Applications
+# ********************
+
+module "argocd_apps" {
+  # The Argo CD Application CRD must be installed (by the Argo CD Helm chart in module.argocd)
+  # before creating the Application manifest, just like karpenter_nodepool requires karpenter_controller.
+  depends_on = [module.argocd]
+
+  source = "../../modules/argocd-apps"
+
+  environment     = var.environment
+  repo_url        = "https://github.com/${var.github_org}/${var.github_repo}.git"
+  target_revision = "HEAD"
 }
