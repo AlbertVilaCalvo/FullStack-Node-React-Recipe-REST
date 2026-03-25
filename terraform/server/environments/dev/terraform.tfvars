@@ -73,4 +73,4 @@ email_password = "placeholder"
 
 # GitHub Actions OIDC
 github_org  = "AlbertVilaCalvo"
-github_repo = "FullStack-Node-React-Recipe-REST"
+github_repo = "RecipeManager"
