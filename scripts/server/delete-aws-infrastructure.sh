@@ -35,7 +35,6 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 ENVIRONMENT="${1}"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 TERRAFORM_DIR="${PROJECT_ROOT}/terraform/server/environments/${ENVIRONMENT}"
-NAMESPACE="recipe-manager"
 
 # ============================================================================
 # Validation
@@ -121,18 +120,25 @@ log_info "Hosted Zone ID: ${ZONE_ID}"
 # Step 1: Delete Kubernetes resources (required to remove ALB created by Ingress)
 log_step "Step 1/6 : Deleting Kubernetes resources..."
 
-# Configure kubectl, delete all resources in the namespace and wait for the Load Balancer Controller to clean up AWS resources (ALB, Target Groups, Security Groups)
+# Configure kubectl, delete Argo CD-managed resources and wait for the Load Balancer Controller
+# to clean up AWS resources (ALB, Target Groups, Security Groups).
 if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
-  # Delete Argo CD Applications first to let Argo CD clean up managed resources.
-  # Argo CD must be running for finalizers to execute.
-  log_info "Deleting Argo CD Applications..."
-  kubectl delete applications --all -n argocd --timeout=300s 2>/dev/null || log_warn "Could not delete Argo CD Applications (may not exist)"
+  # Disable auto-sync on the root Application to prevent Argo CD from re-creating
+  # child Applications while we are deleting them.
+  log_info "Disabling Argo CD auto-sync on root Application..."
+  kubectl patch application root -n argocd \
+    --type merge \
+    -p '{"spec":{"syncPolicy":null}}' 2>/dev/null || log_warn "Could not patch root Application (may not exist)"
 
-  log_info "Deleting Kubernetes resources in namespace ${NAMESPACE}..."
-  kubectl delete namespace "${NAMESPACE}" --ignore-not-found=true --timeout=300s || log_warn "Could not delete namespace (may not exist)"
-
-  log_info "Deleting argocd namespace..."
-  kubectl delete namespace argocd --ignore-not-found=true --timeout=300s || log_warn "Could not delete argocd namespace (may not exist)"
+  # Delete all child Applications (everything except root). The resources-finalizer on
+  # each Application cascades to all managed resources (Deployment, Service, Ingress, etc.),
+  # which causes the Load Balancer Controller to delete ALBs and ExternalDNS to delete
+  # Route53 DNS records. The root Application is left for Terraform to clean up (Step 3).
+  log_info "Deleting Argo CD child Applications (cascade)..."
+  kubectl get applications -n argocd -o name 2>/dev/null \
+    | grep -v '/root$' \
+    | xargs -r kubectl delete -n argocd --wait --timeout=300s \
+    || log_warn "Could not delete Argo CD child Applications (may not exist)"
 
   log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
   log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
