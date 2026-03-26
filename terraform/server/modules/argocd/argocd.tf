@@ -13,9 +13,9 @@ locals {
 
 resource "helm_release" "argocd" {
   name             = "argocd"
-  repository       = var.chart_path != null ? null : "oci://ghcr.io/argoproj/argo-helm"
-  chart            = var.chart_path != null ? var.chart_path : "argo-cd"
-  version          = var.chart_path != null ? null : var.chart_version
+  repository       = "oci://ghcr.io/argoproj/argo-helm"
+  chart            = "argo-cd"
+  version          = var.chart_version
   namespace        = local.namespace
   create_namespace = true
 

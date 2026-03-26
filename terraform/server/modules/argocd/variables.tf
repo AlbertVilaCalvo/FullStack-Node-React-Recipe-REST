@@ -21,12 +21,6 @@ variable "chart_version" {
   type        = string
 }
 
-variable "chart_path" {
-  description = "Local path to the downloaded Helm chart. If provided, disables repository download."
-  type        = string
-  default     = null
-}
-
 variable "argocd_domain" {
   description = "The domain name for the Argo CD UI (e.g., argocd.recipemanager.link)"
   type        = string
