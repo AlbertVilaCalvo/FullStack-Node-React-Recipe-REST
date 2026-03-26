@@ -2,11 +2,11 @@
 
 Recipe Manager is a web application that allows users to manage cooking recipes. Users can read, create, update and delete recipes.
 
-This is a project I'm building to learn technologies like Node.js, AWS, Terraform, Kubernetes, EKS, Docker, databases, system design, software architecture, microservices, Domain-Driven Design, CI/CD, GitHub Actions, GitOps, observability, REST API design etc.
+This is a project I'm building to learn technologies like Node.js, AWS, Terraform, Kubernetes, EKS, Docker, databases, system design, software architecture, microservices, Domain-Driven Design, CI/CD, GitHub Actions, GitOps, Argo CD, observability, REST API design etc.
 
 ## Project Overview & Architecture
 
-Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS, with infrastructure managed using Terraform. Deployment of the website and server are done with GitHub Actions. The application is deployed to two different environments: dev and prod. Local development is done using Docker and Docker Compose.
+Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS, with infrastructure managed using Terraform. The website is deployed to CloudFront using GitHub Actions, and the server is deployed to EKS using GitHub Actions and Argo CD. The application is deployed to two different environments: dev and prod. Local development is done using Docker and Docker Compose.
 
 The project structure is:
 
@@ -19,7 +19,7 @@ The project structure is:
   - `/terraform/server`: Infrastructure for the Node.js API.
 - `kubernetes`: Kubernetes manifests.
   - `kubernetes/server`: Manifests for the server. Uses Kustomize.
-  - `kubernetes/argocd-apps`: Argo CD Application manifests (one per environment) used by the App of Apps pattern.
+  - `kubernetes/argocd-apps`: Argo CD Application manifests. Uses the App of Apps pattern.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
   - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).

@@ -34,19 +34,19 @@ Live site: https://recipemanager.link
 ### AWS
 
 - Frontend deployed to S3 and CloudFront automatically using GitHub Actions.
-- EKS cluster for server deployment.
+- Server deployed to EKS using GitHub Actions and Argo CD.
 - RDS PostgreSQL database.
 - ECR for Docker image storage.
 - Secrets Manager for application secrets (RDS master password, JWT secret, email credentials).
 
 ### Kubernetes (EKS)
 
-- Argo CD for GitOps-based continuous deployment (App of Apps pattern).
+- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, Argo CD, ExternalDNS and External Secrets Operator.
 - Ingress with AWS Load Balancer Controller.
 - Karpenter for automatic provisioning of nodes based on workload.
+- Argo CD for GitOps-based continuous deployment (App of Apps pattern).
 - ExternalDNS for automatic Route53 DNS record management.
 - External Secrets Operator for syncing secrets from AWS Secrets Manager to Kubernetes Secrets.
-- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS, External Secrets Operator and Argo CD.
 - Pod Identity.
 - Kustomize for managing Kubernetes manifests.
 
@@ -254,7 +254,7 @@ This script will:
 - Create VPC, EKS cluster, RDS database, ECR repository, Pod Identity, ACM certificate for the API endpoint and application secrets (JWT, email credentials)
 - Install Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter and Argo CD
 - Create Karpenter NodePool and EC2NodeClass
-- Display next steps (including Argo CD UI access)
+- Display next steps
 
 This process takes approximately 20-30 minutes.
 
@@ -332,7 +332,7 @@ If you changed any value in `terraform.tfvars`, then use that value.
 
 ### Server API
 
-The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml` on every push to `main` that touches `server/**`. Argo CD detects the commit and automatically syncs the changes to the cluster.
+The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
 
 At the GitHub repository, go to Settings → Environments and add the following environment variables to the "dev" and "prod" environments:
 
