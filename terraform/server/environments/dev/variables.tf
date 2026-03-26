@@ -271,6 +271,11 @@ variable "external_secrets_chart_version" {
   type        = string
 }
 
+variable "argocd_chart_version" {
+  description = "Version of the Argo CD Helm chart"
+  type        = string
+}
+
 # Karpenter Controller
 
 variable "karpenter_chart_version" {

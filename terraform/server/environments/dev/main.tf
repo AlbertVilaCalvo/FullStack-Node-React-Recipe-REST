@@ -1,5 +1,6 @@
-# Load Balancer Controller, ExternalDNS and Karpenter Controller Helm charts must be applied
-# AFTER the EKS cluster is created, otherwise you get errors like "Kubernetes cluster unreachable:
+# Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter Controller and
+# Argo CD Helm charts must be applied AFTER the EKS cluster is created, otherwise you get
+# errors like "Kubernetes cluster unreachable:
 # the server has asked for the client to provide credentials".
 # And the Karpenter NodePool and the EC2NodeClass must be applied AFTER the Karpenter Helm chart
 # is installed, otherwise you get this error: "API did not recognize GroupVersionKind from manifest
@@ -8,18 +9,20 @@
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
 #    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.acm_certificates -target=module.app_secrets
 # 2. EKS cluster created -> install Helm charts:
-#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller
+#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller -target=module.argocd
 # 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
 #    terraform apply -target=module.karpenter_nodepool
-# 4. Deploy the Kubernetes manifests with kubectl -> LBC creates the ALB via Ingress, ExternalDNS automatically creates Route53 A record for API endpoint.
+# 4. Argo CD reconciles the Kubernetes manifests stored in Git -> LBC creates the ALB via Ingress, ExternalDNS automatically creates Route53 A records.
 # This can be solved with Terraform Stacks, see https://developer.hashicorp.com/terraform/tutorials/cloud/stacks-eks-deferred
 
 data "aws_caller_identity" "current" {}
 
 locals {
   cluster_name = "${var.app_name}-eks-${var.environment}"
+  git_repo_url = "https://github.com/${var.github_org}/${var.github_repo}"
   namespace    = "recipe-manager"
 
+  argocd_chart_path           = fileexists("${path.module}/.charts/argo-cd-${var.argocd_chart_version}.tgz") ? "${path.module}/.charts/argo-cd-${var.argocd_chart_version}.tgz" : null
   lb_controller_chart_path    = fileexists("${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null
   external_dns_chart_path     = fileexists("${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz") ? "${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz" : null
   external_secrets_chart_path = fileexists("${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz") ? "${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz" : null
@@ -165,6 +168,22 @@ module "external_dns" {
   cluster_name     = module.eks.cluster_name
   hosted_zone_name = var.server_hosted_zone_name
   domains          = [var.api_domain, var.argocd_domain]
+}
+
+module "argocd" {
+  depends_on = [module.lb_controller, module.external_dns]
+
+  source = "../../modules/argocd"
+
+  app_name    = var.app_name
+  environment = var.environment
+
+  acm_certificate_arn = module.acm_certificates[var.argocd_domain].certificate_arn
+  argocd_domain       = var.argocd_domain
+  chart_path          = local.argocd_chart_path
+  chart_version       = var.argocd_chart_version
+  git_repo_url        = local.git_repo_url
+  git_revision        = "main"
 }
 
 module "external_secrets" {

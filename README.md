@@ -10,7 +10,7 @@ Live site: https://recipemanager.link
 
 - Hosted on AWS.
 - Infrastructure as Code with Terraform
-- CI/CD with GitHub Actions.
+- CI/CD with GitHub Actions and Argo CD.
 - Local development with Docker Compose.
 - 100% TypeScript, zero JavaScript.
 
@@ -42,12 +42,24 @@ Live site: https://recipemanager.link
 ### Kubernetes (EKS)
 
 - Ingress with AWS Load Balancer Controller.
+- Argo CD for GitOps deployment of the server manifests.
 - Karpenter for automatic provisioning of nodes based on workload.
 - ExternalDNS for automatic Route53 DNS record management.
 - External Secrets Operator for syncing secrets from AWS Secrets Manager to Kubernetes Secrets.
-- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS and External Secrets Operator.
+- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS, External Secrets Operator and Argo CD.
 - Pod Identity.
 - Kustomize for managing Kubernetes manifests.
+
+### Server deployment flow
+
+Server infrastructure is bootstrapped with Terraform using the scripts in `scripts/server`. After Argo CD is installed, the steady-state deployment flow is GitOps:
+
+1. Push server changes to GitHub.
+2. `.github/workflows/server.yml` builds and pushes the Docker image to ECR.
+3. The workflow updates the image tag in `kubernetes/server/overlays/<environment>/kustomization.yaml`.
+4. Argo CD detects the Git change and syncs the server application into the cluster.
+
+The script `scripts/server/deploy-server-eks.sh` is kept as a manual fallback path for troubleshooting or exceptional cases.
 
 ## Features
 

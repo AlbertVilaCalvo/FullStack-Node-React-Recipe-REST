@@ -52,6 +52,9 @@ external_dns_chart_version = "1.20.0"
 # External Secrets Operator
 external_secrets_chart_version = "2.0.1"
 
+# Argo CD
+argocd_chart_version = "9.4.15"
+
 # Karpenter Controller
 karpenter_chart_version = "1.8.3"
 

@@ -6,7 +6,7 @@ This is a project I'm building to learn technologies like Node.js, AWS, Terrafor
 
 ## Project Overview & Architecture
 
-Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS, with infrastructure managed using Terraform. Deployment of the website and server are done with GitHub Actions. The application is deployed to two different environments: dev and prod. Local development is done using Docker and Docker Compose.
+Recipe Manager is a full-stack web application built using React on the client and Node.js on the server, with a PostgreSQL database. The application is deployed on AWS, with infrastructure managed using Terraform. The website is deployed with GitHub Actions, and the server uses GitHub Actions plus Argo CD: GitHub Actions builds and publishes the image and updates the Kubernetes image tag in Git, and Argo CD syncs the manifests into the cluster. The application is deployed to two different environments: dev and prod. Local development is done using Docker and Docker Compose.
 
 The project structure is:
 
@@ -19,9 +19,10 @@ The project structure is:
   - `/terraform/server`: Infrastructure for the Node.js API.
 - `kubernetes`: Kubernetes manifests.
   - `kubernetes/server`: Manifests for the server. Uses Kustomize.
+  - `kubernetes/argocd-apps`: Argo CD Application manifests per environment.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
-  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
+  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the Git change and deploys the server. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
   - `.github/workflows/web.yml`: Deploys React web app.
 
 The server follows a three-layer architecture for organizing business logic:
@@ -51,8 +52,9 @@ The server follows a three-layer architecture for organizing business logic:
 - ECR for Docker image storage.
 - Secrets Manager for application secrets (RDS master password, JWT secret, email credentials).
 - EKS Kubernetes cluster includes:
-  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS and External Secrets Operator.
+  - Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS, External Secrets Operator and Argo CD.
   - Ingress with AWS Load Balancer Controller.
+  - Argo CD for GitOps deployment of the server application.
   - Karpenter for automatic provisioning of nodes based on workload. App pods run on Karpenter provisioned nodes.
   - ExternalDNS for automatic Route53 DNS record management.
   - External Secrets Operator for syncing secrets from AWS Secrets Manager to Kubernetes Secrets.

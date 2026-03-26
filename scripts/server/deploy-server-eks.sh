@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Deploy server Kubernetes manifests to the EKS cluster
+# Manually deploy server Kubernetes manifests to the EKS cluster
 #
 # Usage:
 #   ./scripts/server/deploy-server-eks.sh <environment> <image_tag>
@@ -11,13 +11,16 @@
 #
 # Arguments:
 #   environment - The deployment environment (dev or prod)
-#   image_tag   - The Docker image tag to deploy (required, use output from build-push-image-ecr.sh)
+#   image_tag   - The Docker image tag to deploy (required, for example a GitHub Actions short SHA tag)
 #
 # Prerequisites:
 #   - AWS CLI configured with appropriate credentials
 #   - kubectl installed and configured
 #   - Terraform outputs available in terraform/server/environments/<environment>
-#   - Docker image already pushed to ECR (run build-push-image-ecr.sh first)
+#   - Docker image already pushed to ECR
+#
+# This script is kept as a manual fallback path. The default Phase 1 deployment flow is:
+# GitHub Actions updates kubernetes/server/overlays/<environment>/kustomization.yaml and Argo CD syncs it.
 
 set -euo pipefail
 
@@ -70,6 +73,7 @@ validate_command_exists aws
 # Main Script
 # ============================================================================
 
+log_warn "Manual fallback deployment path. The default workflow is GitHub Actions -> Git commit -> Argo CD sync."
 log_info "Deploying server to environment: ${ENVIRONMENT}"
 log_info "Image tag: ${IMAGE_TAG}"
 
