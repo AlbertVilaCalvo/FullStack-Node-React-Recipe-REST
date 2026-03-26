@@ -6,7 +6,7 @@
 # (CRD may not be installed) ... no matches for kind "EC2NodeClass" in group "karpenter.k8s.aws"".
 # Do this:
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
-#    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.acm_certificates -target=module.app_secrets
+#    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.acm_certificates -target=module.app_secrets -target=module.github_actions_oidc_role_server
 # 2. EKS cluster created -> install Helm charts and Argo CD:
 #    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller -target=module.argocd
 # 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
