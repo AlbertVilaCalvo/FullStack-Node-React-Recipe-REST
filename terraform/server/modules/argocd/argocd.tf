@@ -20,6 +20,14 @@ resource "helm_release" "argocd" {
   values = [yamlencode({
     global = {
       domain = var.argocd_domain
+      # Allow scheduling on the managed node group, which has a karpenter.sh/controller taint.
+      # This applies to ALL components: dex, redis, redisSecretInit pre-install hook Job, server,
+      # repoServer, notifications...
+      tolerations = [{
+        key      = "karpenter.sh/controller"
+        operator = "Exists"
+        effect   = "NoSchedule"
+      }]
     }
     configs = {
       params = {
@@ -30,14 +38,6 @@ resource "helm_release" "argocd" {
     }
     dex = {
       enabled = false
-    }
-    # Allow scheduling on the bootstrap nodes of the managed node group.
-    controller = {
-      tolerations = [{
-        key      = "karpenter.sh/controller"
-        operator = "Exists"
-        effect   = "NoSchedule"
-      }]
     }
     server = {
       ingress = {
@@ -60,25 +60,6 @@ resource "helm_release" "argocd" {
         }
         tls = false
       }
-      tolerations = [{
-        key      = "karpenter.sh/controller"
-        operator = "Exists"
-        effect   = "NoSchedule"
-      }]
-    }
-    repoServer = {
-      tolerations = [{
-        key      = "karpenter.sh/controller"
-        operator = "Exists"
-        effect   = "NoSchedule"
-      }]
-    }
-    redis = {
-      tolerations = [{
-        key      = "karpenter.sh/controller"
-        operator = "Exists"
-        effect   = "NoSchedule"
-      }]
     }
   })]
 }
