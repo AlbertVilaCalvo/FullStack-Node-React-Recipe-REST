@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/AlbertVilaCalvo/RecipeManager.git
-    targetRevision: main
+    targetRevision: argocd-setup-only
     path: kubernetes/server/overlays/dev
   destination:
     server: https://kubernetes.default.svc
