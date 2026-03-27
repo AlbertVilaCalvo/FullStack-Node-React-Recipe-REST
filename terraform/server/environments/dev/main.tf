@@ -11,7 +11,10 @@
 #    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller -target=module.argocd
 # 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
 #    terraform apply -target=module.karpenter_nodepool
-# 4. Argo CD syncs Application manifests from Git and deploys the server app.
+# 4. Argo CD CRDs installed -> create root Application (App of Apps).
+#    Done after the Karpenter NodePool so that Karpenter nodes are available for the workloads that Argo CD will deploy:
+#    terraform apply -target=module.argocd_apps
+# 5. Argo CD syncs Application manifests from Git and deploys the server app.
 #    The LBC creates the ALB via Ingress, ExternalDNS creates Route53 A records for the API and Argo CD endpoints.
 # This can be solved with Terraform Stacks, see https://developer.hashicorp.com/terraform/tutorials/cloud/stacks-eks-deferred
 
@@ -215,7 +218,18 @@ module "argocd" {
 
   argocd_domain       = var.argocd_domain
   acm_certificate_arn = module.acm_certificates[var.argocd_domain].certificate_arn
+}
 
+# Argo CD Applications (App of Apps)
+# **********************************
+
+module "argocd_apps" {
+  # Argo CD CRDs need to be installed before creating the root Application
+  depends_on = [module.argocd]
+
+  source = "../../modules/argocd-apps"
+
+  environment  = var.environment
   git_repo_url = var.git_repo_url
   git_revision = var.git_revision
 }

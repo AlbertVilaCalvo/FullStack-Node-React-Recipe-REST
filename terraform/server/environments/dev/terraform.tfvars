@@ -1,9 +1,13 @@
 app_name    = "recipe-manager"
 environment = "dev"
 aws_region  = "us-east-1"
-web_domain  = "recipemanager.link"
+
+# GitOps
+git_repo_url = "https://github.com/AlbertVilaCalvo/RecipeManager.git"
+git_revision = "main"
 
 # Domains
+web_domain              = "recipemanager.link"
 server_hosted_zone_name = "recipemanager.link"
 api_domain              = "api.recipemanager.link"
 argocd_domain           = "argocd.recipemanager.link"
@@ -57,10 +61,6 @@ karpenter_chart_version = "1.8.3"
 
 # Argo CD
 argocd_chart_version = "9.4.15"
-
-# GitOps
-git_repo_url = "https://github.com/AlbertVilaCalvo/RecipeManager.git"
-git_revision = "main"
 
 # Karpenter NodePool
 # If you use spot and on-demand, you need at least 5 instance types, otherwise you get this error:

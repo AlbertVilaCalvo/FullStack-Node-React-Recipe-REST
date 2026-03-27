@@ -26,21 +26,11 @@ variable "argocd_domain" {
   type        = string
   validation {
     condition     = can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,}$", var.argocd_domain))
-    error_message = "The domain must be a valid domain name."
+    error_message = "The Argo CD domain must be a valid domain name."
   }
 }
 
 variable "acm_certificate_arn" {
   description = "ARN of the ACM certificate for the Argo CD domain"
-  type        = string
-}
-
-variable "git_repo_url" {
-  description = "URL of the Git repository containing Argo CD Application manifests"
-  type        = string
-}
-
-variable "git_revision" {
-  description = "Git revision (branch, tag, or commit) to sync from"
   type        = string
 }

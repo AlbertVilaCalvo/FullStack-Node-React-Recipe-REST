@@ -2,10 +2,6 @@
 #   - AWS Load Balancer Controller to provision the ALB
 #   - ExternalDNS to create the Route53 A record
 # Therefore, this module must be applied AFTER module.lb_controller and module.external_dns.
-#
-# The root Application (App of Apps pattern) is embedded in the Helm chart's extraObjects.
-# Helm installs CRDs before templates, so the Application CRD is available when the root
-# Application is created. This avoids the need for a separate Terraform module or apply step.
 
 locals {
   namespace = "argocd"
@@ -19,8 +15,6 @@ resource "helm_release" "argocd" {
   namespace        = local.namespace
   create_namespace = true
 
-  # Wait for all pods to be ready so that the root Application (in extraObjects)
-  # is processed by the Argo CD Application controller
   wait = true
 
   values = [yamlencode({
@@ -86,35 +80,5 @@ resource "helm_release" "argocd" {
         effect   = "NoSchedule"
       }]
     }
-    # Root Application (App of Apps pattern).
-    # Points to a directory in the Git repository that contains Argo CD Application manifests.
-    # Adding new applications (e.g., Prometheus, Grafana) only requires a YAML file in Git.
-    extraObjects = [{
-      apiVersion = "argoproj.io/v1alpha1"
-      kind       = "Application"
-      metadata = {
-        name       = "root"
-        namespace  = local.namespace
-        finalizers = ["resources-finalizer.argocd.argoproj.io"]
-      }
-      spec = {
-        project = "default"
-        source = {
-          repoURL        = var.git_repo_url
-          targetRevision = var.git_revision
-          path           = "kubernetes/argocd-apps/${var.environment}"
-        }
-        destination = {
-          server    = "https://kubernetes.default.svc"
-          namespace = local.namespace
-        }
-        syncPolicy = {
-          automated = {
-            prune    = true
-            selfHeal = true
-          }
-        }
-      }
-    }]
   })]
 }

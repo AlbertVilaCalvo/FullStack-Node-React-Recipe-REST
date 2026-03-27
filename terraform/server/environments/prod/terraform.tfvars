@@ -1,9 +1,13 @@
 app_name    = "recipe-manager"
 environment = "prod"
 aws_region  = "us-east-1"
-web_domain  = "recipeapp.link"
+
+# GitOps
+git_repo_url = "https://github.com/AlbertVilaCalvo/RecipeManager.git"
+git_revision = "main"
 
 # Domains
+web_domain              = "recipeapp.link"
 server_hosted_zone_name = "recipeapp.link"
 api_domain              = "api.recipeapp.link"
 argocd_domain           = "argocd.recipeapp.link"
@@ -57,10 +61,6 @@ karpenter_chart_version = "1.8.3"
 
 # Argo CD
 argocd_chart_version = "9.4.15"
-
-# GitOps
-git_repo_url = "https://github.com/AlbertVilaCalvo/RecipeManager.git"
-git_revision = "main"
 
 # Karpenter NodePool
 # Order does not matter: Karpenter automatically provisions the cheapest available instance
