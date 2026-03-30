@@ -2,9 +2,10 @@
 #
 # Deploy server Kubernetes manifests to the EKS cluster
 #
-# This script is for manual deployments only. GitHub Actions deploys automatically
-# when a commit lands in the main branch, so you typically do not need to run
-# this script directly.
+# This script is for manual deployments only. When a commit lands in the main
+# branch, GitHub Actions builds and pushes the image to ECR, and then Argo CD
+# deploys/syncs automatically, so you typically do not need to run this script
+# directly.
 #
 # Usage:
 #   ./scripts/server/deploy-server-eks.sh <environment> <image_tag>
