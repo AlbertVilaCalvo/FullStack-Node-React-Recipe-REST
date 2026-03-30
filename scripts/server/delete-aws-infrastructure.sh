@@ -133,7 +133,7 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
   # Delete all child Applications (everything except root). The resources-finalizer on
   # each Application cascades to all managed resources (Deployment, Service, Ingress, etc.),
   # which causes the Load Balancer Controller to delete ALBs and ExternalDNS to delete
-  # Route53 DNS records. The root Application is left for Terraform to clean up (Step 3).
+  # Route53 DNS records. The root Application is left for Terraform to clean up (Step 2).
   log_info "Deleting Argo CD child Applications (cascade)..."
   kubectl get applications -n argocd -o name 2>/dev/null \
     | grep -v '/root$' \
@@ -152,7 +152,7 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
   log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
   log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
 
-  WAIT_TIMEOUT=600
+  WAIT_TIMEOUT=400
   START_TIME=$(date +%s)
 
   while true; do
@@ -221,7 +221,7 @@ terraform destroy -target=module.karpenter_nodepool -auto-approve
 # Deleting the controller while EC2 instances are still running could leave them orphaned
 # (no controller to terminate them), causing them to keep running indefinitely, incurring costs.
 log_info "Waiting for Karpenter-provisioned EC2 instances to terminate..."
-WAIT_TIMEOUT=600
+WAIT_TIMEOUT=400
 START_TIME=$(date +%s)
 while true; do
   CURRENT_TIME=$(date +%s)
