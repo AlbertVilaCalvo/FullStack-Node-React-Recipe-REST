@@ -19,7 +19,7 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  cluster_name = "${var.app_name}-eks-${var.environment}"
+  cluster_name = "${var.app_name}-eks-cluster-${var.environment}"
   namespace    = "recipe-manager"
 
   lb_controller_chart_path    = fileexists("${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null

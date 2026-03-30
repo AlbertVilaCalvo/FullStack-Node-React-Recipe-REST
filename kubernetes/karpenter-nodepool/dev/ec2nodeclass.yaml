@@ -5,11 +5,11 @@ metadata:
 spec:
   amiSelectorTerms:
     - alias: al2023@latest
-  role: recipe-manager-eks-node-group-role-dev
+  role: recipe-manager-eks-node-role-dev
   subnetSelectorTerms:
     - tags:
-        karpenter.sh/discovery: recipe-manager-eks-dev
+        karpenter.sh/discovery: recipe-manager-eks-cluster-dev
   securityGroupSelectorTerms:
     - tags:
-        karpenter.sh/discovery: recipe-manager-eks-dev
-        kubernetes.io/cluster/recipe-manager-eks-dev: owned
+        karpenter.sh/discovery: recipe-manager-eks-cluster-dev
+        kubernetes.io/cluster/recipe-manager-eks-cluster-dev: owned
