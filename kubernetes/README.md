@@ -20,6 +20,8 @@ You can save the rendered output to a file.
 kubectl kustomize kubernetes/server/overlays/dev > dev-manifest.yaml
 ```
 
+## Deploy a new image tag
+
 To deploy a new image tag, update the image reference in the overlay's `kustomization.yaml`:
 
 ```shell

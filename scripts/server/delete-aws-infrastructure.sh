@@ -130,15 +130,16 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
     --type merge \
     -p '{"spec":{"syncPolicy":null}}' 2>/dev/null || log_warn "Could not patch root Application (may not exist)"
 
-  # Delete all child Applications (everything except root). The resources-finalizer on
-  # each Application cascades to all managed resources (Deployment, Service, Ingress, etc.),
+  # Delete the server Application only (not Karpenter). The resources-finalizer on the
+  # Application cascades to all managed resources (Deployment, Service, Ingress, etc.),
   # which causes the Load Balancer Controller to delete ALBs and ExternalDNS to delete
-  # Route53 DNS records. The root Application is left for Terraform to clean up (Step 2).
-  log_info "Deleting Argo CD child Applications (cascade)..."
-  kubectl get applications -n argocd -o name 2>/dev/null \
-    | grep -v '/root$' \
-    | xargs -r kubectl delete -n argocd --wait --timeout=300s \
-    || log_warn "Could not delete Argo CD child Applications (may not exist)"
+  # Route53 DNS records. The Karpenter Application is kept so that Karpenter nodes remain
+  # available for controllers (LBC, ExternalDNS) to finish cleanup. The root Application
+  # is left for Terraform to clean up (Step 2).
+  log_info "Deleting Argo CD server Application (cascade)..."
+  kubectl delete application recipe-manager-server -n argocd \
+    --ignore-not-found=true --wait --timeout=300s \
+    || log_warn "Could not delete Argo CD server Application (may not exist)"
 
   # Delete the Argo CD Ingress to trigger ALB cleanup by the Load Balancer Controller.
   # The Argo CD Ingress is managed by Helm (not by an Argo CD Application), so it is
@@ -213,11 +214,13 @@ fi
 log_step "Step 2/7 : Deleting Argo CD root Application (App of Apps)..."
 terraform destroy -target=module.argocd_apps -auto-approve
 
-# Step 3: Delete Karpenter NodePool
-log_step "Step 3/7 : Deleting Karpenter NodePool and EC2NodeClass..."
-terraform destroy -target=module.karpenter_nodepool -auto-approve
+# Step 3: Delete Karpenter Application (NodePool and EC2NodeClass)
+log_step "Step 3/7 : Deleting Karpenter Application (NodePool and EC2NodeClass)..."
+kubectl delete application karpenter -n argocd \
+  --ignore-not-found=true --wait --timeout=300s \
+  || log_warn "Could not delete Karpenter Application (may not exist)"
 
-# Wait for Karpenter nodes to be terminated before deleting the Karpenter controller in Step 3.
+# Wait for Karpenter nodes to be terminated before deleting the Karpenter controller in Step 4.
 # Deleting the controller while EC2 instances are still running could leave them orphaned
 # (no controller to terminate them), causing them to keep running indefinitely, incurring costs.
 log_info "Waiting for Karpenter-provisioned EC2 instances to terminate..."
