@@ -50,7 +50,7 @@ resource "helm_release" "argocd" {
           "alb.ingress.kubernetes.io/listen-ports"                 = jsonencode([{ HTTP = 80 }, { HTTPS = 443 }])
           "alb.ingress.kubernetes.io/ssl-redirect"                 = "443"
           "alb.ingress.kubernetes.io/certificate-arn"              = var.acm_certificate_arn
-          "alb.ingress.kubernetes.io/healthcheck-path"             = "/api/health"
+          "alb.ingress.kubernetes.io/healthcheck-path"             = "/healthz"
           "alb.ingress.kubernetes.io/healthcheck-interval-seconds" = "15"
           "alb.ingress.kubernetes.io/healthcheck-timeout-seconds"  = "5"
           "alb.ingress.kubernetes.io/healthy-threshold-count"      = "2"
