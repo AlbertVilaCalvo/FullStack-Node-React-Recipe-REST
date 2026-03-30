@@ -58,7 +58,6 @@ resource "helm_release" "argocd" {
           "alb.ingress.kubernetes.io/tags"                         = "app=${var.app_name},environment=${var.environment}"
           "external-dns.alpha.kubernetes.io/hostname"              = var.argocd_domain
         }
-        tls = false
       }
     }
   })]
