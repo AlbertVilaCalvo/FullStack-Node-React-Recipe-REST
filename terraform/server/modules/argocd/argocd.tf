@@ -42,6 +42,7 @@ resource "helm_release" "argocd" {
     server = {
       ingress = {
         enabled          = true
+        controller       = "aws"
         ingressClassName = "alb"
         annotations = {
           "alb.ingress.kubernetes.io/scheme"                       = "internet-facing"
@@ -57,6 +58,22 @@ resource "helm_release" "argocd" {
           "alb.ingress.kubernetes.io/load-balancer-name"           = "${var.app_name}-argocd-lb-${var.environment}"
           "alb.ingress.kubernetes.io/tags"                         = "app=${var.app_name},environment=${var.environment}"
           "external-dns.alpha.kubernetes.io/hostname"              = var.argocd_domain
+        }
+        # Create a second service for argocd-server as explained at
+        # https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#aws-application-load-balancers-albs-and-classic-elb-http-mode
+        # The chart creates a separate gRPC Service (argocd-server-grpc) with an
+        # alb.ingress.kubernetes.io/backend-protocol-version: GRPC annotation, and adds
+        # the following condition annotation to the Ingress to route application/grpc
+        # traffic to it:
+        #   alb.ingress.kubernetes.io/conditions.argocd-server-grpc:
+        #   [{"field":"http-header","httpHeaderConfig":{"httpHeaderName": "Content-Type", "values":["application/grpc"]}}]
+        # Without this, you get the following error when running `argocd` CLI commands:
+        #   {"level":"warning",
+        #    "msg":"Failed to invoke grpc call. Use flag --grpc-web in grpc calls. To avoid this warning message, use flag --grpc-web.",
+        #    "time":"2026-03-27T13:42:29+01:00"}
+        aws = {
+          serviceType            = "ClusterIP"
+          backendProtocolVersion = "GRPC"
         }
       }
     }
