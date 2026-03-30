@@ -140,6 +140,15 @@ if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2
     | xargs -r kubectl delete -n argocd --wait --timeout=300s \
     || log_warn "Could not delete Argo CD child Applications (may not exist)"
 
+  # Delete the Argo CD Ingress to trigger ALB cleanup by the Load Balancer Controller.
+  # The Argo CD Ingress is managed by Helm (not by an Argo CD Application), so it is
+  # not deleted when we delete child Applications above. We must delete it now while
+  # the LBC is still running, otherwise the Argo CD ALB is orphaned and blocks VPC
+  # deletion (the ALB holds ENIs in public subnets and references the ACM certificate
+  # for argocd.recipemanager.link).
+  log_info "Deleting Argo CD Ingress..."
+  kubectl delete ingress --all -n argocd --timeout=60s 2>/dev/null || log_warn "Could not delete Argo CD Ingress (may not exist)"
+
   log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
   log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
 
