@@ -35,7 +35,6 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 ENVIRONMENT="${1}"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 TERRAFORM_DIR="${PROJECT_ROOT}/terraform/server/environments/${ENVIRONMENT}"
-NAMESPACE="recipe-manager"
 
 # ============================================================================
 # Validation
@@ -119,17 +118,41 @@ fi
 log_info "Hosted Zone ID: ${ZONE_ID}"
 
 # Step 1: Delete Kubernetes resources (required to remove ALB created by Ingress)
-log_step "Step 1/6 : Deleting Kubernetes resources..."
+log_step "Step 1/7 : Deleting Kubernetes resources..."
 
-# Configure kubectl, delete all resources in the namespace and wait for the Load Balancer Controller to clean up AWS resources (ALB, Target Groups, Security Groups)
+# Configure kubectl, delete Argo CD-managed resources and wait for the Load Balancer Controller
+# to clean up AWS resources (ALB, Target Groups, Security Groups).
 if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
-  log_info "Deleting Kubernetes resources in namespace ${NAMESPACE}..."
-  kubectl delete namespace "${NAMESPACE}" --ignore-not-found=true --timeout=300s || log_warn "Could not delete namespace (may not exist)"
+  # Disable auto-sync on the root Application to prevent Argo CD from re-creating
+  # child Applications while we are deleting them.
+  log_info "Disabling Argo CD auto-sync on root Application..."
+  kubectl patch application root -n argocd \
+    --type merge \
+    -p '{"spec":{"syncPolicy":null}}' 2>/dev/null || log_warn "Could not patch root Application (may not exist)"
+
+  # Delete all child Applications (everything except root). The resources-finalizer on
+  # each Application cascades to all managed resources (Deployment, Service, Ingress, etc.),
+  # which causes the Load Balancer Controller to delete ALBs and ExternalDNS to delete
+  # Route53 DNS records. The root Application is left for Terraform to clean up (Step 2).
+  log_info "Deleting Argo CD child Applications (cascade)..."
+  kubectl get applications -n argocd -o name 2>/dev/null \
+    | grep -v '/root$' \
+    | xargs -r kubectl delete -n argocd --wait --timeout=300s \
+    || log_warn "Could not delete Argo CD child Applications (may not exist)"
+
+  # Delete the Argo CD Ingress to trigger ALB cleanup by the Load Balancer Controller.
+  # The Argo CD Ingress is managed by Helm (not by an Argo CD Application), so it is
+  # not deleted when we delete child Applications above. We must delete it now while
+  # the LBC is still running, otherwise the Argo CD ALB is orphaned and blocks VPC
+  # deletion (the ALB holds ENIs in public subnets and references the ACM certificate
+  # for argocd.recipemanager.link).
+  log_info "Deleting Argo CD Ingress..."
+  kubectl delete ingress --all -n argocd --timeout=60s 2>/dev/null || log_warn "Could not delete Argo CD Ingress (may not exist)"
 
   log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
   log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
 
-  WAIT_TIMEOUT=600
+  WAIT_TIMEOUT=400
   START_TIME=$(date +%s)
 
   while true; do
@@ -186,15 +209,19 @@ else
   exit 1
 fi
 
-# Step 2: Delete Karpenter NodePool
-log_step "Step 2/6 : Deleting Karpenter NodePool and EC2NodeClass..."
+# Step 2: Delete Argo CD root Application (App of Apps)
+log_step "Step 2/7 : Deleting Argo CD root Application (App of Apps)..."
+terraform destroy -target=module.argocd_apps -auto-approve
+
+# Step 3: Delete Karpenter NodePool
+log_step "Step 3/7 : Deleting Karpenter NodePool and EC2NodeClass..."
 terraform destroy -target=module.karpenter_nodepool -auto-approve
 
 # Wait for Karpenter nodes to be terminated before deleting the Karpenter controller in Step 3.
 # Deleting the controller while EC2 instances are still running could leave them orphaned
 # (no controller to terminate them), causing them to keep running indefinitely, incurring costs.
 log_info "Waiting for Karpenter-provisioned EC2 instances to terminate..."
-WAIT_TIMEOUT=600
+WAIT_TIMEOUT=400
 START_TIME=$(date +%s)
 while true; do
   CURRENT_TIME=$(date +%s)
@@ -222,23 +249,24 @@ while true; do
   sleep 10
 done
 
-# Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts
-log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) Helm charts..."
+# Step 4: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) and Argo CD Helm charts
+log_step "Step 4/7 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) and Argo CD Helm charts..."
 
 # Download Helm charts locally to avoid network timeouts during Terraform destroy
 download_helm_charts
 
 # Retry logic for network timeouts when downloading Helm charts
-retry_with_backoff 3 "Delete Kubernetes controllers" \
+retry_with_backoff 3 "Delete Kubernetes controllers and Argo CD" \
   terraform destroy \
   -target=module.lb_controller \
   -target=module.external_dns \
   -target=module.external_secrets \
   -target=module.karpenter_controller \
+  -target=module.argocd \
   -auto-approve
 
-# Step 4: Delete all remaining resources
-log_step "Step 4/6 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
+# Step 5: Delete all remaining resources
+log_step "Step 5/7 : Deleting all remaining resources (VPC, EKS, RDS, ECR, Pod Identity, ACM Certificate, App Secrets, GitHub Actions OIDC role)..."
 log_info "This may take 15-20 minutes..."
 
 # The VPC CNI plugin (aws-node) leaves behind ENIs in Karpenter node subnets that block
@@ -310,8 +338,8 @@ done
 
 log_info "Remaining resources (VPC, EKS, RDS, ECR...) deleted successfully"
 
-# Step 5: Cleanup local Docker images
-log_step "Step 5/6 : Cleaning up local Docker images..."
+# Step 6: Cleanup local Docker images
+log_step "Step 6/7 : Cleaning up local Docker images..."
 
 # Check if Docker is available
 if command -v docker &>/dev/null && docker info >/dev/null 2>&1; then
@@ -339,8 +367,8 @@ else
   log_warn "Docker is not available. Skipping Docker image cleanup."
 fi
 
-# Step 6: Cleanup ~/.kube/config
-log_step "Step 6/6 : Removing kubeconfig context, cluster and user entries..."
+# Step 7: Cleanup ~/.kube/config
+log_step "Step 7/7 : Removing kubeconfig context, cluster and user entries..."
 CLUSTER_ARN="arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}"
 kubectl config delete-context "${CLUSTER_ARN}" || true
 kubectl config delete-cluster "${CLUSTER_ARN}" || true

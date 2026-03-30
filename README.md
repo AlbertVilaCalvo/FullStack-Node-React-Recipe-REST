@@ -1,6 +1,6 @@
 # Recipe Manager
 
-_A Full Stack app built with Node, React, PostgreSQL, REST API, AWS, Kubernetes (EKS) and GitHub Actions_
+_A Full Stack app built with Node, React, PostgreSQL, REST API, AWS, Kubernetes (EKS), Argo CD and GitHub Actions_
 
 Live site: https://recipemanager.link
 
@@ -10,7 +10,7 @@ Live site: https://recipemanager.link
 
 - Hosted on AWS.
 - Infrastructure as Code with Terraform
-- CI/CD with GitHub Actions.
+- CI/CD with GitHub Actions and Argo CD.
 - Local development with Docker Compose.
 - 100% TypeScript, zero JavaScript.
 
@@ -34,18 +34,19 @@ Live site: https://recipemanager.link
 ### AWS
 
 - Frontend deployed to S3 and CloudFront automatically using GitHub Actions.
-- EKS cluster for server deployment.
+- Server deployed to EKS using GitHub Actions and Argo CD.
 - RDS PostgreSQL database.
 - ECR for Docker image storage.
 - Secrets Manager for application secrets (RDS master password, JWT secret, email credentials).
 
 ### Kubernetes (EKS)
 
+- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, Argo CD, ExternalDNS and External Secrets Operator.
 - Ingress with AWS Load Balancer Controller.
 - Karpenter for automatic provisioning of nodes based on workload.
+- Argo CD for GitOps-based continuous deployment (App of Apps pattern).
 - ExternalDNS for automatic Route53 DNS record management.
 - External Secrets Operator for syncing secrets from AWS Secrets Manager to Kubernetes Secrets.
-- Managed Node Group that runs CoreDNS, Load Balancer Controller, Karpenter controller, ExternalDNS and External Secrets Operator.
 - Pod Identity.
 - Kustomize for managing Kubernetes manifests.
 
@@ -251,7 +252,8 @@ This script will:
 
 - Initialize Terraform
 - Create VPC, EKS cluster, RDS database, ECR repository, Pod Identity, ACM certificate for the API endpoint and application secrets (JWT, email credentials)
-- Install Load Balancer Controller, ExternalDNS, External Secrets Operator and Karpenter
+- Install Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter and Argo CD using Helm
+- Create the Argo CD root Application (App of Apps)
 - Create Karpenter NodePool and EC2NodeClass
 - Display next steps
 
@@ -331,7 +333,7 @@ If you changed any value in `terraform.tfvars`, then use that value.
 
 ### Server API
 
-The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml` on every push to `main` that touches `server/**`.
+The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
 
 At the GitHub repository, go to Settings → Environments and add the following environment variables to the "dev" and "prod" environments:
 

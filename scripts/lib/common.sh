@@ -250,8 +250,9 @@ retry_with_backoff() {
 # │ 6: resource "helm_release" "aws_load_balancer_controller" {
 # │
 # │ Unable to locate chart aws-load-balancer-controller: Get "https://aws.github.io/eks-charts/aws-load-balancer-controller-1.17.1.tgz": read tcp 192.168.1.59:51924->185.199.110.153:443: read: operation timed out
-# We do not download the Karpenter chart because it uses oci://, and the download is reliable.
 # Charts are downloaded to the environment-specific .charts/ directory.
+# We do not download the Karpenter and Argo CD charts because they use oci://,
+# and the download is reliable.
 download_helm_charts() {
   local charts_dir="${TERRAFORM_DIR}/.charts"
 

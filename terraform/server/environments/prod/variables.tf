@@ -278,6 +278,23 @@ variable "karpenter_chart_version" {
   type        = string
 }
 
+# Argo CD
+
+variable "argocd_chart_version" {
+  description = "Version of the Argo CD Helm chart"
+  type        = string
+}
+
+variable "git_repo_url" {
+  description = "URL of the Git repository containing Argo CD Application manifests"
+  type        = string
+}
+
+variable "git_revision" {
+  description = "Git revision (branch, tag, or commit) to sync from"
+  type        = string
+}
+
 # Karpenter NodePool Configuration
 
 variable "karpenter_instance_types" {
