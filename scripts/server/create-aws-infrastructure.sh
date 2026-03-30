@@ -118,7 +118,12 @@ terraform apply -target=module.argocd_apps -auto-approve
 log_step "Step 6/6: Updating kubectl configuration..."
 AWS_REGION=$(get_tfvars_value "aws_region")
 CLUSTER_NAME=$(get_terraform_output "cluster_name")
+NAMESPACE="recipe-manager"
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
+
+# Set default namespace for context to avoid specifying -n each time
+kubectl config set-context "arn:aws:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}" --namespace "${NAMESPACE}"
 
 # Display summary
 echo ""
