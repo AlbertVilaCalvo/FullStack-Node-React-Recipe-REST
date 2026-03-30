@@ -29,6 +29,7 @@ resource "aws_security_group" "node" {
   description = "Security group for EKS worker nodes for ${var.app_name} in ${var.environment} environment"
   vpc_id      = var.vpc_id
 
+  # See securityGroupSelectorTerms in ec2nodeclass.yaml for how Karpenter discovers this SG to attach the nodes it provisions
   tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "owned"
     "karpenter.sh/discovery"                      = local.cluster_name
