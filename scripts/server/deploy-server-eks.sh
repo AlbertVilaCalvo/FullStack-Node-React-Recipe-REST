@@ -3,7 +3,7 @@
 # Deploy server Kubernetes manifests to the EKS cluster
 #
 # This script is for manual deployments only. GitHub Actions deploys automatically
-# when a commit is pushed to the main branch, so you typically do not need to run
+# when a commit lands in the main branch, so you typically do not need to run
 # this script directly.
 #
 # Usage:

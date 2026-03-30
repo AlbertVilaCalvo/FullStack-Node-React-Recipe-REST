@@ -109,8 +109,8 @@ terraform apply -target=module.karpenter_nodepool -auto-approve
 
 # Step 5: Create Argo CD root Application (App of Apps)
 # The Argo CD CRDs need to be installed before creating the root Application.
-# Creating the root application is done after creating the Karpenter NodePool,
-# this way Karpenter nodes are available for the workloads that Argo CD will deploy
+# Creating the root application is done after creating the Karpenter NodePool, this
+# way Karpenter nodes are available for the workloads that Argo CD will deploy.
 log_step "Step 5/6: Creating Argo CD root Application (App of Apps)..."
 terraform apply -target=module.argocd_apps -auto-approve
 

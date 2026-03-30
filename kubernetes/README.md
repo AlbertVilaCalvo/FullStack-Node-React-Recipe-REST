@@ -27,7 +27,7 @@ cd kubernetes/server/overlays/dev
 kustomize edit set image recipe-manager-api-server=<YOUR_ECR_REGISTRY_URL>:<TAG>
 ```
 
-This adds the following to `kubernetes/server/overlays/dev/kustomization.yaml`:
+This adds or modifies the following to `kubernetes/server/overlays/dev/kustomization.yaml`:
 
 ```yaml
 images:

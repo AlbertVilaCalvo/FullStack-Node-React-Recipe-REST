@@ -10,7 +10,7 @@ Live site: https://recipemanager.link
 
 - Hosted on AWS.
 - Infrastructure as Code with Terraform
-- CI/CD with GitHub Actions.
+- CI/CD with GitHub Actions and Argo CD.
 - Local development with Docker Compose.
 - 100% TypeScript, zero JavaScript.
 
@@ -252,7 +252,8 @@ This script will:
 
 - Initialize Terraform
 - Create VPC, EKS cluster, RDS database, ECR repository, Pod Identity, ACM certificate for the API endpoint and application secrets (JWT, email credentials)
-- Install Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter and Argo CD
+- Install Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter and Argo CD using Helm
+- Create the Argo CD root Application (App of Apps)
 - Create Karpenter NodePool and EC2NodeClass
 - Display next steps
 
