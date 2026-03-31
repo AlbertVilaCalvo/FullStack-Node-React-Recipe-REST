@@ -11,10 +11,11 @@ Recipe Manager is a full-stack web application built using React on the client a
 The project structure is:
 
 - `/server`: A Node.js (Express) REST API backend.
+  - `/server/src/router.ts`: API endpoints definition.
 - `/web`: A React single-page application frontend.
   - `/web/src/ui`: React components and pages.
 - `/terraform`: Terraform code for AWS infrastructure.
-  - `/terraform/bootstrap`: S3 buckets for Terraform state.
+  - `/terraform/bootstrap`: S3 buckets for Terraform state and GitHub Actions OIDC provider.
   - `/terraform/web`: Infrastructure for the frontend.
   - `/terraform/server`: Infrastructure for the Node.js API.
 - `kubernetes`: Kubernetes manifests.
