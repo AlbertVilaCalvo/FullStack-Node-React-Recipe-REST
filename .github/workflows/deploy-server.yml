@@ -1,4 +1,4 @@
-name: Server (Node.js API)
+name: Deploy server
 
 on:
   push:
@@ -6,20 +6,10 @@ on:
       - main
     paths:
       - server/**
-      - .github/workflows/server.yml
-  pull_request:
-    branches:
-      - main
-    paths:
-      - server/**
-      - .github/workflows/server.yml
-    types:
-      - opened
-      - synchronize
-      - closed
+      - kubernetes/server/**
+      - .github/workflows/deploy-server.yml
   workflow_dispatch:
 
-# Allow only one concurrent execution
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -29,58 +19,8 @@ defaults:
     working-directory: server
 
 jobs:
-  eslint:
-    name: ESLint
-    runs-on: ubuntu-24.04
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: 'npm'
-          cache-dependency-path: 'server/package-lock.json'
-      - name: Install dependencies
-        # Here I don't suppress audit with --no-audit like I do at the other 'npm ci' because I want to know
-        # if there are security vulnerabilities.
-        run: npm ci --no-fund
-      - name: Run ESLint
-        run: npm run lint
-
-  typecheck:
-    name: Typecheck
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: 'npm'
-          cache-dependency-path: 'server/package-lock.json'
-      - name: Install dependencies
-        run: npm ci --no-fund --no-audit
-      - name: Run TypeScript compiler check
-        run: npx tsc --noEmit
-
-  test:
-    name: Tests
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: 'npm'
-          cache-dependency-path: 'server/package-lock.json'
-      - name: Install dependencies
-        run: npm ci --no-fund --no-audit
-      - name: Run tests
-        run: npm test
-
   build_and_push_dev:
-    name: Build & push Docker image to ECR (dev)
-    needs: [eslint, typecheck, test]
-    if: github.event_name == 'push' || github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    name: Build and push Docker image to ECR (dev)
     runs-on: ubuntu-24.04
     environment:
       name: dev
@@ -94,11 +34,6 @@ jobs:
       - uses: actions/checkout@v6
       - name: Set image tag and ECR URL
         id: vars
-        # GITHUB_SHA is set once by GitHub Actions at workflow start and never changes, making it safe
-        # to use as the image tag across all jobs. Using 'git rev-parse --short HEAD' instead would be
-        # unreliable: the update_image_tag_* jobs run 'git pull --rebase origin main' before editing
-        # the kustomization file, which can shift HEAD to a newer commit if something else landed on
-        # main in the meantime. That would produce a tag pointing to an image that was never built.
         run: |
           echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           echo "ecr_repository_url=${{ vars.ECR_REPOSITORY_URL }}" >> "$GITHUB_OUTPUT"
@@ -118,18 +53,9 @@ jobs:
             .
           docker push ${{ vars.ECR_REPOSITORY_URL }}:${{ steps.vars.outputs.image_tag }}
 
-  # Deployment to production is protected by environment protection rules.
-  # Must configure required reviewers at GitHub Settings → Environments → prod → Required reviewers.
-  # The environment gate ('environment: prod') is placed here rather than on update_image_tag_prod
-  # so that nothing prod-related happens until a reviewer approves (no image built, no ECR push).
-  # If the gate were on update_image_tag_prod instead, the prod image would already be in ECR before
-  # anyone approved.
   build_and_push_prod:
-    name: Build & push Docker image to ECR (prod)
-    # Enforce a dev→prod promotional hierarchy: the dev kustomization commit
-    # must succeed before the prod pipeline even starts.
+    name: Build and push Docker image to ECR (prod)
     needs: update_image_tag_dev
-    if: github.event_name == 'push' || github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     environment:
       name: prod
@@ -168,10 +94,12 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+    defaults:
+      run:
+        working-directory: .
     steps:
       - uses: actions/checkout@v6
         with:
-          # Fetch full history so the push doesn't reject due to diverged history
           fetch-depth: 0
       - name: Install Kustomize
         run: |
@@ -179,10 +107,6 @@ jobs:
             | tar -xz -C /usr/local/bin kustomize
           kustomize version
       - name: Configure git and pull latest
-        working-directory: '.'
-        # Pull before editing so that kustomize changes are applied on top of the latest main.
-        # If another commit landed after this workflow started, rebasing avoids a rejected push
-        # due to a non-fast-forward update.
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -192,7 +116,6 @@ jobs:
         run: |
           kustomize edit set image recipe-manager-api-server=${{ needs.build_and_push_dev.outputs.ecr_repository_url }}:${{ needs.build_and_push_dev.outputs.image_tag }}
       - name: Commit and push
-        working-directory: '.'
         run: |
           git add kubernetes/server/overlays/dev/kustomization.yaml
           git commit -m "chore(k8s): update dev server image tag to ${{ needs.build_and_push_dev.outputs.image_tag }} [skip ci]"
@@ -202,13 +125,11 @@ jobs:
     name: Update image tag in kustomization file (prod)
     needs: build_and_push_prod
     runs-on: ubuntu-24.04
-    # No 'environment:' declaration needed here. The approval gate was already enforced on
-    # build_and_push_prod. Declaring an environment on this job would also require a second
-    # manual approval, which is unnecessary. Because there is no environment context, this job
-    # cannot access environment-scoped vars.*; instead the ECR URL and image tag are sourced
-    # from build_and_push_prod's job outputs.
     permissions:
       contents: write
+    defaults:
+      run:
+        working-directory: .
     steps:
       - uses: actions/checkout@v6
         with:
@@ -219,7 +140,6 @@ jobs:
             | tar -xz -C /usr/local/bin kustomize
           kustomize version
       - name: Configure git and pull latest
-        working-directory: '.'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -229,7 +149,6 @@ jobs:
         run: |
           kustomize edit set image recipe-manager-api-server=${{ needs.build_and_push_prod.outputs.ecr_repository_url }}:${{ needs.build_and_push_prod.outputs.image_tag }}
       - name: Commit and push
-        working-directory: '.'
         run: |
           git add kubernetes/server/overlays/prod/kustomization.yaml
           git commit -m "chore(k8s): update prod server image tag to ${{ needs.build_and_push_prod.outputs.image_tag }} [skip ci]"

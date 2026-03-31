@@ -1,0 +1,179 @@
+name: CI validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - server/**
+      - web/**
+      - terraform/**
+      - kubernetes/**
+      - scripts/**
+      - pre-commit
+      - .github/workflows/**
+      - package.json
+      - package-lock.json
+  push:
+    branches:
+      - main
+    paths:
+      - server/**
+      - web/**
+      - terraform/**
+      - kubernetes/**
+      - scripts/**
+      - pre-commit
+      - .github/workflows/**
+      - package.json
+      - package-lock.json
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  server-validation:
+    name: Server lint, typecheck, tests
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit
+      - name: Run ESLint
+        run: npm run lint
+      - name: Run TypeScript compiler check
+        run: npx tsc --noEmit
+      - name: Run tests
+        run: npm test
+
+  web-validation:
+    name: Web lint, typecheck, tests
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: web
+    env:
+      VITE_PORT: 3000
+      VITE_API_BASE_URL: 'http://localhost:5000/api'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit
+      - name: Run ESLint
+        run: npm run lint
+      - name: Run TypeScript compiler check
+        run: npx tsc -b
+      - name: Run tests
+        run: npm run test:run
+
+  formatting-and-shell:
+    name: Formatting and shell checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+      - name: Install root dependencies
+        run: npm ci --no-fund --no-audit
+      - name: Install shell and YAML validators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck shfmt python3-pip
+          pip3 install --user yamllint
+      - name: Run Prettier check
+        run: npm run format:check
+      - name: Run shellcheck
+        run: |
+          set -euo pipefail
+          shellcheck pre-commit
+          if ls scripts/**/*.sh >/dev/null 2>&1; then
+            find scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck
+          fi
+      - name: Run shfmt check
+        run: |
+          set -euo pipefail
+          shfmt -d -i 2 -ci -bn pre-commit
+          if ls scripts/**/*.sh >/dev/null 2>&1; then
+            find scripts -type f -name '*.sh' -print0 | xargs -0 shfmt -d -i 2 -ci -bn
+          fi
+      - name: Run yamllint
+        run: |
+          ~/.local/bin/yamllint -s .github/workflows kubernetes
+
+  terraform-and-kubernetes:
+    name: Terraform and Kubernetes validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive terraform
+      - name: Terraform validate (all environments)
+        run: |
+          set -euo pipefail
+          for dir in $(find terraform -type f -name main.tf -path '*/environments/*' -exec dirname {} \;); do
+            echo "Validating $dir"
+            terraform -chdir="$dir" init -backend=false -input=false
+            terraform -chdir="$dir" validate
+          done
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform
+          quiet: true
+          framework: terraform
+      - name: Install Kubernetes tooling
+        run: |
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_amd64.tar.gz" | tar -xz
+          sudo mv kustomize /usr/local/bin/kustomize
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.7.0/kubeconform-linux-amd64.tar.gz" | tar -xz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+          curl -sSL "https://github.com/zegl/kube-score/releases/download/v1.20.0/kube-score_1.20.0_linux_amd64.tar.gz" | tar -xz kube-score
+          sudo mv kube-score /usr/local/bin/kube-score
+          curl -sSL "https://github.com/stackrox/kube-linter/releases/download/v0.7.4/kube-linter-linux.tar.gz" | tar -xz
+          sudo mv kube-linter /usr/local/bin/kube-linter
+      - name: Validate Kubernetes manifests
+        run: |
+          set -euo pipefail
+          kustomize build kubernetes/server/overlays/dev > /tmp/k8s-dev.yaml
+          kustomize build kubernetes/server/overlays/prod > /tmp/k8s-prod.yaml
+          kubeconform -strict -summary -ignore-missing-schemas /tmp/k8s-dev.yaml /tmp/k8s-prod.yaml
+          kube-score score /tmp/k8s-dev.yaml /tmp/k8s-prod.yaml
+          kube-linter lint /tmp/k8s-dev.yaml /tmp/k8s-prod.yaml
+
+  trivy-image-scan:
+    name: Trivy image scan
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build server Docker image
+        run: docker build -t recipe-manager-server-ci:scan ./server
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          image-ref: recipe-manager-server-ci:scan
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'

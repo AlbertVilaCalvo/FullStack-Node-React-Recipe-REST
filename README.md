@@ -317,6 +317,8 @@ This script will:
 
 Once the AWS infrastructure is deployed, you can set up automatic deployment of the React web app to S3 and CloudFront using GitHub Actions.
 
+Validation runs in `.github/workflows/ci-validate.yml`. Deployment runs in `.github/workflows/deploy-web.yml`.
+
 At the GitHub repository, go to Settings → Environments and create an environment named "dev" or "prod".
 On that page, click the environment and add the following environment variables (not secrets):
 
@@ -333,7 +335,9 @@ If you changed any value in `terraform.tfvars`, then use that value.
 
 ### Server API
 
-The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
+Validation runs in `.github/workflows/ci-validate.yml`.
+
+The server deployment workflow (`.github/workflows/deploy-server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
 
 At the GitHub repository, go to Settings → Environments and add the following environment variables to the "dev" and "prod" environments:
 
