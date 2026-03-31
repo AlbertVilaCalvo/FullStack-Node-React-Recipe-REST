@@ -38,7 +38,7 @@ spec:
             - t3a.large
             - t3.large
   limits:
-    cpu: '50'
+    cpu: 50
     memory: 50Gi
   disruption:
     consolidationPolicy: WhenEmptyOrUnderutilized
