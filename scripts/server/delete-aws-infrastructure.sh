@@ -120,93 +120,92 @@ log_info "Hosted Zone ID: ${ZONE_ID}"
 # Step 1: Delete Kubernetes resources (required to remove ALB created by Ingress)
 log_step "Step 1/6 : Deleting Kubernetes resources..."
 
-# Configure kubectl, delete Argo CD-managed resources and wait for the Load Balancer Controller
-# to clean up AWS resources (ALB, Target Groups, Security Groups).
-if aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
-  # Disable auto-sync on the root Application to prevent Argo CD from re-creating
-  # child Applications while we are deleting them.
-  log_info "Disabling Argo CD auto-sync on root Application..."
-  kubectl patch application root -n argocd \
-    --type merge \
-    -p '{"spec":{"syncPolicy":null}}' 2>/dev/null || log_warn "Could not patch root Application (may not exist)"
-
-  # Delete the server Application and all its managed resources (Deployment, Service,
-  # Ingress, etc.). This causes the Load Balancer Controller to delete ALBs and
-  # ExternalDNS to delete Route53 DNS records. The Karpenter Application is kept so that
-  # Karpenter nodes remain available for controllers (LBC, ExternalDNS) to finish cleanup.
-  log_info "Deleting Argo CD server Application (cascade)..."
-  kubectl delete application recipe-manager-server -n argocd \
-    --ignore-not-found=true --wait --timeout=300s \
-    || log_warn "Could not delete Argo CD server Application (may not exist)"
-
-  # Delete the Argo CD Ingress to trigger ALB cleanup by the Load Balancer Controller.
-  # The Argo CD Ingress is managed by Helm (not by an Argo CD Application), so it is
-  # not deleted when we delete child Applications above. We must delete it now while
-  # the LBC is still running, otherwise the Argo CD ALB is orphaned and blocks VPC
-  # deletion (the ALB holds ENIs in public subnets and references the ACM certificate
-  # for argocd.recipemanager.link).
-  log_info "Deleting Argo CD Ingress..."
-  kubectl delete ingress --all -n argocd --timeout=60s 2>/dev/null || log_warn "Could not delete Argo CD Ingress (may not exist)"
-
-  log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
-  log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
-
-  WAIT_TIMEOUT=400
-  START_TIME=$(date +%s)
-
-  while true; do
-    CURRENT_TIME=$(date +%s)
-    ELAPSED=$((CURRENT_TIME - START_TIME))
-
-    if [[ $ELAPSED -gt $WAIT_TIMEOUT ]]; then
-      log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for AWS resources cleanup. Proceeding anyway..."
-      break
-    fi
-
-    # Check for Load Balancers, Target Groups, and Security Groups managed by the Load Balancer Controller
-    REMAINING_ALB_RESOURCES=$(aws resourcegroupstaggingapi get-resources \
-      --region "${AWS_REGION}" \
-      --tag-filters "Key=elbv2.k8s.aws/cluster,Values=${CLUSTER_NAME}" \
-      --resource-type-filters "elasticloadbalancing:loadbalancer" "elasticloadbalancing:targetgroup" "ec2:security-group" \
-      --query 'ResourceTagMappingList[*].ResourceARN' \
-      --output text)
-
-    # Check for DNS A records
-    # There are also TXT records created by ExternalDNS for ownership tracking, but we only check for the A records which point to the ALB
-    REMAINING_API_DNS=$(aws route53 list-resource-record-sets \
-      --hosted-zone-id "${ZONE_ID}" \
-      --query "ResourceRecordSets[?Name=='${API_DOMAIN}.' && Type=='A'].Name" \
-      --output text)
-    REMAINING_ARGOCD_DNS=$(aws route53 list-resource-record-sets \
-      --hosted-zone-id "${ZONE_ID}" \
-      --query "ResourceRecordSets[?Name=='${ARGOCD_DOMAIN}.' && Type=='A'].Name" \
-      --output text)
-    REMAINING_DNS_RECORD="${REMAINING_API_DNS}${REMAINING_ARGOCD_DNS}"
-
-    if [[ -z "${REMAINING_ALB_RESOURCES}" && -z "${REMAINING_DNS_RECORD}" ]]; then
-      log_info "All Load Balancer resources and DNS records have been successfully deleted."
-      break
-    fi
-
-    if [[ -n "${REMAINING_API_DNS}" ]]; then
-      log_info "DNS A Record for ${API_DOMAIN} still exists..."
-    fi
-    if [[ -n "${REMAINING_ARGOCD_DNS}" ]]; then
-      log_info "DNS A Record for ${ARGOCD_DOMAIN} still exists..."
-    fi
-    if [[ -n "${REMAINING_ALB_RESOURCES}" ]]; then
-      log_info "Load Balancer resources still remaining..."
-    fi
-
-    log_info "Checking again in 10s (Elapsed: ${ELAPSED}s)"
-    sleep 10
-  done
-else
+# Configure kubectl
+if ! aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}" 2>/dev/null; then
   log_error "Could not connect to EKS cluster"
   log_error "Make sure the cluster is up and you have the correct AWS credentials configured"
   log_error "Then run this script again"
   exit 1
 fi
+
+# Delete Argo CD-managed resources
+# Disable auto-sync on the root Application to prevent Argo CD from re-creating
+# child Applications while we are deleting them.
+log_info "Disabling Argo CD auto-sync on root Application..."
+kubectl patch application root -n argocd \
+  --type merge \
+  -p '{"spec":{"syncPolicy":null}}' 2>/dev/null || log_warn "Could not patch root Application (may not exist)"
+
+# Delete the server Application and all its managed resources (Deployment, Service,
+# Ingress, etc.). This causes the Load Balancer Controller to delete ALBs and
+# ExternalDNS to delete Route53 DNS records. The Karpenter Application is kept so that
+# Karpenter nodes remain available for controllers (LBC, ExternalDNS) to finish cleanup.
+log_info "Deleting Argo CD server Application (cascade)..."
+kubectl delete application recipe-manager-server -n argocd \
+  --ignore-not-found=true --wait --timeout=300s \
+  || log_warn "Could not delete Argo CD server Application (may not exist)"
+
+# Delete the Argo CD Ingress to trigger ALB cleanup by the Load Balancer Controller.
+# The Argo CD Ingress is managed by Helm (not by an Argo CD Application), so it is
+# not deleted when we delete child Applications above. We must delete it now while
+# the LBC is still running, otherwise the Argo CD ALB is orphaned and blocks VPC
+# deletion (the ALB holds ENIs in public subnets and references the ACM certificate
+# for argocd.recipemanager.link).
+log_info "Deleting Argo CD Ingress..."
+kubectl delete ingress --all -n argocd --timeout=60s 2>/dev/null || log_warn "Could not delete Argo CD Ingress (may not exist)"
+
+# Wait for the Load Balancer Controller to clean up AWS resources (ALB, Target Groups, Security Groups)
+log_info "Waiting for AWS Load Balancer Controller to clean up AWS resources..."
+log_info "Checking for resources tagged with 'elbv2.k8s.aws/cluster: ${CLUSTER_NAME}'..."
+WAIT_TIMEOUT=400
+START_TIME=$(date +%s)
+while true; do
+  CURRENT_TIME=$(date +%s)
+  ELAPSED=$((CURRENT_TIME - START_TIME))
+
+  if [[ $ELAPSED -gt $WAIT_TIMEOUT ]]; then
+    log_warn "Timeout ($WAIT_TIMEOUT seconds) waiting for AWS resources cleanup. Proceeding anyway..."
+    break
+  fi
+
+  # Check for Load Balancers, Target Groups, and Security Groups managed by the Load Balancer Controller
+  REMAINING_ALB_RESOURCES=$(aws resourcegroupstaggingapi get-resources \
+    --region "${AWS_REGION}" \
+    --tag-filters "Key=elbv2.k8s.aws/cluster,Values=${CLUSTER_NAME}" \
+    --resource-type-filters "elasticloadbalancing:loadbalancer" "elasticloadbalancing:targetgroup" "ec2:security-group" \
+    --query 'ResourceTagMappingList[*].ResourceARN' \
+    --output text)
+
+  # Check for DNS A records
+  # There are also TXT records created by ExternalDNS for ownership tracking, but we only check for the A records which point to the ALB
+  REMAINING_API_DNS=$(aws route53 list-resource-record-sets \
+    --hosted-zone-id "${ZONE_ID}" \
+    --query "ResourceRecordSets[?Name=='${API_DOMAIN}.' && Type=='A'].Name" \
+    --output text)
+  REMAINING_ARGOCD_DNS=$(aws route53 list-resource-record-sets \
+    --hosted-zone-id "${ZONE_ID}" \
+    --query "ResourceRecordSets[?Name=='${ARGOCD_DOMAIN}.' && Type=='A'].Name" \
+    --output text)
+  REMAINING_DNS_RECORD="${REMAINING_API_DNS}${REMAINING_ARGOCD_DNS}"
+
+  if [[ -z "${REMAINING_ALB_RESOURCES}" && -z "${REMAINING_DNS_RECORD}" ]]; then
+    log_info "All Load Balancer resources and DNS records have been successfully deleted."
+    break
+  fi
+
+  if [[ -n "${REMAINING_API_DNS}" ]]; then
+    log_info "DNS A Record for ${API_DOMAIN} still exists..."
+  fi
+  if [[ -n "${REMAINING_ARGOCD_DNS}" ]]; then
+    log_info "DNS A Record for ${ARGOCD_DOMAIN} still exists..."
+  fi
+  if [[ -n "${REMAINING_ALB_RESOURCES}" ]]; then
+    log_info "Load Balancer resources still remaining..."
+  fi
+
+  log_info "Checking again in 10s (Elapsed: ${ELAPSED}s)"
+  sleep 10
+done
 
 # Step 2: Delete Argo CD root Application (App of Apps)
 # This deletes the karpenter NodePool and EC2NodeClass
