@@ -311,14 +311,59 @@ This script will:
 
 **Warning:** This will permanently delete all infrastructure resources, including the ECR images!
 
-## Automatic deployment with GitHub Actions
+## CI/CD with GitHub Actions
 
-### Web frontend
+This repository uses separate CI and CD workflows:
 
-Once the AWS infrastructure is deployed, you can set up automatic deployment of the React web app to S3 and CloudFront using GitHub Actions.
+- CI workflows run on pull requests to validate quality before merge.
+- CD workflows run on `push` to `main` (and optionally `workflow_dispatch`) to deploy only merged code.
 
-At the GitHub repository, go to Settings → Environments and create an environment named "dev" or "prod".
-On that page, click the environment and add the following environment variables (not secrets):
+### CI workflows (pull requests)
+
+All CI workflows run on `pull_request` targeting `main`.
+
+| Workflow file                            | Trigger paths                                                                                                          | Jobs                                                                                                                                        |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/ci-web.yml`           | `web/**`                                                                                                               | `eslint`, `typecheck`, `tests`, `build`                                                                                                     |
+| `.github/workflows/ci-server.yml`        | `server/**`                                                                                                            | `eslint`, `typecheck`, `tests`, `build`, `dockerfile_lint`, `trivy_fs`                                                                      |
+| `.github/workflows/ci-infra-quality.yml` | `terraform/**`, `kubernetes/**`, `scripts/**`, `.github/workflows/**`, `pre-commit`, and formatting-related file types | `prettier`, `yamllint`, `shell_quality`, `terraform_fmt`, `terraform_validate_tflint`, `kubernetes_validate`, `secret_scan`, `security_iac` |
+
+The CI quality gates include:
+
+- Prettier formatting check (`npm run format:check` at repository root).
+- `terraform fmt`, `terraform validate`, and `tflint` for Terraform.
+- `yamllint` for GitHub workflows and Kubernetes manifests.
+- `shfmt` and `shellcheck` for shell scripts.
+- `kubeconform` and `kube-linter` for Kubernetes manifests.
+- `trivy` and `checkov` security scans (configured to hard-fail on `CRITICAL`).
+- `gitleaks` secret scanning.
+- `hadolint` Dockerfile linting for server Dockerfiles.
+
+### CD workflows (main branch)
+
+CD workflows run on `push` to `main` (plus `workflow_dispatch`). They deploy only after PR merges when branch protection requires CI checks.
+
+| Workflow file                     | Trigger paths | Jobs                                                                                         |
+| --------------------------------- | ------------- | -------------------------------------------------------------------------------------------- |
+| `.github/workflows/cd-web.yml`    | `web/**`      | `deploy_dev`, `deploy_prod`                                                                  |
+| `.github/workflows/cd-server.yml` | `server/**`   | `build_and_push_dev`, `update_image_tag_dev`, `build_and_push_prod`, `update_image_tag_prod` |
+
+`cd-web.yml` deploys the built React app to S3 and invalidates CloudFront for dev first, then prod.
+
+`cd-server.yml` builds and scans Docker images, pushes to ECR, then updates `kubernetes/server/overlays/[env]/kustomization.yaml` so Argo CD syncs the new image tag.
+
+### Required repository settings
+
+At GitHub repository settings:
+
+- Configure branch protection on `main` and require CI status checks that match your merge policy.
+- Configure environment protection rules on `prod` with required reviewers.
+
+### Environment variables for CD workflows
+
+Create two environments in GitHub: `dev` and `prod`.
+
+#### Web environment variables
 
 | Environment variable                   | Value                                                                                   |
 | -------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -328,14 +373,9 @@ On that page, click the environment and add the following environment variables 
 | `WEB_CLOUDFRONT_DISTRIBUTION_ID`       | `terraform output website_cloudfront_distribution_id`                                   |
 | `VITE_API_BASE_URL`                    | `https://api.recipemanager.link/api` for dev, `https://api.recipeapp.link/api` for prod |
 
-Run `terraform output` in the `terraform/web/environments/[env]` directory to get the values for the environment variables.
-If you changed any value in `terraform.tfvars`, then use that value.
+Run `terraform output` in `terraform/web/environments/[env]` to get values.
 
-### Server API
-
-The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
-
-At the GitHub repository, go to Settings → Environments and add the following environment variables to the "dev" and "prod" environments:
+#### Server environment variables
 
 | Environment variable                      | Value                                                  |
 | ----------------------------------------- | ------------------------------------------------------ |
@@ -343,13 +383,11 @@ At the GitHub repository, go to Settings → Environments and add the following 
 | `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER` | `terraform output server_github_actions_oidc_role_arn` |
 | `ECR_REPOSITORY_URL`                      | `terraform output ecr_repository_url`                  |
 
-Run `terraform output` in the `terraform/server/environments/[env]` directory to get the values for the environment variables.
-
-**Prod deployment protection rules:** To require manual approval before deploying to production, configure required reviewers on the "prod" environment: Settings → Environments → prod → Required reviewers.
+Run `terraform output` in `terraform/server/environments/[env]` to get values.
 
 ## Manually deploy the React web app to AWS S3 and CloudFront
 
-This is done automatically using GitHub Actions (see [Automatic deployment with GitHub Actions](#automatic-deployment-with-github-actions)), but you can also do it manually:
+This is done automatically using GitHub Actions (see [CI/CD with GitHub Actions](#cicd-with-github-actions)), but you can also do it manually:
 
 ```shell
 cd web

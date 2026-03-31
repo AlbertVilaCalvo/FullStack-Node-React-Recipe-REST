@@ -1,0 +1,217 @@
+name: CD Server (Node.js API)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - server/**
+      - .github/workflows/cd-server.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-server-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: server
+
+jobs:
+  build_and_push_dev:
+    name: Build and push Docker image to ECR (dev)
+    runs-on: ubuntu-24.04
+    environment:
+      name: dev
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      image_tag: ${{ steps.vars.outputs.image_tag }}
+      ecr_repository_url: ${{ steps.vars.outputs.ecr_repository_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set image tag and ECR URL
+        id: vars
+        run: |
+          echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "ecr_repository_url=${{ vars.ECR_REPOSITORY_URL }}" >> "$GITHUB_OUTPUT"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.0.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER }}
+          role-session-name: 'GitHubActions-server-ecr-push-dev'
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build Docker image
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            -t ${{ steps.vars.outputs.ecr_repository_url }}:${{ steps.vars.outputs.image_tag }} \
+            .
+      - name: Scan image with Trivy (CRITICAL only)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'image'
+          image-ref: '${{ steps.vars.outputs.ecr_repository_url }}:${{ steps.vars.outputs.image_tag }}'
+          severity: 'CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: Push Docker image
+        run: docker push ${{ steps.vars.outputs.ecr_repository_url }}:${{ steps.vars.outputs.image_tag }}
+
+  update_image_tag_dev:
+    name: Update image tag in kustomization file (dev)
+    needs: build_and_push_dev
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install kustomize
+        working-directory: .
+        run: |
+          KUSTOMIZE_VERSION=5.6.0
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
+            | tar -xz -C /tmp
+          sudo mv /tmp/kustomize /usr/local/bin/kustomize
+      - name: Configure Git user
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Update image tag and push with retry
+        working-directory: .
+        run: |
+          set -euo pipefail
+
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+
+            pushd kubernetes/server/overlays/dev >/dev/null
+            kustomize edit set image recipe-manager-api-server=${{ needs.build_and_push_dev.outputs.ecr_repository_url }}:${{ needs.build_and_push_dev.outputs.image_tag }}
+            popd >/dev/null
+
+            git add kubernetes/server/overlays/dev/kustomization.yaml
+
+            if git diff --cached --quiet; then
+              echo "No changes to commit."
+              exit 0
+            fi
+
+            git commit -m "chore(k8s): update dev server image tag to ${{ needs.build_and_push_dev.outputs.image_tag }} [skip ci]"
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            git reset --hard HEAD~1
+            sleep 2
+          done
+
+          echo "Failed to push kustomization update after 3 attempts."
+          exit 1
+
+  build_and_push_prod:
+    name: Build and push Docker image to ECR (prod)
+    needs: update_image_tag_dev
+    runs-on: ubuntu-24.04
+    environment:
+      name: prod
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      image_tag: ${{ steps.vars.outputs.image_tag }}
+      ecr_repository_url: ${{ steps.vars.outputs.ecr_repository_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set image tag and ECR URL
+        id: vars
+        run: |
+          echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "ecr_repository_url=${{ vars.ECR_REPOSITORY_URL }}" >> "$GITHUB_OUTPUT"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.0.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER }}
+          role-session-name: 'GitHubActions-server-ecr-push-prod'
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build Docker image
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            -t ${{ steps.vars.outputs.ecr_repository_url }}:${{ steps.vars.outputs.image_tag }} \
+            .
+      - name: Scan image with Trivy (CRITICAL only)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'image'
+          image-ref: '${{ steps.vars.outputs.ecr_repository_url }}:${{ steps.vars.outputs.image_tag }}'
+          severity: 'CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: Push Docker image
+        run: docker push ${{ steps.vars.outputs.ecr_repository_url }}:${{ steps.vars.outputs.image_tag }}
+
+  update_image_tag_prod:
+    name: Update image tag in kustomization file (prod)
+    needs: build_and_push_prod
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install kustomize
+        working-directory: .
+        run: |
+          KUSTOMIZE_VERSION=5.6.0
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
+            | tar -xz -C /tmp
+          sudo mv /tmp/kustomize /usr/local/bin/kustomize
+      - name: Configure Git user
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Update image tag and push with retry
+        working-directory: .
+        run: |
+          set -euo pipefail
+
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+
+            pushd kubernetes/server/overlays/prod >/dev/null
+            kustomize edit set image recipe-manager-api-server=${{ needs.build_and_push_prod.outputs.ecr_repository_url }}:${{ needs.build_and_push_prod.outputs.image_tag }}
+            popd >/dev/null
+
+            git add kubernetes/server/overlays/prod/kustomization.yaml
+
+            if git diff --cached --quiet; then
+              echo "No changes to commit."
+              exit 0
+            fi
+
+            git commit -m "chore(k8s): update prod server image tag to ${{ needs.build_and_push_prod.outputs.image_tag }} [skip ci]"
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            git reset --hard HEAD~1
+            sleep 2
+          done
+
+          echo "Failed to push kustomization update after 3 attempts."
+          exit 1

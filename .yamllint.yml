@@ -1,0 +1,9 @@
+extends: default
+
+ignore: |
+  web/build/**
+  server/build/**
+
+rules:
+  line-length: disable
+  truthy: disable

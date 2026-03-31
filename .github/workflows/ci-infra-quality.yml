@@ -1,0 +1,283 @@
+name: CI Infrastructure and Quality
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - terraform/**
+      - kubernetes/**
+      - scripts/**
+      - pre-commit
+      - .github/workflows/**
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.md'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.css'
+      - '**/*.scss'
+      - '**/*.json'
+      - '**/*.sh'
+      - package.json
+      - package-lock.json
+      - .prettierrc.json
+      - .prettierignore
+      - .yamllint.yml
+      - .tflint.hcl
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-infra-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changed file groups
+    runs-on: ubuntu-24.04
+    outputs:
+      formatting: ${{ steps.filter.outputs.formatting }}
+      yaml: ${{ steps.filter.outputs.yaml }}
+      shell: ${{ steps.filter.outputs.shell }}
+      terraform: ${{ steps.filter.outputs.terraform }}
+      kubernetes: ${{ steps.filter.outputs.kubernetes }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3.0.2
+        with:
+          filters: |
+            formatting:
+              - '**/*.ts'
+              - '**/*.tsx'
+              - '**/*.js'
+              - '**/*.jsx'
+              - '**/*.md'
+              - '**/*.yml'
+              - '**/*.yaml'
+              - '**/*.css'
+              - '**/*.scss'
+              - '**/*.json'
+              - package.json
+              - package-lock.json
+              - .prettierrc.json
+              - .prettierignore
+            yaml:
+              - '.github/workflows/**/*.yml'
+              - '.github/workflows/**/*.yaml'
+              - 'kubernetes/**/*.yml'
+              - 'kubernetes/**/*.yaml'
+            shell:
+              - 'scripts/**/*.sh'
+              - 'pre-commit'
+            terraform:
+              - 'terraform/**/*.tf'
+              - 'terraform/**/*.tfvars'
+              - '.tflint.hcl'
+            kubernetes:
+              - 'kubernetes/**/*.yml'
+              - 'kubernetes/**/*.yaml'
+
+  prettier:
+    name: Prettier formatting check
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.formatting == 'true'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+      - name: Install root dependencies
+        run: npm ci --no-fund --no-audit
+      - name: Run Prettier check
+        run: npm run format:check
+
+  yamllint:
+    name: YAMLLint
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.yaml == 'true'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install yamllint
+        run: python -m pip install --disable-pip-version-check yamllint==1.37.1
+      - name: Run yamllint on workflows and manifests
+        run: yamllint -c .yamllint.yml .github/workflows kubernetes
+
+  shell_quality:
+    name: ShellCheck and shfmt
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.shell == 'true'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+      - name: Install shfmt
+        run: |
+          SHFMT_VERSION=3.11.0
+          curl -sSL "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64" -o /tmp/shfmt
+          chmod +x /tmp/shfmt
+          sudo mv /tmp/shfmt /usr/local/bin/shfmt
+      - name: Run shfmt check
+        run: shfmt -l -i 2 -ci -bn scripts pre-commit
+      - name: Run ShellCheck
+        run: |
+          shellcheck pre-commit
+          find scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck
+
+  terraform_fmt:
+    name: Terraform fmt
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.terraform == 'true'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3.1.2
+      - name: Run terraform fmt check
+        run: terraform fmt -check -recursive terraform
+
+  terraform_validate_tflint:
+    name: Terraform validate and TFLint (${{ matrix.environment_dir }})
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.terraform == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment_dir:
+          - terraform/bootstrap/environments/all
+          - terraform/bootstrap/environments/dev
+          - terraform/bootstrap/environments/prod
+          - terraform/server/environments/dev
+          - terraform/server/environments/prod
+          - terraform/web/environments/dev
+          - terraform/web/environments/prod
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3.1.2
+      - uses: terraform-linters/setup-tflint@v4.1.0
+      - name: Initialize Terraform (no backend)
+        working-directory: ${{ matrix.environment_dir }}
+        run: terraform init -backend=false
+      - name: Validate Terraform
+        working-directory: ${{ matrix.environment_dir }}
+        run: terraform validate
+      - name: Initialize TFLint plugins
+        working-directory: ${{ matrix.environment_dir }}
+        run: tflint --init
+      - name: Run TFLint
+        working-directory: ${{ matrix.environment_dir }}
+        run: tflint
+
+  kubernetes_validate:
+    name: Kubernetes validation (kubeconform and kube-linter)
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.kubernetes == 'true'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install tools
+        run: |
+          KUSTOMIZE_VERSION=5.6.0
+          KUBECONFORM_VERSION=0.6.7
+          KUBELINTER_VERSION=0.7.2
+
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
+            | tar -xz -C /tmp
+          sudo mv /tmp/kustomize /usr/local/bin/kustomize
+
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar -xz -C /tmp kubeconform
+          sudo mv /tmp/kubeconform /usr/local/bin/kubeconform
+
+          curl -sSL "https://github.com/stackrox/kube-linter/releases/download/v${KUBELINTER_VERSION}/kube-linter-linux.tar.gz" \
+            | tar -xz -C /tmp kube-linter
+          sudo mv /tmp/kube-linter /usr/local/bin/kube-linter
+      - name: Render kustomize overlays
+        run: |
+          mkdir -p /tmp/rendered
+          kustomize build kubernetes/server/overlays/dev > /tmp/rendered/server-dev.yaml
+          kustomize build kubernetes/server/overlays/prod > /tmp/rendered/server-prod.yaml
+      - name: Validate manifests with kubeconform
+        run: |
+          kubeconform -strict -summary -ignore-missing-schemas /tmp/rendered/server-dev.yaml /tmp/rendered/server-prod.yaml
+          kubeconform -strict -summary -ignore-missing-schemas \
+            kubernetes/argocd-apps/dev/*.yaml \
+            kubernetes/argocd-apps/prod/*.yaml \
+            kubernetes/karpenter-nodepool/dev/*.yaml \
+            kubernetes/karpenter-nodepool/prod/*.yaml
+      - name: Lint manifests with kube-linter
+        run: |
+          kube-linter lint \
+            /tmp/rendered/server-dev.yaml \
+            /tmp/rendered/server-prod.yaml \
+            kubernetes/argocd-apps/dev/*.yaml \
+            kubernetes/argocd-apps/prod/*.yaml \
+            kubernetes/karpenter-nodepool/dev/*.yaml \
+            kubernetes/karpenter-nodepool/prod/*.yaml
+
+  secret_scan:
+    name: Secret scanning (gitleaks)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install gitleaks
+        run: |
+          GITLEAKS_VERSION=8.28.0
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz -C /tmp gitleaks
+          sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
+      - name: Run gitleaks
+        run: gitleaks detect --source . --no-git --redact
+
+  security_iac:
+    name: IaC security scan (Trivy and Checkov)
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.terraform == 'true' || needs.changes.outputs.kubernetes == 'true'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Trivy config scan (CRITICAL only)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          severity: 'CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Checkov
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install checkov
+      - name: Run Checkov (CRITICAL hard fail)
+        run: |
+          checkov \
+            -d terraform \
+            --framework terraform \
+            --quiet \
+            --soft-fail-on LOW,MEDIUM,HIGH \
+            --hard-fail-on CRITICAL
+          checkov \
+            -d kubernetes \
+            --framework kubernetes \
+            --quiet \
+            --soft-fail-on LOW,MEDIUM,HIGH \
+            --hard-fail-on CRITICAL

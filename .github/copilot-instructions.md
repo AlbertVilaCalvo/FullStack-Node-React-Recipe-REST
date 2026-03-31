@@ -23,8 +23,11 @@ The project structure is:
   - `kubernetes/argocd-apps`: Argo CD Application manifests. Uses the App of Apps pattern.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
-  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
-  - `.github/workflows/web.yml`: Deploys React web app.
+  - `.github/workflows/ci-web.yml`: Pull request CI checks for frontend (`eslint`, `typecheck`, `tests`, `build`).
+  - `.github/workflows/ci-server.yml`: Pull request CI checks for backend (`eslint`, `typecheck`, `tests`, `build`) plus Dockerfile linting and Trivy scan.
+  - `.github/workflows/ci-infra-quality.yml`: Pull request CI checks for formatting, Terraform, shell scripts, YAML, Kubernetes manifests, and security scanning.
+  - `.github/workflows/cd-web.yml`: Main-branch CD workflow that deploys the React app to dev and prod S3/CloudFront.
+  - `.github/workflows/cd-server.yml`: Main-branch CD workflow that builds/pushes Docker images and updates kustomization image tags for Argo CD sync.
 
 The server follows a three-layer architecture for organizing business logic:
 
@@ -37,6 +40,22 @@ The server follows a three-layer architecture for organizing business logic:
 - TypeScript: The entire codebase is written in TypeScript. Avoid JavaScript.
 - Code Style: Prettier is used for formatting. Adhere to its conventions (single quotes, no semicolons, 2-space indentation and trailing commas).
 - Asynchronous Code: Prefer `async/await` for asynchronous operations.
+
+## CI/CD Expectations
+
+- Keep CI and CD separated:
+  - CI workflows run on pull requests to validate changes before merge.
+  - CD workflows run on `push` to `main` (or manual `workflow_dispatch`) and deploy only merged code.
+- Keep `GITHUB_TOKEN` permissions minimal. Use `contents: read` by default, and only escalate per job when required.
+- Use OIDC for AWS authentication in deployment jobs. Avoid static AWS keys.
+- Maintain these quality gates in CI:
+  - Prettier (`npm run format:check` in repo root)
+  - Terraform (`terraform fmt`, `terraform validate`, `tflint`)
+  - YAML (`yamllint`)
+  - Shell scripts (`shfmt -l -i 2 -ci -bn`, `shellcheck`)
+  - Kubernetes manifests (`kubeconform`, `kube-linter`)
+  - Security scans (`trivy`, `checkov`, secret scanning)
+- Production deployments must remain protected by GitHub environment required reviewers.
 
 ## Server Patterns
 
@@ -72,7 +91,7 @@ The server follows a three-layer architecture for organizing business logic:
 ## Frontend Infrastructure
 
 - React frontend is deployed to CloudFront, using a private S3 bucket as the origin.
-- Deployment is done automatically using GitHub Actions (see `.github/workflows/web.yml`).
+- Deployment is done automatically using GitHub Actions (see `.github/workflows/cd-web.yml`).
 
 ## Terraform
 
