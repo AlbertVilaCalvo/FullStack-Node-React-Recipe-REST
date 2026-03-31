@@ -313,12 +313,23 @@ This script will:
 
 ## Automatic deployment with GitHub Actions
 
-### Web frontend
+The CI/CD pipeline is split into dedicated CI workflows (run on pull requests and push to `main`) and CD workflows (run on push to `main` only).
 
-Once the AWS infrastructure is deployed, you can set up automatic deployment of the React web app to S3 and CloudFront using GitHub Actions.
+| Workflow          | Purpose                                                                 | Trigger                                             |
+| ----------------- | ----------------------------------------------------------------------- | --------------------------------------------------- |
+| `ci-lint.yml`     | Prettier, ShellCheck, shfmt, YAMLLint, Hadolint                         | PR + push to main                                   |
+| `ci-server.yml`   | ESLint, TypeScript, Jest tests                                          | PR + push to main (`server/**`)                     |
+| `ci-web.yml`      | ESLint, TypeScript, Vitest tests, Vite build check                      | PR + push to main (`web/**`)                        |
+| `ci-infra.yml`    | terraform fmt/validate, tflint, kubeconform, kube-linter                | PR + push to main (`terraform/**`, `kubernetes/**`) |
+| `ci-security.yml` | Trivy (CVEs, secrets, IaC misconfigs), Checkov                          | PR + push to main + weekly                          |
+| `cd-server.yml`   | Build Docker image, Trivy image scan, push to ECR, update kustomization | Push to main (`server/**`)                          |
+| `cd-web.yml`      | Build React app, deploy to S3/CloudFront                                | Push to main (`web/**`)                             |
 
-At the GitHub repository, go to Settings → Environments and create an environment named "dev" or "prod".
-On that page, click the environment and add the following environment variables (not secrets):
+To enable automatic deployments, configure the GitHub environments at Settings → Environments. Create environments named `dev` and `prod`. **Prod** should have required reviewers configured (Settings → Environments → prod → Required reviewers) to gate all prod deployments behind a manual approval.
+
+### Web frontend environment variables
+
+Add the following environment variables to the `dev` and `prod` environments:
 
 | Environment variable                   | Value                                                                                   |
 | -------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -328,14 +339,13 @@ On that page, click the environment and add the following environment variables 
 | `WEB_CLOUDFRONT_DISTRIBUTION_ID`       | `terraform output website_cloudfront_distribution_id`                                   |
 | `VITE_API_BASE_URL`                    | `https://api.recipemanager.link/api` for dev, `https://api.recipeapp.link/api` for prod |
 
-Run `terraform output` in the `terraform/web/environments/[env]` directory to get the values for the environment variables.
-If you changed any value in `terraform.tfvars`, then use that value.
+Run `terraform output` in `terraform/web/environments/[env]` to get the values.
 
-### Server API
+### Server API environment variables
 
-The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
+`cd-server.yml` builds the Docker image, scans it with Trivy, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
 
-At the GitHub repository, go to Settings → Environments and add the following environment variables to the "dev" and "prod" environments:
+Add the following environment variables to the `dev` and `prod` environments:
 
 | Environment variable                      | Value                                                  |
 | ----------------------------------------- | ------------------------------------------------------ |
@@ -343,9 +353,16 @@ At the GitHub repository, go to Settings → Environments and add the following 
 | `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER` | `terraform output server_github_actions_oidc_role_arn` |
 | `ECR_REPOSITORY_URL`                      | `terraform output ecr_repository_url`                  |
 
-Run `terraform output` in the `terraform/server/environments/[env]` directory to get the values for the environment variables.
+Run `terraform output` in `terraform/server/environments/[env]` to get the values.
 
-**Prod deployment protection rules:** To require manual approval before deploying to production, configure required reviewers on the "prod" environment: Settings → Environments → prod → Required reviewers.
+### Branch protection
+
+To enforce CI before merging, configure required status checks on the `main` branch (Settings → Branches → main → Branch protection rules). Add the following job names as required checks:
+
+- From `ci-lint.yml`: `prettier`, `shellcheck`, `shfmt`, `yamllint`, `hadolint`
+- From `ci-server.yml`: `typecheck`, `test`
+- From `ci-web.yml`: `typecheck`, `test`, `build`
+- From `ci-infra.yml`: `terraform-fmt`, `terraform-validate-and-lint`, `kubeconform`
 
 ## Manually deploy the React web app to AWS S3 and CloudFront
 

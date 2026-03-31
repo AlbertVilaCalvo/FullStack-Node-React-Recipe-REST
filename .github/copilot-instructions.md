@@ -22,9 +22,16 @@ The project structure is:
   - `kubernetes/server`: Manifests for the server. Uses Kustomize.
   - `kubernetes/argocd-apps`: Argo CD Application manifests. Uses the App of Apps pattern.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
-- `.github/workflows`: GitHub Actions workflows for CI/CD.
-  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
-  - `.github/workflows/web.yml`: Deploys React web app.
+- `.github/workflows`: GitHub Actions workflows for CI/CD. Workflows are split into CI (validation, run on PRs) and CD (deployment, run on push to main).
+  - **CI workflows** (run on pull requests and push to main):
+    - `.github/workflows/ci-lint.yml`: Formatting and lint checks: Prettier, ShellCheck, shfmt, YAMLLint, Hadolint.
+    - `.github/workflows/ci-server.yml`: Server code quality: ESLint, TypeScript typecheck, Jest tests.
+    - `.github/workflows/ci-web.yml`: Frontend code quality: ESLint, TypeScript typecheck, Vitest tests, Vite build check.
+    - `.github/workflows/ci-infra.yml`: Infrastructure validation: `terraform fmt`, `terraform validate`, tflint (with AWS ruleset), kubeconform, kube-linter.
+    - `.github/workflows/ci-security.yml`: Security scanning with Trivy (filesystem/secrets/IaC misconfigs, SARIF → GitHub Security tab) and Checkov (IaC policies). Also runs on a weekly schedule.
+  - **CD workflows** (run on push to main only):
+    - `.github/workflows/cd-server.yml`: Builds the Docker image, scans it with Trivy, pushes to ECR, then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
+    - `.github/workflows/cd-web.yml`: Builds the React app and deploys it to S3/CloudFront for dev and prod. Deployment to prod is gated by GitHub environment protection rules.
 
 The server follows a three-layer architecture for organizing business logic:
 
