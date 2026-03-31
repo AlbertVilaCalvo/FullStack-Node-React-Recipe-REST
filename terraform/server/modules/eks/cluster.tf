@@ -1,7 +1,3 @@
-locals {
-  cluster_name = "${var.app_name}-eks-${var.environment}"
-}
-
 resource "aws_eks_cluster" "main" {
   depends_on = [
     # Ensure that IAM Role permissions are created before and deleted
@@ -17,7 +13,7 @@ resource "aws_eks_cluster" "main" {
     aws_cloudwatch_log_group.eks
   ]
 
-  name     = local.cluster_name
+  name     = var.cluster_name
   version  = var.kubernetes_version
   role_arn = aws_iam_role.cluster.arn
 
@@ -44,6 +40,6 @@ resource "aws_eks_cluster" "main" {
 # CloudWatch Log Group for EKS logs
 
 resource "aws_cloudwatch_log_group" "eks" {
-  name              = "/aws/eks/${local.cluster_name}/cluster"
+  name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = var.log_retention_days
 }

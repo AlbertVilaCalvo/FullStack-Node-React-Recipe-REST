@@ -31,8 +31,8 @@ resource "aws_security_group" "node" {
 
   # See securityGroupSelectorTerms in ec2nodeclass.yaml for how Karpenter discovers this SG to attach the nodes it provisions
   tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "owned"
-    "karpenter.sh/discovery"                      = local.cluster_name
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    "karpenter.sh/discovery"                    = var.cluster_name
   }
 
   timeouts {

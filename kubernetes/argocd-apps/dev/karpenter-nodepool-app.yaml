@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/AlbertVilaCalvo/RecipeManager.git
-    targetRevision: main
+    targetRevision: argocd-karpenter-migration-opus-4.6
     path: kubernetes/karpenter-nodepool/dev
   destination:
     server: https://kubernetes.default.svc
