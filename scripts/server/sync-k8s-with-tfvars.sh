@@ -17,6 +17,7 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 ENVIRONMENT="${1:-}"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 KUBERNETES_DIR="${PROJECT_ROOT}/kubernetes/server"
+KARPENTER_NODEPOOL_DIR="${PROJECT_ROOT}/kubernetes/karpenter-nodepool/${ENVIRONMENT}"
 ARGOCD_APPS_DIR="${PROJECT_ROOT}/kubernetes/argocd-apps/${ENVIRONMENT}"
 TERRAFORM_DIR="${PROJECT_ROOT}/terraform/server/environments/${ENVIRONMENT}"
 
@@ -31,6 +32,7 @@ validate_environment "${ENVIRONMENT}"
 
 validate_directory_exists "${TERRAFORM_DIR}"
 validate_directory_exists "${KUBERNETES_DIR}"
+validate_directory_exists "${KARPENTER_NODEPOOL_DIR}"
 validate_directory_exists "${ARGOCD_APPS_DIR}"
 
 log_info "Syncing Kubernetes manifests for environment: ${ENVIRONMENT}"
@@ -40,9 +42,12 @@ WEB_DOMAIN=$(get_tfvars_value "web_domain")
 AWS_REGION=$(get_tfvars_value "aws_region")
 RDS_DATABASE_NAME=$(get_tfvars_value "database_name")
 RDS_USERNAME=$(get_tfvars_value "master_username")
+APP_NAME=$(get_tfvars_value "app_name")
 GIT_REPO_URL=$(get_tfvars_value "git_repo_url")
 GIT_REVISION=$(get_tfvars_value "git_revision")
 
+CLUSTER_NAME="${APP_NAME}-eks-cluster-${ENVIRONMENT}"
+NODE_ROLE_NAME="${APP_NAME}-eks-node-role-${ENVIRONMENT}"
 CORS_ORIGINS="https://${WEB_DOMAIN},https://www.${WEB_DOMAIN}"
 
 BASE_DIR="${KUBERNETES_DIR}/base"
@@ -80,13 +85,23 @@ sed -i.bak \
 sed -i.bak \
   -e "s|repoURL: .*|repoURL: ${GIT_REPO_URL}|g" \
   -e "s|targetRevision: .*|targetRevision: ${GIT_REVISION}|g" \
-  "${ARGOCD_APPS_DIR}/server-app.yaml"
+  "${ARGOCD_APPS_DIR}/server-app.yaml" \
+  "${ARGOCD_APPS_DIR}/karpenter-nodepool-app.yaml"
+
+# Update ec2nodeclass.yaml (role and cluster name)
+sed -i.bak \
+  -e "s|role: .*|role: ${NODE_ROLE_NAME}|g" \
+  -e "s|karpenter.sh/discovery: .*|karpenter.sh/discovery: ${CLUSTER_NAME}|g" \
+  -e "s|kubernetes.io/cluster/.*: owned|kubernetes.io/cluster/${CLUSTER_NAME}: owned|g" \
+  "${KARPENTER_NODEPOOL_DIR}/ec2nodeclass.yaml"
 
 # Cleanup sed backups
 rm -f "${OVERLAY_DIR}/ingress_patch.yaml.bak" \
   "${OVERLAY_DIR}/configmap_patch.yaml.bak" \
   "${BASE_DIR}/configmap.yaml.bak" \
   "${BASE_DIR}/secret-store.yaml.bak" \
-  "${ARGOCD_APPS_DIR}"/server-app.yaml.bak
+  "${ARGOCD_APPS_DIR}"/server-app.yaml.bak \
+  "${ARGOCD_APPS_DIR}"/karpenter-nodepool-app.yaml.bak \
+  "${KARPENTER_NODEPOOL_DIR}"/ec2nodeclass.yaml.bak
 
 log_info "Manifest synchronization complete."

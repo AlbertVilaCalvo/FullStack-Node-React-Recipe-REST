@@ -1,0 +1,19 @@
+# AWS-specific configuration for nodes
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  amiSelectorTerms:
+    - alias: al2023@latest
+  # IAM role applied to the EC2 instances provisioned by Karpenter
+  role: recipe-manager-eks-node-role-dev
+  # Subnets where Karpenter will launch the EC2 instances, see vpc/subnets.tf
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: recipe-manager-eks-cluster-dev
+  # Security groups applied to the EC2 instances provisioned by Karpenter, see eks/security-groups.tf
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: recipe-manager-eks-cluster-dev
+        kubernetes.io/cluster/recipe-manager-eks-cluster-dev: owned

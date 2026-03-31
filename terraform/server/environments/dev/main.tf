@@ -7,15 +7,13 @@
 # Do this:
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
 #    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.acm_certificates -target=module.app_secrets -target=module.github_actions_oidc_role_server
-# 2. EKS cluster created -> install Helm charts and Argo CD:
+# 2. EKS cluster created -> install controllers and Argo CD Helm charts:
 #    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller -target=module.argocd
-# 3. Karpenter CRDs installed -> create Karpenter NodePool and EC2NodeClass:
-#    terraform apply -target=module.karpenter_nodepool
-# 4. Argo CD CRDs installed -> create root Application (App of Apps).
-#    Done after the Karpenter NodePool so that Karpenter nodes are available for the workloads that Argo CD will deploy:
+#    LBC creates the Argo CD ALB via Ingress, and ExternalDNS creates Route53 A record for Argo CD endpoint.
+# 3. Argo CD and Karpenter CRDs installed -> create Argo CD root Application (App of Apps):
 #    terraform apply -target=module.argocd_apps
-# 5. Argo CD syncs Application manifests from Git and deploys the server app.
-#    The LBC creates the ALB via Ingress, ExternalDNS creates Route53 A records for the API and Argo CD endpoints.
+#    Argo CD then syncs from Git: deploys the Karpenter NodePool + EC2NodeClass (which provisions worker nodes) and the server app.
+#    LBC creates the server ALB via Ingress, and ExternalDNS creates Route53 A record for the server endpoint.
 # This can be solved with Terraform Stacks, see https://developer.hashicorp.com/terraform/tutorials/cloud/stacks-eks-deferred
 
 data "aws_caller_identity" "current" {}
@@ -233,25 +231,6 @@ module "argocd_apps" {
   environment  = var.environment
   git_repo_url = var.git_repo_url
   git_revision = var.git_revision
-}
-
-# Karpenter NodePool and EC2NodeClass
-# ***********************************
-
-module "karpenter_nodepool" {
-  # Karpenter CRDs need to be installed before creating the NodePool and EC2NodeClass
-  depends_on = [module.karpenter_controller]
-
-  source = "../../modules/karpenter-nodepool"
-
-  cluster_name       = module.eks.cluster_name
-  node_iam_role_name = module.eks.node_group_iam_role_name
-
-  instance_types    = var.karpenter_instance_types
-  capacity_types    = var.karpenter_capacity_types
-  cpu_limit         = var.karpenter_cpu_limit
-  memory_limit      = var.karpenter_memory_limit
-  consolidate_after = var.karpenter_consolidate_after
 }
 
 # GitHub Actions OIDC

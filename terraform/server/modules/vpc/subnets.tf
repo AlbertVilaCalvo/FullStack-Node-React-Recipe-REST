@@ -30,7 +30,7 @@ resource "aws_subnet" "private_nodes" {
     Type                                        = "private-nodes"
     "kubernetes.io/role/internal-elb"           = "1"              # Used by Load Balancer Controller to discover subnets for internal load balancers
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"         # Used by Load Balancer Controller to discover cluster subnets
-    "karpenter.sh/discovery"                    = var.cluster_name # Used by Karpenter to discover subnets for provisioning EC2 instances, see subnetSelectorTerms in karpenter-nodepool.tf
+    "karpenter.sh/discovery"                    = var.cluster_name # Used by Karpenter to discover subnets for provisioning EC2 instances, see subnetSelectorTerms in ec2nodeclass.yaml
   }
 
   timeouts {
