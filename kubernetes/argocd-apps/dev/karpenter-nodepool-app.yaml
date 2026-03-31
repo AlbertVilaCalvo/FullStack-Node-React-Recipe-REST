@@ -4,7 +4,7 @@ metadata:
   name: karpenter
   namespace: argocd
   annotations:
-    # Provision Karpenter worker nodes before the application
+    # Provision Karpenter worker nodes before the recipe manager application
     argocd.argoproj.io/sync-wave: '-1'
   finalizers:
     - resources-finalizer.argocd.argoproj.io

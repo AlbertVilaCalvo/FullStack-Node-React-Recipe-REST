@@ -7,13 +7,13 @@
 # Do this:
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
 #    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.acm_certificates -target=module.app_secrets -target=module.github_actions_oidc_role_server
-# 2. EKS cluster created -> install Helm charts and Argo CD:
+# 2. EKS cluster created -> install controllers and Argo CD Helm charts:
 #    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller -target=module.argocd
-# 3. Argo CD CRDs installed -> create root Application (App of Apps).
-#    Argo CD then syncs from Git: deploys the Karpenter NodePool + EC2NodeClass (which provisions worker
-#    nodes) and the server app.
+#    LBC creates the Argo CD ALB via Ingress, and ExternalDNS creates Route53 A record for Argo CD endpoint.
+# 3. Argo CD and Karpenter CRDs installed -> create Argo CD root Application (App of Apps):
 #    terraform apply -target=module.argocd_apps
-# 4. The LBC creates the ALB via Ingress, ExternalDNS creates Route53 A records for the API and Argo CD endpoints.
+#    Argo CD then syncs from Git: deploys the Karpenter NodePool + EC2NodeClass (which provisions worker nodes) and the server app.
+#    LBC creates the server ALB via Ingress, and ExternalDNS creates Route53 A record for the server endpoint.
 # This can be solved with Terraform Stacks, see https://developer.hashicorp.com/terraform/tutorials/cloud/stacks-eks-deferred
 
 data "aws_caller_identity" "current" {}

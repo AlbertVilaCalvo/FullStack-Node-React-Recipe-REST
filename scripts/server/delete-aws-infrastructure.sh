@@ -208,7 +208,7 @@ while true; do
 done
 
 # Step 2: Delete Argo CD root Application (App of Apps)
-# This deletes the karpenter NodePool and EC2NodeClass
+# We already deleted the server application. This deletes the karpenter NodePool and EC2NodeClass.
 log_step "Step 2/6 : Deleting Argo CD root Application (App of Apps)..."
 terraform destroy -target=module.argocd_apps -auto-approve
 
