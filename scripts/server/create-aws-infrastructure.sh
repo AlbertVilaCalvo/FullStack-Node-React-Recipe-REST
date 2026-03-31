@@ -104,9 +104,10 @@ retry_with_backoff 3 "Install Kubernetes controllers and Argo CD using Helm" \
 
 # Step 4: Create Argo CD root Application (App of Apps)
 # The Argo CD CRDs need to be installed before creating the root Application.
-# This deploys the root Application which Argo CD then syncs from Git: it deploys
-# the Karpenter NodePool + EC2NodeClass (which provisions worker nodes) and the server app.
+# The root Application deploys the Karpenter NodePool + EC2NodeClass (which
+# provisions worker nodes) and the server app.
 log_step "Step 4/5: Creating Argo CD root Application (App of Apps)..."
+log_info "This deploys the Karpenter NodePool + EC2NodeClass (which provisions worker nodes) and the server app"
 terraform apply -target=module.argocd_apps -auto-approve
 
 # Step 5: Update kubectl config
