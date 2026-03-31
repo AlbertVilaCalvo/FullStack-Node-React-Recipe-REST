@@ -30,8 +30,8 @@ resource "aws_security_group" "node" {
   vpc_id      = var.vpc_id
 
   tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "owned"
-    "karpenter.sh/discovery"                      = local.cluster_name
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    "karpenter.sh/discovery"                    = var.cluster_name
   }
 
   timeouts {

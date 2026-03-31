@@ -3,7 +3,7 @@
 #   Record name: externaldns-cname-api.recipemanager.link
 #   Type: TXT
 #   Alias: No
-#   Value/Route traffic to: "heritage=external-dns,external-dns/owner=recipe-manager-eks-dev,external-dns/resource=ingress/recipe-manager/recipe-manager-api"
+#   Value/Route traffic to: "heritage=external-dns,external-dns/owner=recipe-manager-eks-cluster-dev,external-dns/resource=ingress/recipe-manager/recipe-manager-api"
 #   TTL: 300
 # A record for the API endpoint pointing to the ALB:
 #   Record name: api.recipemanager.link

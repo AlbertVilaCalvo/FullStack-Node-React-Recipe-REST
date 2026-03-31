@@ -21,7 +21,7 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  cluster_name = "${var.app_name}-eks-${var.environment}"
+  cluster_name = "${var.app_name}-eks-cluster-${var.environment}"
   namespace    = "recipe-manager"
 
   lb_controller_chart_path    = fileexists("${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null
@@ -53,6 +53,7 @@ module "eks" {
   kubernetes_version = var.kubernetes_version
 
   vpc_id                  = module.vpc.vpc_id
+  cluster_name            = local.cluster_name
   private_eni_subnet_ids  = module.vpc.private_eni_subnet_ids
   private_node_subnet_ids = module.vpc.private_node_subnet_ids
 
