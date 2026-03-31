@@ -23,8 +23,8 @@ The project structure is:
   - `kubernetes/argocd-apps`: Argo CD Application manifests. Uses the App of Apps pattern.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
-  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
-  - `.github/workflows/web.yml`: Deploys React web app.
+  - CI Workflows (`ci-*.yml`): Validate code on PRs and pushes (linting, tests, Terraform validation, Trivy vulnerability scanning, Kubeconform, Hadolint).
+  - CD Workflows (`cd-server.yml`, `cd-web.yml`): Handle deployments when code is merged to main.`cd-server.yml` builds the server Docker image, pushes it to ECR, and edits the image tag in `kustomization.yaml` for Argo CD to sync. Deployment to prod is gated by GitHub environment protection rules (required reviewers). `cd-web.yml` deploys the React web app.
 
 The server follows a three-layer architecture for organizing business logic:
 
@@ -72,7 +72,7 @@ The server follows a three-layer architecture for organizing business logic:
 ## Frontend Infrastructure
 
 - React frontend is deployed to CloudFront, using a private S3 bucket as the origin.
-- Deployment is done automatically using GitHub Actions (see `.github/workflows/web.yml`).
+- Deployment is done automatically using GitHub Actions (see `.github/workflows/cd-web.yml`).
 
 ## Terraform
 

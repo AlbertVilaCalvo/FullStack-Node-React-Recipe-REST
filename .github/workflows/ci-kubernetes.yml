@@ -1,0 +1,57 @@
+name: Kubernetes CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'kubernetes/**'
+      - '.github/workflows/ci-kubernetes.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'kubernetes/**'
+      - '.github/workflows/ci-kubernetes.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kubeconform:
+    name: Kubeconform Schema Validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Kubeconform
+        run: |
+          curl -sSLo /tmp/kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz
+          tar -xzf /tmp/kubeconform.tar.gz -C /tmp
+          sudo mv /tmp/kubeconform /usr/local/bin/
+          kubeconform -v
+      - name: Kustomize build and validate
+        run: |
+          # Since kustomize requires building overlays, we build and pipe to kubeconform
+          # This assumes overlays dev and prod can be built independently
+          for overlay in kubernetes/server/overlays/*; do
+            if [ -d "$overlay" ]; then
+              echo "Validating Kustomize overlay: $overlay"
+              kustomize build "$overlay" | kubeconform -strict -summary -
+            fi
+          done
+
+          # Validate raw manifests in argocd-apps and karpenter-nodepool
+          kubeconform -strict -summary kubernetes/argocd-apps/
+          kubeconform -strict -summary kubernetes/karpenter-nodepool/
+
+  kubelinter:
+    name: KubeLinter Best Practices
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run KubeLinter
+        uses: stackrox/kube-linter-action@v1.0.4
+        with:
+          directory: kubernetes
+          # Some defaults might fail out of the box, tweak config if needed:
+          # config: .kube-linter.yaml

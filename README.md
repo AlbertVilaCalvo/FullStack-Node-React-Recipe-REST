@@ -357,3 +357,21 @@ npm run build
 aws s3 sync build s3://<s3-bucket-name> --delete
 aws cloudfront create-invalidation --distribution-id <distribution-id> --paths '/*'
 ```
+
+## CI/CD Pipeline
+
+The project uses GitHub Actions for Continuous Integration (CI) and Continuous Deployment (CD). CI workflows validate code on pull requests and pushes, while CD workflows deploy code when merged to the `main` branch.
+
+### CI Workflows
+
+- **Global CI**: Runs `prettier` and `yamllint` on all files.
+- **Web CI**: Runs `eslint`, `typescript` checks, tests, and validates the Vite build for the frontend.
+- **Server CI**: Runs `eslint`, `typescript` checks, tests, `hadolint` for Dockerfile validation, and `trivy` for vulnerability scanning on the Docker image.
+- **Terraform CI**: Validates infrastructure configurations using `terraform fmt`, `terraform validate`, `tflint`, and `trivy` in IaC mode.
+- **Kubernetes CI**: Validates manifests with `kubeconform` (schema validation) and `kube-linter` (best practices).
+- **Scripts CI**: Checks shell scripts with `shellcheck` and formats them using `shfmt`.
+
+### CD Workflows
+
+- **CD Web**: Automatically builds and deploys the React frontend to the Dev S3 bucket/CloudFront on merge. An approval gated deployment is also configured for Prod.
+- **CD Server**: Builds the Docker image, pushes it to ECR, and commits the new tags to the Dev environment (which ArgoCD picks up). Deployment to Prod is gated by an environment approval.
