@@ -18,4 +18,4 @@ patches:
 images:
   - name: recipe-manager-api-server
     newName: 725270464668.dkr.ecr.us-east-1.amazonaws.com/recipe-manager-server-dev
-    newTag: f425761
+    newTag: cc3f637
