@@ -1,0 +1,100 @@
+name: CI – Lint & Formatting
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
+
+# No path filter: formatting must always pass regardless of what changed.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  prettier:
+    name: Prettier (formatting check)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit
+      - name: Check formatting
+        run: npm run format:check
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          scandir: ./scripts
+          severity: warning
+
+  shfmt:
+    name: shfmt (shell script formatting)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install shfmt
+        run: |
+          curl -sSL "https://github.com/mvdan/sh/releases/download/v3.10.0/shfmt_v3.10.0_linux_amd64" \
+            -o /usr/local/bin/shfmt
+          chmod +x /usr/local/bin/shfmt
+          shfmt --version
+      - name: Check shell script formatting
+        run: |
+          UNFORMATTED=$(shfmt -l -i 2 -ci -bn scripts/)
+          if [ -n "$UNFORMATTED" ]; then
+            echo "The following shell scripts are not properly formatted:"
+            echo "$UNFORMATTED"
+            shfmt -d -i 2 -ci -bn scripts/
+            exit 1
+          fi
+          echo "All shell scripts are properly formatted."
+
+  yamllint:
+    name: YAMLLint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install yamllint
+        run: pip install --user yamllint
+      - name: Run yamllint
+        run: |
+          yamllint \
+            .github/workflows/ \
+            kubernetes/
+
+  hadolint:
+    name: Lint Dockerfile (${{ matrix.dockerfile }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile:
+          - server/Dockerfile
+          - server/Dockerfile.local
+          - web/Dockerfile.local
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ${{ matrix.dockerfile }}

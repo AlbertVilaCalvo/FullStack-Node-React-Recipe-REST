@@ -1,0 +1,5 @@
+checks:
+  addAllBuiltIn: true
+  exclude:
+    # NetworkPolicy enforcement is not implemented in this setup
+    - non-isolated-pod

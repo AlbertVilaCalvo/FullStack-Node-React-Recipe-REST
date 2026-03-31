@@ -1,4 +1,4 @@
-name: Web (frontend React app)
+name: CI – Web (React frontend)
 
 on:
   push:
@@ -6,23 +6,24 @@ on:
       - main
     paths:
       - web/**
-      - .github/workflows/web.yml
+      - .github/workflows/ci-web.yml
   pull_request:
     branches:
       - main
     paths:
       - web/**
-      - .github/workflows/web.yml
+      - .github/workflows/ci-web.yml
     types:
       - opened
       - synchronize
-      - closed
   workflow_dispatch:
 
-# Allow only one concurrent execution
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 defaults:
   run:
@@ -66,7 +67,7 @@ jobs:
       - name: Run TypeScript compiler check
         run: npx tsc -b
 
-  tests:
+  test:
     name: Tests
     runs-on: ubuntu-24.04
     steps:
@@ -84,25 +85,9 @@ jobs:
       - name: Run tests
         run: npm test
 
-  deploy_dev:
-    name: Deploy React web app to the dev environment
-    needs: [eslint, typecheck, tests]
-    # Deploy only when:
-    # 1. Pushing to the main branch
-    # 2. A pull request is merged (closed) to the main branch
-    # 3. Manually triggered at the github.com website
-    # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-when-a-pull-request-merges
-    if: github.event_name == 'push' || github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+  build:
+    name: Build check
     runs-on: ubuntu-24.04
-    environment:
-      name: dev
-    # Permissions needed to interact with GitHub’s OIDC Token endpoint
-    # https://docs.github.com/en/actions/reference/security/oidc#workflow-permissions-for-the-requesting-the-oidc-token
-    permissions:
-      id-token: write # Allows the job to request the JWT token from GitHub's OIDC provider
-      contents: read # Allows the action to clone your repository code. Required for actions/checkout
-    env:
-      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }} # Override with environment-specific API URL
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -114,21 +99,3 @@ jobs:
         run: npm ci --no-fund --no-audit
       - name: Build React web app
         run: npm run build
-        # TODO build React in production mode
-        # env:
-        #   NODE_ENV: production
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6.0.0 # https://github.com/aws-actions/configure-aws-credentials
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_WEB }}
-          role-session-name: 'GitHubActions-web-deploy-dev'
-          # We could also do:
-          # role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
-      - name: Upload build folder files to S3
-        run: aws s3 sync build s3://${{ vars.WEB_S3_BUCKET }} --delete
-      - name: Invalidate CloudFront distribution
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ vars.WEB_CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths '/*'

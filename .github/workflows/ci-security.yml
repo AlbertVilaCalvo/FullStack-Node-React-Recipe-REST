@@ -1,0 +1,101 @@
+name: CI – Security scanning
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - server/**
+      - web/**
+      - terraform/**
+      - kubernetes/**
+      - '**/Dockerfile*'
+      - .github/workflows/ci-security.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - server/**
+      - web/**
+      - terraform/**
+      - kubernetes/**
+      - '**/Dockerfile*'
+      - .github/workflows/ci-security.yml
+    types:
+      - opened
+      - synchronize
+  schedule:
+    # Run weekly on Sunday at 06:00 UTC to catch newly published CVEs
+    - cron: '0 6 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  # Required to upload SARIF results to the GitHub Security tab
+  security-events: write
+
+jobs:
+  trivy-fs:
+    name: Trivy (dependency & secret scan)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret
+          format: sarif
+          output: trivy-fs-results.sarif
+          severity: CRITICAL,HIGH
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-fs-results.sarif
+
+  trivy-config:
+    name: Trivy (IaC misconfiguration scan)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Trivy IaC config scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: sarif
+          output: trivy-config-results.sarif
+          severity: CRITICAL,HIGH
+      - name: Upload Trivy config scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-config-results.sarif
+
+  checkov:
+    name: Checkov (IaC security policies)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Checkov on Terraform
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform/
+          framework: terraform
+          # soft_fail: set to true initially so findings are visible without blocking the pipeline.
+          # Remove once existing findings have been triaged and resolved.
+          soft_fail: true
+          output_format: cli
+      - name: Run Checkov on Kubernetes manifests
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: kubernetes/
+          framework: kubernetes
+          soft_fail: true
+          output_format: cli

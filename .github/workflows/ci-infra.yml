@@ -1,0 +1,117 @@
+name: CI – Infrastructure (Terraform & Kubernetes)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - terraform/**
+      - kubernetes/**
+      - .github/workflows/ci-infra.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - terraform/**
+      - kubernetes/**
+      - .github/workflows/ci-infra.yml
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  terraform-fmt:
+    name: Terraform formatting check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive terraform/
+
+  terraform-validate-and-lint:
+    name: Terraform validate & tflint (${{ matrix.tf_dir }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        tf_dir:
+          - terraform/bootstrap/environments/all
+          - terraform/bootstrap/environments/dev
+          - terraform/bootstrap/environments/prod
+          - terraform/server/environments/dev
+          - terraform/server/environments/prod
+          - terraform/web/environments/dev
+          - terraform/web/environments/prod
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform init
+        working-directory: ${{ matrix.tf_dir }}
+        run: terraform init -backend=false -input=false
+      - name: Terraform validate
+        working-directory: ${{ matrix.tf_dir }}
+        run: terraform validate
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.55.0
+      - name: Cache tflint plugins
+        uses: actions/cache@v4
+        with:
+          path: ~/.tflint.d/plugins
+          key: ${{ runner.os }}-tflint-${{ hashFiles('.tflint.hcl') }}
+      - name: Initialize tflint plugins
+        run: tflint --init --config "${{ github.workspace }}/.tflint.hcl"
+      - name: Run tflint
+        run: tflint --chdir "${{ matrix.tf_dir }}" --config "${{ github.workspace }}/.tflint.hcl"
+
+  kubeconform:
+    name: Kubeconform (Kubernetes manifest validation)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Kustomize
+        run: |
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin kustomize
+          kustomize version
+      - name: Install kubeconform
+        run: |
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin kubeconform
+          kubeconform -v
+      - name: Validate server overlay (dev)
+        run: kustomize build kubernetes/server/overlays/dev | kubeconform -strict -ignore-missing-schemas -summary -
+      - name: Validate server overlay (prod)
+        run: kustomize build kubernetes/server/overlays/prod | kubeconform -strict -ignore-missing-schemas -summary -
+      - name: Validate Argo CD app manifests
+        run: |
+          kubeconform -strict -ignore-missing-schemas -summary \
+            kubernetes/argocd-apps/dev/ \
+            kubernetes/argocd-apps/prod/
+      - name: Validate Karpenter node pool manifests
+        run: |
+          kubeconform -strict -ignore-missing-schemas -summary \
+            kubernetes/karpenter-nodepool/dev/ \
+            kubernetes/karpenter-nodepool/prod/
+
+  kube-linter:
+    name: Kube-linter (Kubernetes best practices)
+    runs-on: ubuntu-24.04
+    # Non-blocking until existing findings are triaged and fixed.
+    # Remove continue-on-error once kube-linter findings have been resolved.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: stackrox/kube-linter-action@v1
+        with:
+          directory: kubernetes/server
+          config: .kube-linter.yml
