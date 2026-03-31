@@ -4,7 +4,7 @@ aws_region  = "us-east-1"
 
 # GitOps
 git_repo_url = "https://github.com/AlbertVilaCalvo/RecipeManager.git"
-git_revision = "argocd-karpenter-migration-opus-4.6"
+git_revision = "main"
 
 # Domains
 web_domain              = "recipemanager.link"
