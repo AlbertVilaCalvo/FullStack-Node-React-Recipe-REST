@@ -333,7 +333,7 @@ If you changed any value in `terraform.tfvars`, then use that value.
 
 ### Server API
 
-The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
+The server CD workflow (`.github/workflows/cd-server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
 
 At the GitHub repository, go to Settings → Environments and add the following environment variables to the "dev" and "prod" environments:
 

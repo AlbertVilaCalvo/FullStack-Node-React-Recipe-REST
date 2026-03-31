@@ -1,0 +1,18 @@
+---
+extends: default
+
+rules:
+  # Allow long lines — K8s manifests and GHA workflows often have long values
+  line-length: disable
+
+  # Allow truthy values like 'on' in GitHub Actions triggers without quoting
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']
+    check-keys: false
+
+  # K8s manifests use many comments, allow them without a space
+  comments:
+    min-spaces-from-content: 1
+
+  # Allow multiple documents in a single file (K8s multi-doc manifests)
+  document-start: disable

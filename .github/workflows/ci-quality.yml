@@ -1,0 +1,105 @@
+name: 'CI: Quality'
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit
+      - name: Check formatting
+        run: npm run format:check
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run ShellCheck
+        run: find scripts -name '*.sh' -print0 | xargs -0 shellcheck
+
+  shfmt:
+    name: shfmt
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install shfmt
+        run: |
+          SHFMT_VERSION="v3.11.0"
+          curl -sSL "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64" -o /usr/local/bin/shfmt
+          chmod +x /usr/local/bin/shfmt
+          shfmt --version
+      - name: Check shell script formatting
+        run: shfmt -l -d -i 2 -ci -bn scripts/
+
+  yamllint:
+    name: YAMLLint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install yamllint
+        run: pip install yamllint
+      - name: Lint YAML files
+        run: yamllint -c .yamllint.yml kubernetes/ .github/workflows/
+
+  hadolint:
+    name: Hadolint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Hadolint
+        run: |
+          HADOLINT_VERSION="v2.12.0"
+          curl -sSL "https://github.com/hadolint/hadolint/releases/download/${HADOLINT_VERSION}/hadolint-Linux-x86_64" -o /usr/local/bin/hadolint
+          chmod +x /usr/local/bin/hadolint
+          hadolint --version
+      - name: Lint Dockerfiles
+        run: |
+          hadolint server/Dockerfile
+          hadolint server/Dockerfile.local
+          hadolint web/Dockerfile.local
+
+  kube-linter:
+    name: KubeLinter
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install KubeLinter
+        run: |
+          KUBELINTER_VERSION="v0.7.2"
+          curl -sSL "https://github.com/stackrox/kube-linter/releases/download/${KUBELINTER_VERSION}/kube-linter-linux" -o /usr/local/bin/kube-linter
+          chmod +x /usr/local/bin/kube-linter
+          kube-linter version
+      - name: Lint Kubernetes manifests
+        run: kube-linter lint kubernetes/
+
+  trivy-fs:
+    name: Trivy filesystem scan
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'

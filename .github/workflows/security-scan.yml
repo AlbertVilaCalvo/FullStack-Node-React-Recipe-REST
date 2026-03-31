@@ -1,0 +1,39 @@
+name: 'Security scan'
+
+on:
+  schedule:
+    # Weekly on Monday at 8:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  trivy-image:
+    name: Trivy Docker image scan
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build server Docker image
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            -t recipe-manager-server:scan \
+            server/
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'recipe-manager-server:scan'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
+
+  trivy-repo:
+    name: Trivy repository scan
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'

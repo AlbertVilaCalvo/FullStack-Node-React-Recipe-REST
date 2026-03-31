@@ -1,0 +1,78 @@
+name: 'CI: Terraform'
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - terraform/**
+      - .github/workflows/ci-terraform.yml
+    types:
+      - opened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fmt:
+    name: Terraform fmt
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '~> 1.14'
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive terraform/
+
+  validate:
+    name: Terraform validate (${{ matrix.directory }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        directory:
+          - terraform/bootstrap/environments/all
+          - terraform/bootstrap/environments/dev
+          - terraform/bootstrap/environments/prod
+          - terraform/server/environments/dev
+          - terraform/server/environments/prod
+          - terraform/web/environments/dev
+          - terraform/web/environments/prod
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '~> 1.14'
+      - name: Terraform init
+        working-directory: ${{ matrix.directory }}
+        run: terraform init -backend=false
+      - name: Terraform validate
+        working-directory: ${{ matrix.directory }}
+        run: terraform validate
+
+  tflint:
+    name: TFLint (${{ matrix.directory }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        directory:
+          - terraform/bootstrap/environments/all
+          - terraform/bootstrap/environments/dev
+          - terraform/bootstrap/environments/prod
+          - terraform/server/environments/dev
+          - terraform/server/environments/prod
+          - terraform/web/environments/dev
+          - terraform/web/environments/prod
+    steps:
+      - uses: actions/checkout@v6
+      - uses: terraform-linters/setup-tflint@v4
+      - name: Init TFLint
+        working-directory: ${{ matrix.directory }}
+        run: tflint --init
+      - name: Run TFLint
+        working-directory: ${{ matrix.directory }}
+        run: tflint
