@@ -244,8 +244,8 @@ while true; do
   sleep 10
 done
 
-# Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) and Argo CD Helm charts
-log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, External Secrets Operator, Karpenter) and Argo CD Helm charts..."
+# Step 3: Delete Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter) and Argo CD Helm charts
+log_step "Step 3/6 : Deleting Kubernetes controllers (Load Balancer Controller, ExternalDNS, Karpenter) and Argo CD Helm charts..."
 
 # Download Helm charts locally to avoid network timeouts during Terraform destroy
 download_helm_charts
@@ -255,7 +255,6 @@ retry_with_backoff 3 "Delete Kubernetes controllers and Argo CD" \
   terraform destroy \
   -target=module.lb_controller \
   -target=module.external_dns \
-  -target=module.external_secrets \
   -target=module.karpenter_controller \
   -target=module.argocd \
   -auto-approve
