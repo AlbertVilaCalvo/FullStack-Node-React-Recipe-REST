@@ -1,0 +1,19 @@
+---
+# Relaxed yamllint config for Kubernetes manifests and GitHub Actions workflows.
+# Key relaxations for a learning project:
+#   - line-length is warned (not errored) with a generous maximum
+#   - truthy values like 'on', 'off', 'yes', 'no' are allowed (needed for GitHub Actions 'on:' trigger)
+#   - document-start (---) is not required
+extends: default
+
+rules:
+  line-length:
+    max: 200
+    level: warning
+  truthy:
+    # GitHub Actions uses 'on:' as a top-level key; allow it along with other truthy values
+    allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
+    check-keys: false
+  comments:
+    min-spaces-from-content: 1
+  document-start: disable
