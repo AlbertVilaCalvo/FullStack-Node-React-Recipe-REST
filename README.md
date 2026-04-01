@@ -311,6 +311,49 @@ This script will:
 
 **Warning:** This will permanently delete all infrastructure resources, including the ECR images!
 
+## CI/CD pipeline
+
+The CI/CD pipeline is split into **CI workflows** (validation on pull requests) and **CD workflows** (deployment on merge to main).
+
+### CI workflows (pull requests)
+
+CI workflows run on every pull request to validate code quality. All checks run in parallel for speed. Only workflows relevant to the changed files are triggered (path filters). Non-critical checks are non-blocking — they show failures in the PR but don't prevent merging.
+
+| Workflow            | Path filter                        | Jobs                                                         | Blocking?               |
+| ------------------- | ---------------------------------- | ------------------------------------------------------------ | ----------------------- |
+| `ci-server.yml`     | `server/**`                        | ESLint, Typecheck, Tests, Hadolint                           | Typecheck, Tests        |
+| `ci-web.yml`        | `web/**`                           | ESLint, Typecheck, Tests, Build                              | Typecheck, Tests, Build |
+| `ci-terraform.yml`  | `terraform/**`                     | Format, Validate (matrix), TFLint (matrix), Security (Trivy) | Validate                |
+| `ci-kubernetes.yml` | `kubernetes/**`                    | Kubeconform, KubeLinter                                      | Kubeconform             |
+| `ci-scripts.yml`    | `scripts/**`, `pre-commit`         | ShellCheck & shfmt                                           | —                       |
+| `ci-format.yml`     | `*.ts,tsx,js,json,md,yml,yaml,css` | Prettier, yamllint                                           | —                       |
+| `ci-security.yml`   | _(all files)_                      | Trivy filesystem scan                                        | —                       |
+
+### CD workflows (merge to main)
+
+| Workflow        | Path filter | Jobs                                                                                                                           |
+| --------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `cd-server.yml` | `server/**` | Build & push Docker image to ECR (dev) → Update kustomization (dev) → Build & push (prod, gated) → Update kustomization (prod) |
+| `cd-web.yml`    | `web/**`    | Deploy to dev (S3 + CloudFront) → Deploy to prod (gated)                                                                       |
+
+Production deployments are gated by GitHub environment protection rules (required reviewers).
+
+### Required status checks (GitHub Rulesets)
+
+Configure the following status checks as **required** in a GitHub repository ruleset (Settings → Rules → Rulesets). Use "Require only when the check was reported" so that path-filtered checks don't block unrelated PRs.
+
+| Check name                                | When it runs            |
+| ----------------------------------------- | ----------------------- |
+| `CI Server / Typecheck`                   | `server/**` changes     |
+| `CI Server / Tests`                       | `server/**` changes     |
+| `CI Web / Typecheck`                      | `web/**` changes        |
+| `CI Web / Tests`                          | `web/**` changes        |
+| `CI Web / Build`                          | `web/**` changes        |
+| `CI Terraform / Validate (terraform/...)` | `terraform/**` changes  |
+| `CI Kubernetes / Validate (Kubeconform)`  | `kubernetes/**` changes |
+
+All other checks (ESLint, Prettier, Hadolint, TFLint, KubeLinter, ShellCheck, shfmt, yamllint, Trivy) are informational — visible in the PR but not required to merge.
+
 ## Automatic deployment with GitHub Actions
 
 ### Web frontend
@@ -333,7 +376,7 @@ If you changed any value in `terraform.tfvars`, then use that value.
 
 ### Server API
 
-The server workflow (`.github/workflows/server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
+The server CD workflow (`.github/workflows/cd-server.yml`) builds the Docker image, pushes it to ECR, and creates a commit that updates the image tag in `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
 
 At the GitHub repository, go to Settings → Environments and add the following environment variables to the "dev" and "prod" environments:
 

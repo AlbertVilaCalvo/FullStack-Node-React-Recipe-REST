@@ -1,0 +1,74 @@
+name: CI Kubernetes
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - kubernetes/**
+      - .github/workflows/ci-kubernetes.yml
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kubeconform:
+    name: Validate (Kubeconform)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Kustomize
+        run: |
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin kustomize
+      - name: Install Kubeconform
+        run: |
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin kubeconform
+      - name: Validate Kustomize overlays
+        run: |
+          for overlay in kubernetes/server/overlays/dev kubernetes/server/overlays/prod; do
+            echo "--- Validating $overlay ---"
+            kustomize build "$overlay" | kubeconform \
+              -kubernetes-version 1.34.0 \
+              -strict \
+              -ignore-missing-schemas \
+              -summary
+          done
+      - name: Validate raw manifests
+        run: |
+          for dir in kubernetes/argocd-apps/dev kubernetes/argocd-apps/prod kubernetes/karpenter-nodepool/dev kubernetes/karpenter-nodepool/prod; do
+            echo "--- Validating $dir ---"
+            kubeconform \
+              -kubernetes-version 1.34.0 \
+              -strict \
+              -ignore-missing-schemas \
+              -summary \
+              "$dir"
+          done
+
+  kubelinter:
+    name: Lint (KubeLinter)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Kustomize
+        run: |
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin kustomize
+      - name: Install KubeLinter
+        run: |
+          curl -sSL "https://github.com/stackrox/kube-linter/releases/download/v0.7.2/kube-linter-linux" -o /usr/local/bin/kube-linter
+          chmod +x /usr/local/bin/kube-linter
+      - name: Lint Kustomize overlays
+        run: |
+          for overlay in kubernetes/server/overlays/dev kubernetes/server/overlays/prod; do
+            echo "--- Linting $overlay ---"
+            kustomize build "$overlay" | kube-linter lint -
+          done

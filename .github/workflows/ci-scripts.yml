@@ -1,0 +1,44 @@
+name: CI Scripts
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/**
+      - pre-commit
+      - .github/workflows/ci-scripts.yml
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shellcheck-and-shfmt:
+    name: ShellCheck & shfmt
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install shfmt
+        run: |
+          curl -sSL "https://github.com/mvdan/sh/releases/download/v3.11.0/shfmt_v3.11.0_linux_amd64" -o /usr/local/bin/shfmt
+          chmod +x /usr/local/bin/shfmt
+      - name: Find shell scripts
+        id: find
+        run: |
+          FILES=$(find scripts -name '*.sh' -type f)
+          FILES="${FILES}"$'\n'"pre-commit"
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$FILES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+      - name: Run ShellCheck
+        run: |
+          echo "${{ steps.find.outputs.files }}" | xargs shellcheck
+      - name: Check formatting with shfmt
+        run: |
+          echo "${{ steps.find.outputs.files }}" | xargs shfmt -l -i 2 -ci -bn

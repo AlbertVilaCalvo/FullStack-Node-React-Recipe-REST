@@ -22,9 +22,18 @@ The project structure is:
   - `kubernetes/server`: Manifests for the server. Uses Kustomize.
   - `kubernetes/argocd-apps`: Argo CD Application manifests. Uses the App of Apps pattern.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
-- `.github/workflows`: GitHub Actions workflows for CI/CD.
-  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
-  - `.github/workflows/web.yml`: Deploys React web app.
+- `.github/workflows`: GitHub Actions workflows for CI/CD. Workflows are split into CI (pull request validation) and CD (deployment on merge to main).
+  - CI workflows (triggered on pull requests):
+    - `.github/workflows/ci-server.yml`: Validates server code (ESLint, typecheck, tests, Hadolint).
+    - `.github/workflows/ci-web.yml`: Validates web code (ESLint, typecheck, tests, build).
+    - `.github/workflows/ci-terraform.yml`: Validates Terraform (format, validate, TFLint, Trivy IaC scan).
+    - `.github/workflows/ci-kubernetes.yml`: Validates Kubernetes manifests (Kubeconform, KubeLinter).
+    - `.github/workflows/ci-scripts.yml`: Validates shell scripts (ShellCheck, shfmt).
+    - `.github/workflows/ci-format.yml`: Validates formatting (Prettier, yamllint).
+    - `.github/workflows/ci-security.yml`: Security scanning (Trivy filesystem scan).
+  - CD workflows (triggered on push to main):
+    - `.github/workflows/cd-server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
+    - `.github/workflows/cd-web.yml`: Builds and deploys the React web app to S3 and CloudFront (dev, then prod gated by required reviewers).
 
 The server follows a three-layer architecture for organizing business logic:
 
@@ -72,7 +81,7 @@ The server follows a three-layer architecture for organizing business logic:
 ## Frontend Infrastructure
 
 - React frontend is deployed to CloudFront, using a private S3 bucket as the origin.
-- Deployment is done automatically using GitHub Actions (see `.github/workflows/web.yml`).
+- Deployment is done automatically using GitHub Actions (see `.github/workflows/cd-web.yml`).
 
 ## Terraform
 

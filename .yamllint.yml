@@ -1,0 +1,18 @@
+# Relaxed yamllint configuration for a learning project.
+# Catches real issues (syntax errors, duplicate keys) without being overly strict.
+
+extends: default
+
+rules:
+  # Allow long lines — Kubernetes manifests and GitHub Actions workflows often have long values.
+  line-length: disable
+
+  # Allow truthy values like 'on' in GitHub Actions triggers without quoting.
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+
+  # Don't enforce comment indentation — it's a style preference.
+  comments-indentation: disable
+
+  # Allow multiple documents in a single file (Kubernetes uses ---).
+  document-start: disable
