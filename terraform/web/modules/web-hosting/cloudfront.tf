@@ -59,7 +59,7 @@ resource "aws_cloudfront_distribution" "web_hosting" {
 
 # Limit the S3 bucket access to only authenticated requests from CloudFront
 resource "aws_cloudfront_origin_access_control" "web_hosting" {
-  name                              = "${var.app_name}-web-oac"
+  name                              = "${var.app_name}-web-oac-${var.environment}"
   description                       = local.description
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
