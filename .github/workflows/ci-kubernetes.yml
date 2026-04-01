@@ -1,0 +1,48 @@
+name: CI - Kubernetes
+
+on:
+  pull_request:
+    paths:
+      - 'kubernetes/**'
+      - '.github/workflows/ci-kubernetes.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install yamllint
+        run: sudo apt-get update && sudo apt-get install -y yamllint
+      - name: Run yamllint
+        run: yamllint kubernetes/
+
+  kubeconform:
+    name: Kubeconform
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Kubeconform
+        uses: mathiasvr/command-wrapper@v2
+        with:
+          cmd: wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz && tar -xf kubeconform-linux-amd64.tar.gz && sudo mv kubeconform /usr/local/bin/
+      - name: Run Kubeconform
+        run: find kubernetes/ -type f -name "*.yaml" -exec kubeconform -summary {} +
+
+  kube-linter:
+    name: Kube-linter
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Kube-linter
+        uses: stackrox/kube-linter-action@v1.0.4
+        with:
+          directory: kubernetes/

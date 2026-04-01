@@ -1,0 +1,33 @@
+name: CI - Shell Scripts
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - '**/*.sh'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run ShellCheck
+        run: find . -name "*.sh" -type f -exec shellcheck {} +
+
+  shfmt:
+    name: shfmt
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install shfmt
+        run: sudo snap install shfmt
+      - name: Run shfmt check
+        run: find . -name "*.sh" -type f -exec shfmt -l -i 2 -ci -bn -d {} +

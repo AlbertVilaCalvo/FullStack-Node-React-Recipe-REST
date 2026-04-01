@@ -31,6 +31,12 @@ Live site: https://recipemanager.link
   - Unit tests for route handlers and middleware with [node-mocks-http](https://github.com/howardabrams/node-mocks-http).
   - Integration tests for routes with [supertest](https://github.com/visionmedia/supertest).
 
+### CI/CD
+
+- **Separated CI / CD pipelines** configured via GitHub Actions.
+- **CI Workflows**: Trigger on pull requests and validate specific domains (web, server, terraform, k8s, scripts) in parallel. Run linters, test suites, static analysis, formatting checks, and security scans (hadolint, Trivy, checkov, kubeconform, etc.).
+- **CD Workflows**: Trigger entirely on merge to main. Deploy the Frontend securely to S3/CloudFront and update the server's GitOps (Kustomize/Argo CD) with new Docker images built and pushed to ECR.
+
 ### AWS
 
 - Frontend deployed to S3 and CloudFront automatically using GitHub Actions.

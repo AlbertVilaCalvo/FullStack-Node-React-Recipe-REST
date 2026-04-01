@@ -1,0 +1,72 @@
+name: CI - Terraform
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/ci-terraform.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform_fmt:
+    name: Terraform Format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+      - name: Terraform Format
+        run: terraform fmt -check -recursive terraform/
+
+  terraform_validate:
+    name: Terraform Validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+      # validate is required per directory. Let's find modules/envs and run init/validate
+      - name: Terraform Init and Validate
+        run: |
+          for dir in $(find terraform -type f -name "*.tf" -exec dirname {} \; | sort -u); do
+            echo "Running terraform init & validate in $dir"
+            (cd "$dir" && terraform init -backend=false && terraform validate)
+          done
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/cache@v4
+        name: Cache plugin dir
+        with:
+          path: ~/.tflint.d/plugins
+          key: tflint-${{ hashFiles('.tflint.hcl') }}
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.50.3
+      - name: Show version
+        run: tflint --version
+      - name: Run TFLint
+        run: tflint -f compact --recursive terraform/
+
+  checkov:
+    name: Checkov
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform/
+          framework: terraform
+          soft_fail: true

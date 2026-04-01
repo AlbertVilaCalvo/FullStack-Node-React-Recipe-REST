@@ -23,8 +23,9 @@ The project structure is:
   - `kubernetes/argocd-apps`: Argo CD Application manifests. Uses the App of Apps pattern.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
-  - `.github/workflows/server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
-  - `.github/workflows/web.yml`: Deploys React web app.
+  - `ci-*.yml`: PR-triggered validation workflows (builds, tests, linters like Trivy, Checkov, Kube-linter) structured per-domain (server, web, terraform, etc).
+  - `cd-server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
+  - `cd-web.yml`: Deploys React web app.
 
 The server follows a three-layer architecture for organizing business logic:
 

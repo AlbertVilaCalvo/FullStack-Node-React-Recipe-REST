@@ -1,0 +1,89 @@
+name: CI - Server
+
+on:
+  pull_request:
+    paths:
+      - 'server/**'
+      - '.github/workflows/ci-server.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: server
+
+jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+      - name: Install dependencies
+        run: npm ci --no-fund
+      - name: Run ESLint
+        run: npm run lint
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit
+      - name: Run TypeScript compiler check
+        run: npx tsc --noEmit
+
+  test:
+    name: Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit
+      - name: Run tests
+        run: npm test
+
+  hadolint:
+    name: Dockerfile Lint
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: server/Dockerfile
+
+  trivy:
+    name: Docker Security Scan
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build local image for scanning
+        run: docker build -t recipe-server:test .
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'recipe-server:test'
+          format: 'table'
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
