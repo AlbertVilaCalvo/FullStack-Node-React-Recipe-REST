@@ -1,5 +1,6 @@
 name: CI - Formatting
 
+# Runs on all paths (prettier and yamllint are quick, not worth path-filtering)
 on:
   pull_request:
     branches:

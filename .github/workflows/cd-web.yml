@@ -37,7 +37,7 @@ jobs:
       id-token: write # Allows the job to request the JWT token from GitHub's OIDC provider
       contents: read # Allows the action to clone your repository code. Required for actions/checkout
     env:
-      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }} # Override with environment-specific API URL
+      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -75,7 +75,7 @@ jobs:
       id-token: write
       contents: read
     env:
-      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }} # Override with environment-specific API URL
+      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
