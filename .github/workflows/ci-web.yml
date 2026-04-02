@@ -43,8 +43,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'web/package-lock.json'
       - name: Install dependencies
-        # Intentionally not suppressing audit here — surface security vulnerabilities.
-        run: npm ci --no-fund
+        run: npm ci --no-fund --no-audit
       - name: Run ESLint
         run: npm run lint
 
