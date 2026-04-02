@@ -45,15 +45,14 @@ jobs:
         run: yamllint -c .yamllint.yml kubernetes/ .github/workflows/
 
   actionlint:
-    name: Actionlint (workflow syntax)
+    name: actionlint (workflow syntax)
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - name: Install actionlint
         run: |
-          curl -sSL "https://github.com/rhysd/actionlint/releases/download/v1.7.4/actionlint_1.7.4_linux_amd64.tar.gz" \
-            | tar -xz -C /usr/local/bin actionlint
-          actionlint --version
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -version
       - name: Run actionlint
-        run: actionlint
+        run: ./actionlint
