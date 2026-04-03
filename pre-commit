@@ -81,7 +81,7 @@ if [ ! -z "$CODE_FILES_SERVER" ]; then
   print_result "ESLint server"
 
   print_title "tsc server"
-  npx tsc --noEmit
+  npm run typecheck
   print_result "tsc server"
 
   cd ..
@@ -99,7 +99,7 @@ if [ ! -z "$CODE_FILES_WEB" ]; then
   print_result "ESLint web"
 
   print_title "tsc web"
-  npx tsc --noEmit
+  npm run typecheck
   print_result "tsc web"
 
   cd ..
