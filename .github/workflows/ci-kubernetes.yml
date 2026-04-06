@@ -48,12 +48,16 @@ jobs:
       - name: Validate manifests (prod)
         run: kustomize build kubernetes/server/overlays/prod | kubeconform -strict -ignore-missing-schemas -summary -
 
+  # We do not run KubeLinter in folders that only contain CRDs (Application, NodePool, EC2NodeClass, etc.) since
+  # it simply reports 'Warning: no valid objects found'.
   kube_linter:
     name: KubeLinter
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
+      # We need to render the manifests before linting, otherwise KubeLinter reports errors in incomplete manifests
+      # (for example, 'object has no selector specified' in deployment_patch.yaml).
       - name: Install Kustomize
         run: |
           KUSTOMIZE_VERSION=5.8.1
@@ -72,15 +76,3 @@ jobs:
       - name: Run KubeLinter - server (prod)
         continue-on-error: true
         run: kustomize build kubernetes/server/overlays/prod | kube-linter lint -
-      - name: Run KubeLinter - argocd-apps (dev)
-        continue-on-error: true
-        run: kube-linter lint kubernetes/argocd-apps/dev/
-      - name: Run KubeLinter - argocd-apps (prod)
-        continue-on-error: true
-        run: kube-linter lint kubernetes/argocd-apps/prod/
-      - name: Run KubeLinter - karpenter-nodepool (dev)
-        continue-on-error: true
-        run: kube-linter lint kubernetes/karpenter-nodepool/dev/
-      - name: Run KubeLinter - karpenter-nodepool (prod)
-        continue-on-error: true
-        run: kube-linter lint kubernetes/karpenter-nodepool/prod/
