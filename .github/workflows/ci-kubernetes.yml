@@ -54,11 +54,27 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
+      - name: Install Kustomize
+        run: |
+          KUSTOMIZE_VERSION=5.8.1
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin kustomize
+          kustomize version
       - name: Install KubeLinter
         run: |
           KUBE_LINTER_VERSION=0.7.2
           curl -sSL "https://github.com/stackrox/kube-linter/releases/download/v${KUBE_LINTER_VERSION}/kube-linter-linux.tar.gz" \
             | tar -xz -C /usr/local/bin
           kube-linter version
-      - name: Run KubeLinter
-        run: kube-linter lint kubernetes/
+      - name: Run KubeLinter - server (dev)
+        run: kustomize build kubernetes/server/overlays/dev | kube-linter lint -
+      - name: Run KubeLinter - server (prod)
+        run: kustomize build kubernetes/server/overlays/prod | kube-linter lint -
+      - name: Run KubeLinter - argocd-apps (dev)
+        run: kube-linter lint kubernetes/argocd-apps/dev/
+      - name: Run KubeLinter - argocd-apps (prod)
+        run: kube-linter lint kubernetes/argocd-apps/prod/
+      - name: Run KubeLinter - karpenter-nodepool (dev)
+        run: kube-linter lint kubernetes/karpenter-nodepool/dev/
+      - name: Run KubeLinter - karpenter-nodepool (prod)
+        run: kube-linter lint kubernetes/karpenter-nodepool/prod/
