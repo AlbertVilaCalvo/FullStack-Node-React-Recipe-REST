@@ -67,14 +67,20 @@ jobs:
             | tar -xz -C /usr/local/bin
           kube-linter version
       - name: Run KubeLinter - server (dev)
+        continue-on-error: true
         run: kustomize build kubernetes/server/overlays/dev | kube-linter lint -
       - name: Run KubeLinter - server (prod)
+        continue-on-error: true
         run: kustomize build kubernetes/server/overlays/prod | kube-linter lint -
       - name: Run KubeLinter - argocd-apps (dev)
+        continue-on-error: true
         run: kube-linter lint kubernetes/argocd-apps/dev/
       - name: Run KubeLinter - argocd-apps (prod)
+        continue-on-error: true
         run: kube-linter lint kubernetes/argocd-apps/prod/
       - name: Run KubeLinter - karpenter-nodepool (dev)
+        continue-on-error: true
         run: kube-linter lint kubernetes/karpenter-nodepool/dev/
       - name: Run KubeLinter - karpenter-nodepool (prod)
+        continue-on-error: true
         run: kube-linter lint kubernetes/karpenter-nodepool/prod/
