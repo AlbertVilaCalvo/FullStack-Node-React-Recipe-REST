@@ -1,13 +1,36 @@
 name: CI - Formatting
 
-# Runs on all paths (prettier and yamllint are quick, not worth path-filtering)
 on:
   pull_request:
     branches:
       - main
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.json'
+      - '**/*.md'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.html'
+      - '**/*.css'
+      - '.prettierignore' # Run workflow if .prettierignore is modified
   push:
     branches:
       - main
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.json'
+      - '**/*.md'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.html'
+      - '**/*.css'
+      - '.prettierignore'
   workflow_dispatch:
 
 concurrency:
