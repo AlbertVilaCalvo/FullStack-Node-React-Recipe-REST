@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 env:
-  VITE_PORT: 3000 # Loaded by vite.config.ts during build
+  VITE_PORT: 3000 # Required by 'npm run build' since it loads config from vite.config.ts
 
 jobs:
   deploy_dev:
