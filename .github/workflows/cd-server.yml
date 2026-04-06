@@ -54,6 +54,9 @@ jobs:
           role-session-name: 'GitHubActions-server-ecr-push-dev'
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
+        # TODO Here we can scan the image with Trivy, see:
+        # https://github.com/AlbertVilaCalvo/RecipeManager/blob/226e27db578f722d7a539e0eeb9b0e4dbb312f4c/.github/workflows/cd-server.yml
+        # https://github.com/AlbertVilaCalvo/RecipeManager/blob/886b4136c1f749da6df34eba9191d2219d67ded5/.github/workflows/cd-server.yml
       - name: Build and push Docker image
         run: |
           docker build \

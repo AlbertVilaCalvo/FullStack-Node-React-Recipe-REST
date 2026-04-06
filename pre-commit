@@ -8,7 +8,7 @@
 # Runs ShellCheck on .sh files if ShellCheck is installed.
 # Runs YAMLLint on .yml/.yaml files if yamllint is installed.
 # Runs actionlint on GitHub Actions workflow files (.github/workflows/) if actionlint is installed.
-# This hook always commits, even if errors are found. And it does not modify the files (ie it does not do `prettier
+# This hook always commits, even if errors are found. And it does not modify the files (i.e. it does not do `prettier
 # write` or `terraform fmt`), it only checks if there is any issue and reports it.
 # Inspired by https://prettier.io/docs/precommit.html#option-5-shell-script
 
