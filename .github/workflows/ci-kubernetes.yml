@@ -27,7 +27,9 @@ jobs:
     name: Kubeconform
     runs-on: ubuntu-24.04
     env:
-      KUBERNETES_VERSION: '1.34' # Should match the value in terraform/server/environments/{env}/terraform.tfvars
+      # Must be a full version (x.y.z, not x.y).
+      # Should match the value in terraform/server/environments/{env}/terraform.tfvars.
+      KUBERNETES_VERSION: '1.34.0'
     steps:
       - uses: actions/checkout@v6
       - name: Install Kustomize
@@ -43,10 +45,9 @@ jobs:
             | tar -xz -C /usr/local/bin kubeconform
           kubeconform -v
       - name: Validate server manifests (dev)
-        # -strict: fail on unknown fields in known schemas
-        # -summary: print a summary line at the end
-        # The CRDs-catalog is used as a secondary schema location to validate CRDs
-        # such as ExternalSecret and SecretStore (from External Secrets Operator).
+        # -strict: fail on unknown or duplicated fields in known schemas
+        # -summary: print a summary at the end
+        # The CRDs-catalog is used to validate CRDs (ExternalSecret and SecretStore)
         run: |
           kustomize build kubernetes/server/overlays/dev \
             | kubeconform \
