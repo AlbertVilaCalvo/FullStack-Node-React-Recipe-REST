@@ -28,7 +28,6 @@ jobs:
   shfmt:
     name: shfmt (formatting)
     runs-on: ubuntu-24.04
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - name: Install shfmt
@@ -47,7 +46,6 @@ jobs:
   shellcheck:
     name: ShellCheck (linting)
     runs-on: ubuntu-24.04
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - name: Install ShellCheck
