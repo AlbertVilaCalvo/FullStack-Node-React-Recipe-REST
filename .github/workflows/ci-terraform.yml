@@ -77,7 +77,7 @@ jobs:
       - name: Init TFLint (download plugins)
         run: tflint --init
       - name: Run TFLint
-        run: tflint --recursive terraform/
+        run: tflint --recursive --chdir=terraform
 
   checkov:
     name: Checkov (security scan)
