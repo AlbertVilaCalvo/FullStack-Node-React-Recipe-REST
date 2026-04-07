@@ -28,13 +28,11 @@ jobs:
   fmt:
     name: Terraform fmt
     runs-on: ubuntu-24.04
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: hashicorp/setup-terraform@v4
       - name: Check Terraform formatting
-        run: terraform fmt -check -recursive
-        working-directory: terraform
+        run: terraform fmt -check -recursive terraform/
 
   validate:
     name: Terraform validate (${{ matrix.dir }})
@@ -61,7 +59,6 @@ jobs:
           restore-keys: |
             terraform-providers-${{ matrix.dir }}-
       - name: Terraform init
-        # -backend=false: skip remote state initialization — no AWS credentials needed
         run: terraform init -backend=false
         working-directory: terraform/${{ matrix.dir }}
       - name: Terraform validate
