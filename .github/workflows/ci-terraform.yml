@@ -56,8 +56,7 @@ jobs:
         with:
           path: terraform/${{ matrix.dir }}/.terraform
           key: terraform-providers-${{ matrix.dir }}-${{ hashFiles(format('terraform/{0}/.terraform.lock.hcl', matrix.dir)) }}
-          restore-keys: |
-            terraform-providers-${{ matrix.dir }}-
+          restore-keys: terraform-providers-${{ matrix.dir }}-
       - name: Terraform init
         run: terraform init -backend=false
         working-directory: terraform/${{ matrix.dir }}
@@ -76,8 +75,13 @@ jobs:
           cache: true
       - name: Init TFLint (download plugins)
         run: tflint --init
+        # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Run TFLint
-        run: tflint --recursive --chdir=terraform
+        # When using --chdir it loads the .tflint.hcl file in the specified directory,
+        # see https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/working-directory.md
+        run: tflint --recursive --chdir=terraform --config="$(realpath .tflint.hcl)"
 
   checkov:
     name: Checkov (security scan)
