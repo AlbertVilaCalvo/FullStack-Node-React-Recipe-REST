@@ -101,10 +101,9 @@ jobs:
       # We do not run KubeLinter in folders that only contain CRDs (Application, NodePool, EC2NodeClass,
       # etc.) since it simply reports 'Warning: no valid objects found'.
       - name: Run KubeLinter - server (dev)
-        continue-on-error: true
         run: kustomize build kubernetes/server/overlays/dev | kube-linter lint -
       - name: Run KubeLinter - server (prod)
-        continue-on-error: true
+        if: always()
         run: kustomize build kubernetes/server/overlays/prod | kube-linter lint -
 
   # Checkov also has Kubernetes checks, see https://www.checkov.io/5.Policy%20Index/kubernetes.html
