@@ -117,7 +117,7 @@ jobs:
   # Scans OS-level packages (Alpine apk) in the base image — something
   # 'trivy fs' cannot cover because it only looks at the package-lock.json.
   trivy_image:
-    name: Trivy (Docker image scan)
+    name: Trivy (Docker image security scan)
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
