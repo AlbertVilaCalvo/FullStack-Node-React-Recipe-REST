@@ -23,16 +23,10 @@ The project structure is:
   - `kubernetes/argocd-apps`: Argo CD Application manifests. Uses the App of Apps pattern.
 - `/scripts`: Scripts for seeding the database, deploying the AWS infrastructure, etc.
 - `.github/workflows`: GitHub Actions workflows for CI/CD.
-  - CI workflows run on `pull_request` and `push` to main with path filters. Non-critical checks use `continue-on-error: true` (non-blocking). Blocking checks must pass before merging.
-  - CD workflows run only on `push` to main (i.e., when a PR is merged). Production deployments are gated by GitHub environment protection rules (required reviewers).
-  - `.github/workflows/ci-server.yml`: ESLint (non-blocking), Typecheck, Tests, Build, Hadolint (non-blocking), Trivy dependency scan (non-blocking). Paths: `server/**`.
-  - `.github/workflows/ci-web.yml`: ESLint (non-blocking), Typecheck, Tests, Build. Paths: `web/**`.
-  - `.github/workflows/ci-terraform.yml`: `terraform fmt` (non-blocking), `terraform validate` (matrix over all environment dirs), TFLint (non-blocking), Checkov security scan (non-blocking). Paths: `terraform/**`.
-  - `.github/workflows/ci-kubernetes.yml`: Kubeconform (validates kustomize-built manifests), KubeLinter (non-blocking). Paths: `kubernetes/**`.
-  - `.github/workflows/ci-scripts.yml`: shfmt formatting check (non-blocking), ShellCheck lint (non-blocking). Paths: `scripts/**`.
-  - `.github/workflows/ci-format.yml`: Prettier formatting check (non-blocking), YAMLLint on `kubernetes/` and `.github/workflows/` (non-blocking), Actionlint workflow syntax (non-blocking). Paths: all (no filter).
-  - `.github/workflows/cd-server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster. Follows a dev→prod promotional hierarchy. Deployment to prod is gated by GitHub environment protection rules (required reviewers).
-  - `.github/workflows/cd-web.yml`: Builds the React web app and deploys to S3 + CloudFront for dev, then prod (gated by required reviewers).
+  - CI workflows (`ci-*.yml`). PR-triggered validation workflows. They check formatting (Prettier, shfmt, terraform fmt), perform linting (ESLint, ShellCheck, YAMLLint, Actionlint, TFLint, KubeLinter, Hadolint), type checking (tsc), run tests, configuration and security scans (npm audit, Trivy, Checkov), etc. Blocking checks must pass before merging.
+  - CD workflows (`cd-*.yml`). Run when a PR is merged. Production deployments are gated by GitHub environment protection rules (required reviewers).
+    - `cd-server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster.
+    - `cd-web.yml`: Deploys the React web app to S3 + CloudFront.
 
 The server follows a three-layer architecture for organizing business logic:
 
