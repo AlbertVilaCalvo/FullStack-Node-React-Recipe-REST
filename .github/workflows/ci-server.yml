@@ -86,7 +86,21 @@ jobs:
         with:
           dockerfile: server/Dockerfile
 
-  trivy:
+  npm_audit:
+    name: npm audit (dependency scan)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+  trivy_fs:
     name: Trivy (dependency scan)
     runs-on: ubuntu-24.04
     continue-on-error: true
