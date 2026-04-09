@@ -22,7 +22,7 @@ plugin "aws" {
   source  = "github.com/terraform-linters/tflint-ruleset-aws"
 }
 
-# Disable "Module should include a main.tf file as the primary entrypoint (terraform_standard_module_structure)"
+# Disable "Module should include a main.tf file as the primary entrypoint"
 # https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_standard_module_structure.md
 rule "terraform_standard_module_structure" {
   enabled = false

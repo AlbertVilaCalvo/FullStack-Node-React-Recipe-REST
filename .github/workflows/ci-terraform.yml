@@ -86,6 +86,7 @@ jobs:
 
   # We do not run 'trivy config' in terraform/ since it is redundant with TFLint and checkov.
 
+  # https://www.checkov.io/5.Policy%20Index/terraform.html
   checkov:
     name: Checkov (misconfiguration and security scan)
     runs-on: ubuntu-24.04
