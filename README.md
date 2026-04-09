@@ -195,6 +195,7 @@ The checks performed are:
 - TypeScript compiler (tsc) for type checking.
 - ESLint for linting.
 - Terraform fmt and validate.
+- TFLint for Terraform linting, with the AWS plugin.
 - ShellCheck to lint shell scripts.
 - shfmt for shell script formatting.
   - Files are formatted with the options `-i 2 -ci -bn`, following [Google's shell style](https://google.github.io/styleguide/shellguide.html#formatting). Run `shfmt -i 2 -ci -bn -w <file> <directory>` to format a file and/or directory.

@@ -5,6 +5,7 @@
 # it's not possible to run tsc on specific files while obeying the tsconfig.json options (see
 # https://github.com/microsoft/TypeScript/issues/27379 and https://www.npmjs.com/package/tsc-files).
 # Runs `terraform fmt -check` and `terraform validate` on .tf and .tfvars files.
+# Runs TFLint if installed.
 # Runs ShellCheck on .sh files if ShellCheck is installed.
 # Runs YAMLLint on .yml/.yaml files if yamllint is installed.
 # Runs actionlint on GitHub Actions workflow files (.github/workflows/) if actionlint is installed.
@@ -122,6 +123,24 @@ if [ ! -z "$TERRAFORM_FILES" ]; then
     (cd "$dir" && terraform validate)
     print_result "Terraform validate ($dir)"
   done
+fi
+
+# TFLint
+
+if [ ! -z "$TERRAFORM_FILES" ]; then
+  print_title "TFLint"
+  if command -v tflint >/dev/null 2>&1; then
+    AWS_PLUGIN_VERSION=$(grep -A5 'plugin "aws"' .tflint.hcl | grep -m1 'version' | sed 's/.*"\(.*\)".*/\1/')
+    AWS_PLUGIN_DIR="${HOME}/.tflint.d/plugins/github.com/terraform-linters/tflint-ruleset-aws/${AWS_PLUGIN_VERSION}"
+    if [ ! -d "$AWS_PLUGIN_DIR" ]; then
+      echo "TFLint aws plugin not found. Running tflint --init to install plugins..."
+      tflint --init
+    fi
+    tflint --recursive --chdir=terraform --config="$(realpath .tflint.hcl)"
+    print_result "TFLint"
+  else
+    echo -e "${YELLOW}tflint not found; skipping TFLint. Install tflint to enable.${NO_COLOR}"
+  fi
 fi
 
 # ShellCheck
