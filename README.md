@@ -320,11 +320,11 @@ The project uses GitHub Actions workflows split into two types: CI and CD.
 
 ### CI workflows (`ci-*.yml`)
 
-Run on `push` to main and on `pull_request` targeting main. They check formatting (Prettier, shfmt, terraform fmt), linting (ESLint, TFLint, ShellCheck, YAMLLint, Actionlint, KubeLinter), type checking (tsc), run tests and security scans (npm audit, Trivy, Hadolint, Checkov).
+Run on `push` to main and on `pull_request` targeting main. They check formatting (Prettier, shfmt, terraform fmt), perform linting (ESLint, ShellCheck, YAMLLint, Actionlint, TFLint, KubeLinter, Hadolint), type checking (tsc), run tests, configuration and security scans (npm audit, Trivy, Checkov), etc.
 
 ### CD workflows (`cd-*.yml`)
 
-Run only on `push` to main (i.e., when a PR is merged). They deploy the changes to AWS and Kubernetes.
+Run only on `push` to main (i.e., when a PR is merged). They deploy code changes to AWS.
 
 | Workflow                          | Trigger paths | Jobs                                                  |
 | --------------------------------- | ------------- | ----------------------------------------------------- |
@@ -361,7 +361,8 @@ If you changed any value in `terraform.tfvars`, then use it.
 
 Run `terraform output` in `terraform/server/environments/[env]`.
 
-The CD server workflow builds the Docker image, pushes it to ECR, and commits an updated image tag to `kubernetes/server/overlays/[env]/kustomization.yaml`. Argo CD detects the commit and automatically syncs the changes to the cluster.
+The CD server workflow builds the Docker image, pushes it to ECR, and commits an updated image tag to `kubernetes/server/overlays/[env]/kustomization.yaml`.
+Argo CD detects the commit and automatically syncs the changes to the cluster.
 
 ## Manually deploy the React web app to AWS S3 and CloudFront
 
