@@ -78,3 +78,32 @@ jobs:
         # See https://vitest.dev/guide/cli.html#vitest
       - name: Run tests
         run: npm test
+
+  # TODO remove
+  audit:
+    name: Audit
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+  trivy:
+    name: Trivy (dependency scan)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: 'fs'
+          scan-ref: 'web/'
+          scanners: 'vuln,secret,misconfig'
+          trivy-config: trivy.yaml

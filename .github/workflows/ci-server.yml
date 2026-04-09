@@ -73,13 +73,16 @@ jobs:
       - name: Run tests
         run: npm test
 
+  # Alternatively, we could use Dockle. Seems more feature rich, see
+  # https://github.com/goodwithtech/dockle#checkpoints-comparison
+  # We could also try Checkov: https://www.checkov.io/5.Policy%20Index/dockerfile.html
   hadolint:
     name: Hadolint (Dockerfile lint)
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
-      - uses: hadolint/hadolint-action@v3.1.0
+      - uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: server/Dockerfile
 
@@ -94,5 +97,25 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: 'server/'
-          exit-code: '0'
-          format: 'table'
+          scanners: 'vuln,secret,misconfig'
+          trivy-config: trivy.yaml
+
+  # Scans OS-level packages (Alpine apk) in the base image — something
+  # 'trivy fs' cannot cover because it only looks at the package-lock.json.
+  trivy_image:
+    name: Trivy (Docker image scan)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build Docker image
+        # The platform flag is omitted here (defaults to the runner's native amd64)
+        # since we only need the image locally for scanning, not for deployment.
+        run: docker build -t recipe-manager-server:ci-scan .
+      - name: Run Trivy image scanner
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: 'image'
+          scan-ref: 'recipe-manager-server:ci-scan'
+          scanners: 'vuln'
+          trivy-config: trivy.yaml

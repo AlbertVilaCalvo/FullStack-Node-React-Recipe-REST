@@ -84,8 +84,10 @@ jobs:
         # see https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/working-directory.md
         run: tflint --recursive --chdir=terraform --config="$(realpath .tflint.hcl)"
 
+  # We do not run 'trivy config' in terraform/ since it is redundant with TFLint and checkov.
+
   checkov:
-    name: Checkov (security scan)
+    name: Checkov (misconfiguration and security scan)
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
