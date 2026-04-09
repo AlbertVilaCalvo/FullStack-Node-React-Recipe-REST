@@ -316,53 +316,48 @@ This script will:
 
 ## CI/CD Pipeline
 
-The project uses 8 GitHub Actions workflows split into two types:
+The project uses GitHub Actions workflows split into two types: CI and CD.
 
-**CI workflows** — run on `push` to main and on `pull_request` targeting main, scoped to paths relevant to each area.
+### CI workflows (`ci-*.yml`)
 
-| Workflow                              | Trigger paths   | Jobs                                                                                                                               |
-| ------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `.github/workflows/ci-server.yml`     | `server/**`     | ESLint (non-blocking), Typecheck, Tests, Build, Hadolint (non-blocking), Trivy scan (non-blocking)                                 |
-| `.github/workflows/ci-web.yml`        | `web/**`        | ESLint (non-blocking), Typecheck, Tests, Build                                                                                     |
-| `.github/workflows/ci-terraform.yml`  | `terraform/**`  | `terraform fmt` (non-blocking), `terraform validate` (matrix over all environments), TFLint (non-blocking), Checkov (non-blocking) |
-| `.github/workflows/ci-kubernetes.yml` | `kubernetes/**` | Kubeconform via kustomize build, KubeLinter (non-blocking)                                                                         |
-| `.github/workflows/ci-scripts.yml`    | `scripts/**`    | shfmt (non-blocking), ShellCheck (non-blocking)                                                                                    |
-| `.github/workflows/ci-format.yml`     | all paths       | Prettier (non-blocking), YAMLLint (non-blocking), Actionlint (non-blocking)                                                        |
+Run on `push` to main and on `pull_request` targeting main. They check formatting (Prettier, shfmt, terraform fmt), linting (ESLint, TFLint, ShellCheck, YAMLLint, Actionlint, KubeLinter), type checking (tsc), run tests and security scans (npm audit, Trivy, Hadolint, Checkov).
 
-**CD workflows** — run only on `push` to main (i.e., when a PR is merged).
+### CD workflows (`cd-*.yml`)
 
-| Workflow                          | Trigger paths | Jobs                                                                                                                                                    |
-| --------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.github/workflows/cd-server.yml` | `server/**`   | Build & push Docker image to ECR (dev), Update kustomization tag (dev), Build & push Docker image to ECR (prod, gated), Update kustomization tag (prod) |
-| `.github/workflows/cd-web.yml`    | `web/**`      | Deploy to S3 + CloudFront (dev), Deploy to S3 + CloudFront (prod, gated)                                                                                |
+Run only on `push` to main (i.e., when a PR is merged). They deploy the changes to AWS and Kubernetes.
 
-Jobs marked **non-blocking** use `continue-on-error: true` — they report issues but never prevent a merge. Blocking jobs (typecheck, tests, build, terraform validate, kubeconform) must pass.
+| Workflow                          | Trigger paths | Jobs                                                  |
+| --------------------------------- | ------------- | ----------------------------------------------------- |
+| `.github/workflows/cd-server.yml` | `server/**`   | Build & push Docker image to ECR and update image tag |
+| `.github/workflows/cd-web.yml`    | `web/**`      | Deploy to S3 and CloudFront                           |
 
 Production deployments are gated by GitHub environment protection rules (required reviewers). Configure at Settings → Environments → prod → Required reviewers.
 
-### GitHub environment variables
+### GitHub Actions environment variables
+
+At GitHub, go to Settings → Environments and create two environments named "dev" and "prod".
+On that page, click the environment and add the following environment variables (not secrets) for each environment.
 
 #### Web (`.github/workflows/cd-web.yml`)
-
-Create `dev` and `prod` environments at GitHub Settings → Environments and add:
 
 | Variable                               | Value                                                                                 |
 | -------------------------------------- | ------------------------------------------------------------------------------------- |
 | `AWS_REGION`                           | `us-east-1`                                                                           |
-| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_WEB` | output of `terraform output web_github_actions_oidc_role_arn`                         |
-| `WEB_S3_BUCKET`                        | output of `terraform output website_s3_bucket_name`                                   |
-| `WEB_CLOUDFRONT_DISTRIBUTION_ID`       | output of `terraform output website_cloudfront_distribution_id`                       |
+| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_WEB` | `terraform output web_github_actions_oidc_role_arn`                                   |
+| `WEB_S3_BUCKET`                        | `terraform output website_s3_bucket_name`                                             |
+| `WEB_CLOUDFRONT_DISTRIBUTION_ID`       | `terraform output website_cloudfront_distribution_id`                                 |
 | `VITE_API_BASE_URL`                    | `https://api.recipemanager.link/api` (dev) or `https://api.recipeapp.link/api` (prod) |
 
 Run `terraform output` in `terraform/web/environments/[env]`.
+If you changed any value in `terraform.tfvars`, then use it.
 
 #### Server (`.github/workflows/cd-server.yml`)
 
-| Variable                                  | Value                                                            |
-| ----------------------------------------- | ---------------------------------------------------------------- |
-| `AWS_REGION`                              | `us-east-1`                                                      |
-| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER` | output of `terraform output server_github_actions_oidc_role_arn` |
-| `ECR_REPOSITORY_URL`                      | output of `terraform output ecr_repository_url`                  |
+| Variable                                  | Value                                                  |
+| ----------------------------------------- | ------------------------------------------------------ |
+| `AWS_REGION`                              | `us-east-1`                                            |
+| `AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER` | `terraform output server_github_actions_oidc_role_arn` |
+| `ECR_REPOSITORY_URL`                      | `terraform output ecr_repository_url`                  |
 
 Run `terraform output` in `terraform/server/environments/[env]`.
 
