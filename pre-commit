@@ -4,11 +4,11 @@
 # .tsx, .js, .jsx files. Prettier and ESLint only check the committed files, whereas tsc checks all project files, since
 # it's not possible to run tsc on specific files while obeying the tsconfig.json options (see
 # https://github.com/microsoft/TypeScript/issues/27379 and https://www.npmjs.com/package/tsc-files).
-# Runs `terraform fmt -check` and `terraform validate` on .tf and .tfvars files.
-# Runs TFLint if installed.
+# Runs `terraform fmt -check`, `terraform validate` and TFLint (if installed) on .tf and .tfvars files.
 # Runs ShellCheck on .sh files if ShellCheck is installed.
 # Runs YAMLLint on .yml/.yaml files if yamllint is installed.
 # Runs actionlint on GitHub Actions workflow files (.github/workflows/) if actionlint is installed.
+
 # This hook always commits, even if errors are found. And it does not modify the files (i.e. it does not do `prettier
 # write` or `terraform fmt`), it only checks if there is any issue and reports it.
 # Inspired by https://prettier.io/docs/precommit.html#option-5-shell-script
