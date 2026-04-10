@@ -225,7 +225,7 @@ terraform apply
 
 ### Web (Frontend)
 
-To deploy the React frontend to S3 and CloudFront:
+To create the S3 bucket and CloudFront distribution that the web app will be deployed to do the following:
 
 ```shell
 cd terraform/web/environments/dev # Or prod
@@ -324,7 +324,7 @@ Run on `push` to main and on `pull_request` targeting main. They check formattin
 
 ### CD workflows (`cd-*.yml`)
 
-Run only on `push` to main (i.e., when a PR is merged). They deploy code changes to AWS.
+Run only on `push` to main (i.e., when a PR is merged). They deploy new code to AWS.
 
 | Workflow                          | Trigger paths | Jobs                                                         |
 | --------------------------------- | ------------- | ------------------------------------------------------------ |
@@ -338,6 +338,8 @@ On that page, click the environment and add the following environment variables 
 Production deployments are gated by GitHub environment protection rules (required reviewers). Once the environment is created, configure the required reviewers at Settings → Environments → prod → Required reviewers.
 
 #### `cd-web.yml`
+
+The CD web workflow builds the React app and deploys it to S3 and CloudFront using the AWS CLI.
 
 Environment variables for `.github/workflows/cd-web.yml`:
 
