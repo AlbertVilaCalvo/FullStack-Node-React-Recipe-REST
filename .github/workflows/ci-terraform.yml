@@ -80,8 +80,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Run TFLint
-        # When using --chdir it loads the .tflint.hcl file in the specified directory,
-        # see https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/working-directory.md
+        # We need to specify the .tflint.hcl location with --config because when using --chdir it looks for the file in
+        # the --chdir directory, see https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/working-directory.md
         run: tflint --recursive --chdir=terraform --config="$(realpath .tflint.hcl)"
 
   # We do not run 'trivy config' in terraform/ since it is redundant with TFLint and checkov.

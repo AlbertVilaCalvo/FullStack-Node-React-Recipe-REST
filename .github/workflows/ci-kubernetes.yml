@@ -127,13 +127,11 @@ jobs:
             | tar -xz -C /usr/local/bin kustomize
           kustomize version
       - name: Render manifests
-        # Render the fully merged manifests so Trivy sees complete resources rather than
-        # patch fragments, which would produce missing or incorrect findings.
         run: |
           mkdir -p rendered
           kustomize build kubernetes/server/overlays/dev > rendered/server-dev.yaml
           kustomize build kubernetes/server/overlays/prod > rendered/server-prod.yaml
-      - name: Run Trivy config scanner
+      - name: Run Trivy config scanner - server manifests
         uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: 'config'

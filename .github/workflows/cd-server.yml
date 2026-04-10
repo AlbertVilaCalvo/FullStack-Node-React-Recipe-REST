@@ -74,7 +74,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          # Fetch full history so the push doesn't reject due to diverged history
+          # Fetch all commit history to avoid "shallow update not allowed" errors when rebasing
+          # and pushing back to the repository in the "Commit and push" step.
           fetch-depth: 0
       - name: Install Kustomize
         run: |
