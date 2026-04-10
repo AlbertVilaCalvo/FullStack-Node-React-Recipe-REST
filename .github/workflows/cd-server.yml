@@ -22,6 +22,9 @@ defaults:
 permissions:
   contents: read
 
+env:
+  KUSTOMIZE_VERSION: '5.8.1'
+
 jobs:
   build_and_push_dev:
     name: Build & push Docker image to ECR (dev)
@@ -75,7 +78,7 @@ jobs:
           fetch-depth: 0
       - name: Install Kustomize
         run: |
-          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_amd64.tar.gz" \
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
             | tar -xz -C /usr/local/bin kustomize
           kustomize version
       - name: Configure git and pull latest
