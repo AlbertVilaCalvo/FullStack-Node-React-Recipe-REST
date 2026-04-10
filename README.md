@@ -326,19 +326,20 @@ Run on `push` to main and on `pull_request` targeting main. They check formattin
 
 Run only on `push` to main (i.e., when a PR is merged). They deploy code changes to AWS.
 
-| Workflow                          | Trigger paths | Jobs                                                  |
-| --------------------------------- | ------------- | ----------------------------------------------------- |
-| `.github/workflows/cd-server.yml` | `server/**`   | Build & push Docker image to ECR and update image tag |
-| `.github/workflows/cd-web.yml`    | `web/**`      | Deploy to S3 and CloudFront                           |
+| Workflow                          | Trigger paths | Jobs                                                         |
+| --------------------------------- | ------------- | ------------------------------------------------------------ |
+| `.github/workflows/cd-server.yml` | `server/**`   | Build & push server Docker image to ECR and update image tag |
+| `.github/workflows/cd-web.yml`    | `web/**`      | Deploy React app to S3 and CloudFront                        |
 
-Production deployments are gated by GitHub environment protection rules (required reviewers). Configure at Settings → Environments → prod → Required reviewers.
-
-### GitHub Actions environment variables
-
+These workflows use environment variables that you need to set up in GitHub for the OIDC authentication and deployment to work.
 At GitHub, go to Settings → Environments and create two environments named "dev" and "prod".
 On that page, click the environment and add the following environment variables (not secrets) for each environment.
 
-#### Web (`.github/workflows/cd-web.yml`)
+Production deployments are gated by GitHub environment protection rules (required reviewers). Once the environment is created, configure the required reviewers at Settings → Environments → prod → Required reviewers.
+
+#### `cd-web.yml`
+
+Environment variables for `.github/workflows/cd-web.yml`:
 
 | Variable                               | Value                                                                                 |
 | -------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -351,7 +352,12 @@ On that page, click the environment and add the following environment variables 
 Run `terraform output` in `terraform/web/environments/[env]`.
 If you changed any value in `terraform.tfvars`, then use it.
 
-#### Server (`.github/workflows/cd-server.yml`)
+#### `cd-server.yml`
+
+The CD server workflow builds the Docker image, pushes it to ECR, and commits an updated image tag to `kubernetes/server/overlays/[env]/kustomization.yaml`.
+Argo CD detects the commit and automatically syncs the changes to the cluster.
+
+Environment variables for `.github/workflows/cd-server.yml`:
 
 | Variable                                  | Value                                                  |
 | ----------------------------------------- | ------------------------------------------------------ |
@@ -361,12 +367,9 @@ If you changed any value in `terraform.tfvars`, then use it.
 
 Run `terraform output` in `terraform/server/environments/[env]`.
 
-The CD server workflow builds the Docker image, pushes it to ECR, and commits an updated image tag to `kubernetes/server/overlays/[env]/kustomization.yaml`.
-Argo CD detects the commit and automatically syncs the changes to the cluster.
-
 ## Manually deploy the React web app to AWS S3 and CloudFront
 
-This is done automatically using GitHub Actions (see [Automatic deployment with GitHub Actions](#automatic-deployment-with-github-actions)), but you can also do it manually:
+This is done automatically using GitHub Actions ([see the `cd-web.yml` workflow](#cd-webyml)), but you can also do it manually:
 
 ```shell
 cd web
