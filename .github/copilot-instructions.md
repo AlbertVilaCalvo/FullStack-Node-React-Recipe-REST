@@ -26,7 +26,7 @@ The project structure is:
   - CI workflows (`ci-*.yml`). PR-triggered validation workflows. They check formatting (Prettier, shfmt, terraform fmt), perform linting (ESLint, ShellCheck, YAMLLint, Actionlint, TFLint, KubeLinter, Hadolint), type checking (tsc), run tests, configuration and security scans (npm audit, Trivy, Checkov), etc. Blocking checks must pass before merging.
   - CD workflows (`cd-*.yml`). Run when a PR is merged. Production deployments are gated by GitHub environment protection rules (required reviewers).
     - `cd-server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster.
-    - `cd-web.yml`: Deploys the React web app to S3 + CloudFront.
+    - `cd-web.yml`: Builds and deploys the React web app to S3 + CloudFront.
 
 The server follows a three-layer architecture for organizing business logic:
 
