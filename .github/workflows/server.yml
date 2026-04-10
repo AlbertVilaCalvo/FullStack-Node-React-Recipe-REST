@@ -60,7 +60,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-fund --no-audit
       - name: Run TypeScript compiler check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
   test:
     name: Tests

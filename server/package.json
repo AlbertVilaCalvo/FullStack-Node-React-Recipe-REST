@@ -8,6 +8,7 @@
     "dev": "tsx watch --env-file=../.env src/index.ts",
     "build": "tsc",
     "serve": "tsc && node --env-file=../.env build/index.js",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "jest",
     "test-watch": "jest --watch",
