@@ -22,9 +22,6 @@ defaults:
 permissions:
   contents: read
 
-# env:
-#   VITE_PORT: 3000 # Required by 'npm run build' since it loads config from vite.config.ts
-
 jobs:
   deploy_dev:
     name: Deploy React web app to the dev environment
