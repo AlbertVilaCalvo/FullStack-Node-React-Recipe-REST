@@ -15,7 +15,9 @@ on:
       - '**/*.yaml'
       - '**/*.html'
       - '**/*.css'
-      - '.prettierignore' # Run workflow if .prettierignore is modified
+      - .prettierrc.json
+      - .prettierignore
+      - .yamllint.yml
       - .github/workflows/ci-format.yml
   push:
     branches:
@@ -31,7 +33,9 @@ on:
       - '**/*.yaml'
       - '**/*.html'
       - '**/*.css'
-      - '.prettierignore'
+      - .prettierrc.json
+      - .prettierignore
+      - .yamllint.yml
       - .github/workflows/ci-format.yml
   workflow_dispatch:
 

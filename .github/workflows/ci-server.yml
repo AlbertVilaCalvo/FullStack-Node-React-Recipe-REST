@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - server/**
+      - trivy.yaml
       - .github/workflows/ci-server.yml
   push:
     branches:
       - main
     paths:
       - server/**
+      - trivy.yaml
       - .github/workflows/ci-server.yml
   workflow_dispatch:
 

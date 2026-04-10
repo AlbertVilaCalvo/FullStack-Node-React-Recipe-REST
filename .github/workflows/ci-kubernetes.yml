@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - kubernetes/**
+      - trivy.yaml
       - .github/workflows/ci-kubernetes.yml
   push:
     branches:
       - main
     paths:
       - kubernetes/**
+      - trivy.yaml
       - .github/workflows/ci-kubernetes.yml
   workflow_dispatch:
 
