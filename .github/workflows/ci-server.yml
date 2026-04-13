@@ -98,7 +98,7 @@ jobs:
         with:
           node-version: 24
           cache: 'npm'
-          cache-dependency-path: 'web/package-lock.json'
+          cache-dependency-path: 'server/package-lock.json'
       - name: Run npm audit
         run: npm audit --audit-level=high
 
