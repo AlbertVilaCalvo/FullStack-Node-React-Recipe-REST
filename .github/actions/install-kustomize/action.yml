@@ -1,5 +1,5 @@
-name: 'Install Kustomize'
-description: 'Download and install Kustomize to /usr/local/bin'
+name: Install Kustomize
+description: Download and install Kustomize to /usr/local/bin
 
 runs:
   using: composite

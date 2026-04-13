@@ -1,0 +1,14 @@
+name: Install KubeLinter
+description: Download and install KubeLinter to /usr/local/bin
+
+runs:
+  using: composite
+  steps:
+    - name: Install KubeLinter
+      shell: bash
+      env:
+        KUBE_LINTER_VERSION: '0.7.2'
+      run: |
+        curl -sSL "https://github.com/stackrox/kube-linter/releases/download/v${KUBE_LINTER_VERSION}/kube-linter-linux.tar.gz" \
+          | tar -xz -C /usr/local/bin
+        kube-linter version

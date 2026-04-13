@@ -1,0 +1,15 @@
+name: Install shfmt
+description: Download and install shfmt to /usr/local/bin
+
+runs:
+  using: composite
+  steps:
+    - name: Install shfmt
+      shell: bash
+      env:
+        SHFMT_VERSION: '3.13.1'
+      run: |
+        curl -sSL "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64" \
+          -o /usr/local/bin/shfmt
+        chmod +x /usr/local/bin/shfmt
+        shfmt --version

@@ -24,9 +24,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  SHFMT_VERSION: '3.13.1'
-
 jobs:
   shfmt:
     name: shfmt (formatting)
@@ -34,11 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install shfmt
-        run: |
-          curl -sSL "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64" \
-            -o /usr/local/bin/shfmt
-          chmod +x /usr/local/bin/shfmt
-          shfmt --version
+        uses: ./.github/actions/install-shfmt
       - name: Check shell script formatting
         # -l: list files that differ; exits 1 if any file is not formatted
         run: |
