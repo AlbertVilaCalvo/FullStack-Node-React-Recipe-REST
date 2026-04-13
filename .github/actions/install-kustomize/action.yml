@@ -1,0 +1,14 @@
+name: 'Install Kustomize'
+description: 'Download and install Kustomize to /usr/local/bin'
+
+runs:
+  using: composite
+  steps:
+    - name: Install Kustomize
+      shell: bash
+      env:
+        KUSTOMIZE_VERSION: '5.8.1'
+      run: |
+        curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
+          | tar -xz -C /usr/local/bin kustomize
+        kustomize version

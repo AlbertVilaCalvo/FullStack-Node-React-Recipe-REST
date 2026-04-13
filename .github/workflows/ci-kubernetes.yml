@@ -25,7 +25,6 @@ permissions:
   contents: read
 
 env:
-  KUSTOMIZE_VERSION: '5.8.1'
   KUBECONFORM_VERSION: '0.7.0'
   # Must be a full version (x.y.z, not x.y), otherwise kubeconform throws an error.
   # Should match the value of kubernetes_version in terraform/server/environments/[env]/terraform.tfvars.
@@ -39,10 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install Kustomize
-        run: |
-          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
-            | tar -xz -C /usr/local/bin kustomize
-          kustomize version
+        uses: ./.github/actions/install-kustomize
       - name: Install Kubeconform
         run: |
           curl -sSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
@@ -91,10 +87,7 @@ jobs:
       # We need to render the manifests before linting, otherwise KubeLinter reports errors in incomplete
       # manifests (for example, 'object has no selector specified' in deployment_patch.yaml).
       - name: Install Kustomize
-        run: |
-          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
-            | tar -xz -C /usr/local/bin kustomize
-          kustomize version
+        uses: ./.github/actions/install-kustomize
       - name: Install KubeLinter
         run: |
           curl -sSL "https://github.com/stackrox/kube-linter/releases/download/v${KUBE_LINTER_VERSION}/kube-linter-linux.tar.gz" \
@@ -122,10 +115,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install Kustomize
-        run: |
-          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
-            | tar -xz -C /usr/local/bin kustomize
-          kustomize version
+        uses: ./.github/actions/install-kustomize
       - name: Render manifests
         run: |
           mkdir -p rendered
