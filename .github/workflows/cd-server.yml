@@ -11,6 +11,9 @@ on:
 
 # Allow only one concurrent deployment at a time.
 # Unlike CI, we don't cancel in-progress runs to avoid leaving deployments in a partial state.
+# In the future, if we have multiple services with a cd-*.yml workflow that push a commit
+# to main, we can use a shared concurrency group across them to ensure the push succeeds. For
+# example, use group: cd-deploy-${{ github.ref }}.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
