@@ -22,7 +22,6 @@ jobs:
     name: actionlint (workflow syntax)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - name: Install actionlint
