@@ -29,6 +29,25 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      yaml: ${{ steps.filter.outputs.yaml }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            yaml:
+              - '**/*.yml'
+              - '**/*.yaml'
+              - .yamllint.yml
+
   prettier:
     name: Prettier
     runs-on: ubuntu-24.04
@@ -47,6 +66,8 @@ jobs:
 
   yamllint:
     name: YAMLLint
+    needs: changes
+    if: needs.changes.outputs.yaml == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     continue-on-error: true
