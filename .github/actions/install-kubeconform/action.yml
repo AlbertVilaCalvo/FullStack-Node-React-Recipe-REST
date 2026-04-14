@@ -8,7 +8,12 @@ runs:
       shell: bash
       env:
         KUBECONFORM_VERSION: '0.7.0'
+        # SHA256 from https://github.com/yannh/kubeconform/releases/download/v0.7.0/CHECKSUMS
+        KUBECONFORM_SHA256: 'c31518ddd122663b3f3aa874cfe8178cb0988de944f29c74a0b9260920d115d3'
       run: |
         curl -sSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
-          | tar -xz -C /usr/local/bin kubeconform
+          -o kubeconform.tar.gz
+        echo "${KUBECONFORM_SHA256}  kubeconform.tar.gz" | sha256sum --check
+        tar -xz -C /usr/local/bin kubeconform < kubeconform.tar.gz
+        rm kubeconform.tar.gz
         kubeconform -v
