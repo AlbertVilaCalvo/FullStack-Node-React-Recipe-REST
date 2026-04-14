@@ -34,9 +34,7 @@ jobs:
         uses: ./.github/actions/install-shfmt
       - name: Check shell script formatting
         # -l: list files that differ; exits 1 if any file is not formatted
-        run: |
-          shfmt -l -i 2 -ci -bn scripts/
-          shfmt -l -i 2 -ci -bn pre-commit
+        run: shfmt -l -i 2 -ci -bn scripts/ pre-commit
 
   shellcheck:
     name: ShellCheck (linting)
