@@ -3,6 +3,10 @@
 
 extends: default
 
+ignore: |
+  server/node_modules/
+  web/node_modules/
+
 rules:
   line-length:
     max: 200
