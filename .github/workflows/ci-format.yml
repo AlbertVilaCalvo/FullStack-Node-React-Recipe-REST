@@ -19,24 +19,6 @@ on:
       - .prettierignore
       - .yamllint.yml
       - .github/workflows/ci-format.yml
-  push:
-    branches:
-      - main
-    paths:
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.js'
-      - '**/*.jsx'
-      - '**/*.json'
-      - '**/*.md'
-      - '**/*.yml'
-      - '**/*.yaml'
-      - '**/*.html'
-      - '**/*.css'
-      - .prettierrc.json
-      - .prettierignore
-      - .yamllint.yml
-      - .github/workflows/ci-format.yml
   workflow_dispatch:
 
 concurrency:

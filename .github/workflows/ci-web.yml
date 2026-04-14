@@ -8,13 +8,6 @@ on:
       - web/**
       - trivy.yaml
       - .github/workflows/ci-web.yml
-  push:
-    branches:
-      - main
-    paths:
-      - web/**
-      - trivy.yaml
-      - .github/workflows/ci-web.yml
   workflow_dispatch:
 
 concurrency:

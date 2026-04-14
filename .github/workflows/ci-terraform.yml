@@ -8,13 +8,6 @@ on:
       - terraform/**
       - .tflint.hcl
       - .github/workflows/ci-terraform.yml
-  push:
-    branches:
-      - main
-    paths:
-      - terraform/**
-      - .tflint.hcl
-      - .github/workflows/ci-terraform.yml
   workflow_dispatch:
 
 concurrency:
