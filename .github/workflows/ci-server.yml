@@ -92,6 +92,7 @@ jobs:
         with:
           dockerfile: server/Dockerfile
 
+  # npm audit and trivy fs are redundant, we may remove one of them
   npm_audit:
     name: npm audit (dependency scan)
     runs-on: ubuntu-24.04
