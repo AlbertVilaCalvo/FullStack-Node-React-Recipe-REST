@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - web/**
+      - .github/actions/deploy-web/**
       - .github/workflows/cd-web.yml
   workflow_dispatch:
 

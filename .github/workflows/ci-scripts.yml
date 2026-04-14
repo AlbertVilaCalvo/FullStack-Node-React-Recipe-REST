@@ -7,6 +7,8 @@ on:
     paths:
       - scripts/**
       - pre-commit
+      - .github/actions/install-shfmt/**
+      - .github/actions/install-shellcheck/**
       - .github/workflows/ci-scripts.yml
   workflow_dispatch:
 
