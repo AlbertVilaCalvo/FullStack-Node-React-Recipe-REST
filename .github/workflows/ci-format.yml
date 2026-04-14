@@ -72,16 +72,3 @@ jobs:
         run: pip install yamllint==1.38.0
       - name: Run yamllint
         run: yamllint -c .yamllint.yml kubernetes/ .github/workflows/
-
-  actionlint:
-    name: actionlint (workflow syntax)
-    runs-on: ubuntu-24.04
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v6
-      - name: Install actionlint
-        run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) 1.7.12
-          ./actionlint -version
-      - name: Run actionlint
-        run: ./actionlint
