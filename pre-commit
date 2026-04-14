@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Runs Prettier on .ts, .tsx, .js, .jsx, .md, .yml, .yaml, html, .css and .json files, and also runs ESLint and tsc on .ts,
+# Runs Prettier on .ts, .tsx, .js, .jsx, .md, .yml, .yaml, .html, .css and .json files, and also runs ESLint and tsc on .ts,
 # .tsx, .js, .jsx files. Prettier and ESLint only check the committed files, whereas tsc checks all project files, since
 # it's not possible to run tsc on specific files while obeying the tsconfig.json options (see
 # https://github.com/microsoft/TypeScript/issues/27379 and https://www.npmjs.com/package/tsc-files).
