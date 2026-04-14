@@ -107,27 +107,31 @@ jobs:
   # so that nothing prod-related happens until a reviewer approves (no image built, no ECR push).
   # If the gate were on update_image_tag_prod instead, the prod image would already be in ECR before
   # anyone approved.
+  # We are building the Docker image twice rather than reusing the dev image because
+  # dev and prod have separate ECR repositories with separate OIDC roles, potentially in
+  # different AWS accounts. Cross-account image promotion would require additional IAM
+  # configuration. TODO In the future we need to use the same image for both dev and prod.
   build_and_push_prod:
     name: Build & push Docker image to ECR (prod)
     # Enforce a dev→prod promotional hierarchy: the dev kustomization commit
     # must succeed before the prod pipeline even starts.
-    needs: update_image_tag_dev
+    needs: [build_and_push_dev, update_image_tag_dev]
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     environment:
       name: prod
     permissions:
       id-token: write
       contents: read
     outputs:
-      image_tag: ${{ steps.vars.outputs.image_tag }}
+      image_tag: ${{ needs.build_and_push_dev.outputs.image_tag }}
       ecr_repository_url: ${{ steps.vars.outputs.ecr_repository_url }}
     steps:
       - uses: actions/checkout@v6
       - name: Set image tag and ECR URL
         id: vars
         run: |
-          echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${{ needs.build_and_push_dev.outputs.image_tag }}" >> "$GITHUB_OUTPUT"
           echo "ecr_repository_url=${{ vars.ECR_REPOSITORY_URL }}" >> "$GITHUB_OUTPUT"
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6.0.0
@@ -141,13 +145,13 @@ jobs:
         run: |
           docker build \
             --platform linux/amd64 \
-            -t ${{ vars.ECR_REPOSITORY_URL }}:${{ steps.vars.outputs.image_tag }} \
+            -t ${{ vars.ECR_REPOSITORY_URL }}:${{ needs.build_and_push_dev.outputs.image_tag }} \
             .
-          docker push ${{ vars.ECR_REPOSITORY_URL }}:${{ steps.vars.outputs.image_tag }}
+          docker push ${{ vars.ECR_REPOSITORY_URL }}:${{ needs.build_and_push_dev.outputs.image_tag }}
 
   update_image_tag_prod:
     name: Update image tag in kustomization file (prod)
-    needs: build_and_push_prod
+    needs: [build_and_push_dev, build_and_push_prod]
     runs-on: ubuntu-24.04
     # No 'environment:' declaration needed here. The approval gate was already enforced on
     # build_and_push_prod. Declaring an environment on this job would also require a second
