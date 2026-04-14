@@ -51,7 +51,7 @@ jobs:
           echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           echo "ecr_repository_url=${{ vars.ECR_REPOSITORY_URL }}" >> "$GITHUB_OUTPUT"
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6.0.0
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER }}
@@ -134,7 +134,7 @@ jobs:
           echo "image_tag=${{ needs.build_and_push_dev.outputs.image_tag }}" >> "$GITHUB_OUTPUT"
           echo "ecr_repository_url=${{ vars.ECR_REPOSITORY_URL }}" >> "$GITHUB_OUTPUT"
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6.0.0
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER }}
