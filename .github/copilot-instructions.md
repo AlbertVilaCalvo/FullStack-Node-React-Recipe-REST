@@ -27,6 +27,7 @@ The project structure is:
   - CD workflows (`cd-*.yml`). Run when a PR is merged. Production deployments are gated by GitHub environment protection rules (required reviewers).
     - `cd-server.yml`: Builds the server Docker image and pushes it to ECR. Then edits the image tag in `kustomization.yaml` and commits. Argo CD detects the commit and syncs the changes to the cluster.
     - `cd-web.yml`: Builds and deploys the React web app to S3 + CloudFront.
+- `.github/actions`: Custom GitHub Actions used in the workflows.
 
 The server follows a three-layer architecture for organizing business logic:
 
@@ -71,11 +72,6 @@ The server follows a three-layer architecture for organizing business logic:
 - UI Components: The UI is built using Chakra UI. When creating new components, use Chakra components whenever possible.
 - Navigation: React Router is used for client-side routing. Define routes in `/web/src/App.tsx` and use the `useNavigate` hook for navigation within components.
 
-## Frontend Infrastructure
-
-- React frontend is deployed to CloudFront, using a private S3 bucket as the origin.
-- Deployment is done automatically using GitHub Actions (see `.github/workflows/web.yml`).
-
 ## Terraform
 
 - Infrastructure as Code: All AWS infrastructure is defined using Terraform in the `/terraform` directory.
@@ -105,3 +101,8 @@ The server follows a three-layer architecture for organizing business logic:
 ## YAML files
 
 - When editing YAML files, format them with `prettier` using the command `npm run format` or `npx prettier --write <file> <directory>`.
+
+## GitHub Actions
+
+- Lint GitHub Actions workflow files with actionlint.
+- Add a timeout (`timeout-minutes`) to all jobs to prevent hanging workflows.
