@@ -320,7 +320,7 @@ The project uses GitHub Actions workflows split into two types: CI and CD.
 
 ### CI workflows (`ci-*.yml`)
 
-Run on `push` to main and on `pull_request` targeting main. They check formatting (Prettier, shfmt, terraform fmt), perform linting (ESLint, ShellCheck, YAMLLint, Actionlint, TFLint, KubeLinter, Hadolint), type checking (tsc), run tests, configuration and security scans (npm audit, Trivy, Checkov), etc.
+Run on `pull_request` targeting `main`. They check formatting (Prettier, shfmt, terraform fmt), perform linting (ESLint, ShellCheck, YAMLLint, Actionlint, TFLint, KubeLinter, Hadolint), type checking (tsc), run tests, configuration and security scans (npm audit, Trivy, Checkov), etc.
 
 ### CD workflows (`cd-*.yml`)
 
