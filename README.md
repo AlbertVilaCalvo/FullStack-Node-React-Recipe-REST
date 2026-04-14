@@ -225,7 +225,7 @@ terraform apply
 
 ### Web (Frontend)
 
-To create the S3 bucket and CloudFront distribution that the web app will be deployed to do the following:
+To create the S3 bucket and CloudFront distribution for the React web app, do the following:
 
 ```shell
 cd terraform/web/environments/dev # Or prod
