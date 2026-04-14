@@ -60,7 +60,7 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-  test:
+  tests:
     name: Tests
     runs-on: ubuntu-24.04
     steps:
