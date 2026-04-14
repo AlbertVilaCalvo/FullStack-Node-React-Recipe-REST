@@ -20,6 +20,7 @@ permissions:
 env:
   # Must be a full version (x.y.z, not x.y), otherwise kubeconform throws an error.
   # Should match the value of kubernetes_version in terraform/server/environments/[env]/terraform.tfvars.
+  # Run scripts/server/sync-k8s-with-tfvars.sh to set this value to match terraform.tfvars.
   KUBERNETES_VERSION: '1.34.0'
 
 jobs:
