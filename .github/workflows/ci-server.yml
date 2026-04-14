@@ -32,6 +32,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -47,6 +48,7 @@ jobs:
   eslint:
     name: ESLint
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
@@ -63,6 +65,7 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -81,6 +84,7 @@ jobs:
   hadolint:
     name: Hadolint (Dockerfile lint)
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
@@ -91,6 +95,7 @@ jobs:
   npm_audit:
     name: npm audit (dependency scan)
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
@@ -105,6 +110,7 @@ jobs:
   trivy_fs:
     name: Trivy (dependency scan)
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
@@ -121,6 +127,7 @@ jobs:
   trivy_image:
     name: Trivy (Docker image security scan)
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6

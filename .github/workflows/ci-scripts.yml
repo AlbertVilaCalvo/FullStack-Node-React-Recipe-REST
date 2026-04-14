@@ -28,6 +28,7 @@ jobs:
   shfmt:
     name: shfmt (formatting)
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - name: Install shfmt
@@ -39,6 +40,7 @@ jobs:
   shellcheck:
     name: ShellCheck (linting)
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - name: Install ShellCheck

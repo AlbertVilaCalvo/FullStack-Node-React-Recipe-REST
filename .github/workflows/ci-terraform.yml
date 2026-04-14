@@ -28,6 +28,7 @@ jobs:
   fmt:
     name: Terraform fmt
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - uses: hashicorp/setup-terraform@v4
@@ -37,6 +38,7 @@ jobs:
   validate:
     name: Terraform validate (${{ matrix.dir }})
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -67,6 +69,7 @@ jobs:
   tflint:
     name: TFLint
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
@@ -90,6 +93,7 @@ jobs:
   checkov:
     name: Checkov (misconfiguration and security scan)
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6

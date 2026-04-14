@@ -22,6 +22,7 @@ jobs:
   deploy_dev:
     name: Deploy React web app to the dev environment
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     environment:
       name: dev
     # Permissions needed to interact with GitHub's OIDC Token endpoint
@@ -47,6 +48,7 @@ jobs:
     name: Deploy React web app to the prod environment
     needs: deploy_dev
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     environment:
       name: prod
     permissions:
