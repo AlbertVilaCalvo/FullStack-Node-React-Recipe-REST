@@ -68,7 +68,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: terraform-linters/setup-tflint@v6
         with:
-          tflint_version: 0.61.0
+          tflint_version: v0.61.0
           cache: true
       - name: Init TFLint (download plugins)
         run: tflint --init
