@@ -61,6 +61,7 @@ runs:
       shell: bash
       run: |
         echo "env: ${{ env }}"
+        echo "env: $env"
         echo "github.repository: ${{ github.repository }}"
         echo "inputs.some_parameter: ${{ inputs.some_parameter }}"
         echo "strategy.matrix: ${{ strategy.matrix }}"
