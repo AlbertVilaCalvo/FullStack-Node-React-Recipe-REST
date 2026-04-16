@@ -44,6 +44,13 @@ runs:
         echo "Current working directory: $(pwd)"
         echo "Contents:"
         ls -la
+    - name: defaults.run.working-directory test with working-directory web
+      shell: bash
+      working-directory: web
+      run: |
+        echo "Current working directory 2: $(pwd)"
+        echo "Contents:"
+        ls -la
     - name: Build React web app
       # TODO build React in production mode
       # env:
