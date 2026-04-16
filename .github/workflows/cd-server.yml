@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - cicd # TODO REMOVE!!!
     paths:
       - server/**
       - .github/actions/install-kustomize/**
