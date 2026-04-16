@@ -33,42 +33,6 @@ runs:
       shell: bash
       working-directory: web
       run: npm ci --no-fund --no-audit
-    - name: Print job
-      shell: bash
-      run: |
-        echo "job: ${{ job }}"
-    - name: Print steps
-      shell: bash
-      run: |
-        echo "steps: ${{ steps }}"
-    - name: Print runner
-      shell: bash
-      run: |
-        echo "runner: ${{ runner }}"
-    - name: Print github context
-      shell: bash
-      run: |
-        echo "github context: ${{ github }}"
-    - name: Print strategy
-      shell: bash
-      run: |
-        echo "strategy: ${{ strategy }}"
-    - name: Print matrix
-      shell: bash
-      run: |
-        echo "matrix: ${{ matrix }}"
-    - name: Print contexts
-      shell: bash
-      run: |
-        echo "env: ${{ env }}"
-        echo "env: $env"
-        echo "github.repository: ${{ github.repository }}"
-        echo "inputs.some_parameter: ${{ inputs.some_parameter }}"
-        echo "strategy.matrix: ${{ strategy.matrix }}"
-        echo "matrix.os: ${{ matrix.os }}"
-        echo "steps.step_id.outputs.output_name: ${{ steps.step_id.outputs.output_name }}"
-        echo "job.job_id: ${{ job.job_id }}"
-        echo "runner.os: ${{ runner.os }}"
     - name: Build React web app
       # TODO build React in production mode
       # env:
