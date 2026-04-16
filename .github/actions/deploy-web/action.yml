@@ -33,6 +33,15 @@ runs:
       shell: bash
       working-directory: web
       run: npm ci --no-fund --no-audit
+    - name: Print SOMETHING env variable
+      shell: bash
+      run: |
+        echo "SOMETHING: ${{ env.SOMETHING }}"
+        echo "SOMETHING: $SOMETHING"
+    - name: Print AWS Account ID
+      shell: bash
+      run: |
+        echo "Account: ${{ vars.AWS_ACCOUNT_ID }}"
     - name: Build React web app
       # TODO build React in production mode
       # env:
