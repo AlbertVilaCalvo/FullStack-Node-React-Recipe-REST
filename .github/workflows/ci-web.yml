@@ -22,6 +22,27 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      deps_or_scan_config: ${{ steps.filter.outputs.deps_or_scan_config }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            deps_or_scan_config:
+              - web/package.json
+              - web/package-lock.json
+              - trivy.yaml
+              - .github/workflows/ci-web.yml
+
   build:
     name: Build
     runs-on: ubuntu-24.04
@@ -76,6 +97,8 @@ jobs:
   # npm audit and trivy fs are redundant, we may remove one of them
   npm_audit:
     name: npm audit (dependency scan)
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.deps_or_scan_config == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     continue-on-error: true
@@ -91,6 +114,8 @@ jobs:
 
   trivy_fs:
     name: Trivy (dependency scan)
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.deps_or_scan_config == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     continue-on-error: true
