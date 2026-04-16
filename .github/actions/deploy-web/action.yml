@@ -38,6 +38,12 @@ runs:
       run: |
         echo "SOMETHING: ${{ env.SOMETHING }}"
         echo "SOMETHING: $SOMETHING"
+    - name: defaults.run.working-directory test
+      shell: bash
+      run: |
+        echo "Current working directory: $(pwd)"
+        echo "Contents:"
+        ls -la
     - name: Build React web app
       # TODO build React in production mode
       # env:
