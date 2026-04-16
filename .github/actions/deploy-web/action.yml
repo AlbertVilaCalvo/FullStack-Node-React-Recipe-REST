@@ -57,6 +57,15 @@ runs:
       shell: bash
       run: |
         echo "matrix: ${{ matrix }}"
+    - name: Print contexts
+      shell: bash
+      run: |
+        echo "GITHUB_REPOSITORY: ${{ github.repository }}"
+        echo "INPUTS_SOME_PARAMETER: ${{ inputs.some_parameter }}"
+        echo "STRATEGY_MATRIX: ${{ strategy.matrix }}"
+        echo "STEPS_STEP_ID_OUTPUT_NAME: ${{ steps.step_id.outputs.output_name }}"
+        echo "JOB_ID: ${{ job.job_id }}"
+        echo "RUNNER_OS: ${{ runner.os }}"
     - name: Build React web app
       # TODO build React in production mode
       # env:
