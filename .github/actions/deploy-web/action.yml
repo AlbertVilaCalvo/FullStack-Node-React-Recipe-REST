@@ -36,7 +36,7 @@ runs:
     - name: Print job
       shell: bash
       run: |
-        echo "SOMETHING: ${{ job }}"
+        echo "job: ${{ job }}"
     - name: Print steps
       shell: bash
       run: |
@@ -60,12 +60,14 @@ runs:
     - name: Print contexts
       shell: bash
       run: |
-        echo "GITHUB_REPOSITORY: ${{ github.repository }}"
-        echo "INPUTS_SOME_PARAMETER: ${{ inputs.some_parameter }}"
-        echo "STRATEGY_MATRIX: ${{ strategy.matrix }}"
-        echo "STEPS_STEP_ID_OUTPUT_NAME: ${{ steps.step_id.outputs.output_name }}"
-        echo "JOB_ID: ${{ job.job_id }}"
-        echo "RUNNER_OS: ${{ runner.os }}"
+        echo "env: ${{ env }}"
+        echo "github.repository: ${{ github.repository }}"
+        echo "inputs.some_parameter: ${{ inputs.some_parameter }}"
+        echo "strategy.matrix: ${{ strategy.matrix }}"
+        echo "matrix.os: ${{ matrix.os }}"
+        echo "steps.step_id.outputs.output_name: ${{ steps.step_id.outputs.output_name }}"
+        echo "job.job_id: ${{ job.job_id }}"
+        echo "runner.os: ${{ runner.os }}"
     - name: Build React web app
       # TODO build React in production mode
       # env:
