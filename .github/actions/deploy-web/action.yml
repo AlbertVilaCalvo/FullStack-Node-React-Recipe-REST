@@ -33,24 +33,30 @@ runs:
       shell: bash
       working-directory: web
       run: npm ci --no-fund --no-audit
-    - name: Print SOMETHING env variable
+    - name: Print job
       shell: bash
       run: |
-        echo "SOMETHING: ${{ env.SOMETHING }}"
-        echo "SOMETHING: $SOMETHING"
-    - name: defaults.run.working-directory test
+        echo "SOMETHING: ${{ job }}"
+    - name: Print steps
       shell: bash
       run: |
-        echo "Current working directory: $(pwd)"
-        echo "Contents:"
-        ls -la
-    - name: defaults.run.working-directory test with working-directory web
+        echo "steps: ${{ steps }}"
+    - name: Print runner
       shell: bash
-      working-directory: web
       run: |
-        echo "Current working directory 2: $(pwd)"
-        echo "Contents:"
-        ls -la
+        echo "runner: ${{ runner }}"
+    - name: Print github context
+      shell: bash
+      run: |
+        echo "github context: ${{ github }}"
+    - name: Print strategy
+      shell: bash
+      run: |
+        echo "strategy: ${{ strategy }}"
+    - name: Print matrix
+      shell: bash
+      run: |
+        echo "matrix: ${{ matrix }}"
     - name: Build React web app
       # TODO build React in production mode
       # env:
