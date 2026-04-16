@@ -324,7 +324,7 @@ Run on `pull_request` targeting `main`. They check formatting (Prettier, shfmt, 
 
 ### CD workflows (`cd-*.yml`)
 
-Run only on `push` to main (i.e., when a PR is merged). They deploy new code to AWS.
+Run on `push` to main (i.e., when a PR is merged). Can also run manually in case you need to test a branch other than `main`. They deploy new code to AWS.
 
 | Workflow                          | Trigger paths | Jobs                                                         |
 | --------------------------------- | ------------- | ------------------------------------------------------------ |
