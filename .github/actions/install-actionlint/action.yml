@@ -14,6 +14,6 @@ runs:
         curl -sSL "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
           -o actionlint.tar.gz
         echo "${ACTIONLINT_SHA256}  actionlint.tar.gz" | sha256sum --check
-        tar -xz -C /usr/local/bin actionlint < actionlint.tar.gz
+        tar -xzf actionlint.tar.gz -C /usr/local/bin actionlint
         rm actionlint.tar.gz
         actionlint -version

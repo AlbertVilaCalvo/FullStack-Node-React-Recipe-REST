@@ -13,6 +13,6 @@ runs:
         curl -sSL "https://github.com/stackrox/kube-linter/releases/download/v${KUBE_LINTER_VERSION}/kube-linter-linux.tar.gz" \
           -o kube-linter.tar.gz
         echo "${KUBE_LINTER_SHA256}  kube-linter.tar.gz" | sha256sum --check
-        tar -xz -C /usr/local/bin kube-linter < kube-linter.tar.gz
+        tar -xzf kube-linter.tar.gz -C /usr/local/bin kube-linter
         rm kube-linter.tar.gz
         kube-linter version

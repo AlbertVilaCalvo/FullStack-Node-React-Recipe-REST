@@ -14,6 +14,6 @@ runs:
         curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
           -o kustomize.tar.gz
         echo "${KUSTOMIZE_SHA256}  kustomize.tar.gz" | sha256sum --check
-        tar -xz -C /usr/local/bin kustomize < kustomize.tar.gz
+        tar -xzf kustomize.tar.gz -C /usr/local/bin kustomize
         rm kustomize.tar.gz
         kustomize version

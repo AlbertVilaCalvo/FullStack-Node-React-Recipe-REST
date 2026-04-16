@@ -14,6 +14,6 @@ runs:
         curl -sSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
           -o kubeconform.tar.gz
         echo "${KUBECONFORM_SHA256}  kubeconform.tar.gz" | sha256sum --check
-        tar -xz -C /usr/local/bin kubeconform < kubeconform.tar.gz
+        tar -xzf kubeconform.tar.gz -C /usr/local/bin kubeconform
         rm kubeconform.tar.gz
         kubeconform -v
