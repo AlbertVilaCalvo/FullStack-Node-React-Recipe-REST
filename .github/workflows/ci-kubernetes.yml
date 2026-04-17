@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install Kustomize
         uses: ./.github/actions/install-kustomize
       - name: Install Kubeconform
@@ -79,7 +79,7 @@ jobs:
     timeout-minutes: 10
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       # We need to render the manifests before linting, otherwise KubeLinter reports errors in incomplete
       # manifests (for example, 'object has no selector specified' in deployment_patch.yaml).
       - name: Install Kustomize
@@ -107,7 +107,7 @@ jobs:
     timeout-minutes: 10
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install Kustomize
         uses: ./.github/actions/install-kustomize
       - name: Render manifests
@@ -116,7 +116,7 @@ jobs:
           kustomize build kubernetes/server/overlays/dev > rendered/server-dev.yaml
           kustomize build kubernetes/server/overlays/prod > rendered/server-prod.yaml
       - name: Run Trivy config scanner - server manifests
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
           scan-type: 'config'
           scan-ref: 'rendered'
