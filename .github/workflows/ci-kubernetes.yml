@@ -21,9 +21,10 @@ permissions:
   contents: read
 
 env:
-  # Must be a full version (x.y.z, not x.y), otherwise kubeconform throws an error.
-  # Should match the value of kubernetes_version in terraform/server/environments/[env]/terraform.tfvars.
-  # Run scripts/server/sync-k8s-with-tfvars.sh to set this value to match terraform.tfvars.
+  # Must be major.minor.patch, not major.minor, otherwise kubeconform throws an error.
+  # Should match the value of kubernetes_version in terraform/server/environments/[env]/terraform.tfvars
+  # (with major.minor.patch format). Run scripts/server/sync-k8s-with-tfvars.sh to set this value to
+  # the same value in terraform.tfvars.
   KUBERNETES_VERSION: '1.34.0'
   # Pin schema to a commit to avoid failures if upstream main changes.
   CRDS_CATALOG_SCHEMA_URL: 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/2f3e984448b8c86a551255f31b10e82596fe1a1e/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
