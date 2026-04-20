@@ -28,10 +28,13 @@ jobs:
       - name: Check Terraform formatting
         run: terraform fmt -check -recursive terraform/
 
+  # We could use a matrix, which runs each validate job in parallel (each one taking about 20-30 seconds only),
+  # so it is quicker since it only takes about 30 seconds in total (the slowest job). However it consumes more
+  # build minutes (about 1 minute more) compared to using a single job with a for loop.
   validate:
     name: Terraform validate
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 10
     env:
       TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform-plugin-cache
     steps:
@@ -45,7 +48,8 @@ jobs:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: terraform-providers-${{ hashFiles('terraform/**/.terraform.lock.hcl') }}
           restore-keys: terraform-providers-
-      - name: Terraform init and validate all environments
+      # Run `terraform init` sequentially to avoid writing to the plugin cache concurrently
+      - name: Terraform init all environments
         run: |
           for dir in \
             bootstrap/environments/all \
@@ -57,9 +61,40 @@ jobs:
             web/environments/prod; do
             echo "::group::terraform/$dir"
             terraform -chdir="terraform/$dir" init -backend=false
-            terraform -chdir="terraform/$dir" validate
             echo "::endgroup::"
           done
+      # Run `terraform validate` in parallel
+      - name: Terraform validate all environments
+        run: |
+          dirs=(
+            "bootstrap/environments/all"
+            "bootstrap/environments/dev"
+            "bootstrap/environments/prod"
+            "server/environments/dev"
+            "server/environments/prod"
+            "web/environments/dev"
+            "web/environments/prod"
+          )
+          pids=()
+          tmpfiles=()
+          for dir in "${dirs[@]}"; do
+            tmpfile=$(mktemp)
+            tmpfiles+=("$tmpfile")
+            terraform -chdir="terraform/$dir" validate >"$tmpfile" 2>&1 &
+            pids+=($!)
+          done
+          failed=0
+          for i in "${!pids[@]}"; do
+            echo "::group::terraform/${dirs[$i]}"
+            cat "${tmpfiles[$i]}"
+            if ! wait "${pids[$i]}"; then
+              echo "::error::terraform/${dirs[$i]} validation failed"
+              failed=1
+            fi
+            echo "::endgroup::"
+            rm "${tmpfiles[$i]}"
+          done
+          exit $failed
 
   tflint:
     name: TFLint
