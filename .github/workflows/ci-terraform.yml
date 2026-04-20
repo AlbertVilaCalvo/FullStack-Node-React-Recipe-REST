@@ -48,23 +48,8 @@ jobs:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: terraform-providers-${{ hashFiles('terraform/**/.terraform.lock.hcl') }}
           restore-keys: terraform-providers-
-      # Run `terraform init` sequentially to avoid writing to the plugin cache concurrently
-      - name: Terraform init all environments
-        run: |
-          for dir in \
-            bootstrap/environments/all \
-            bootstrap/environments/dev \
-            bootstrap/environments/prod \
-            server/environments/dev \
-            server/environments/prod \
-            web/environments/dev \
-            web/environments/prod; do
-            echo "::group::terraform/$dir"
-            terraform -chdir="terraform/$dir" init -backend=false
-            echo "::endgroup::"
-          done
-      # Run `terraform validate` in parallel
-      - name: Terraform validate all environments
+      # Run init+validate in parallel for each environment
+      - name: Terraform init and validate all environments
         run: |
           dirs=(
             "bootstrap/environments/all"
@@ -80,7 +65,10 @@ jobs:
           for dir in "${dirs[@]}"; do
             tmpfile=$(mktemp)
             tmpfiles+=("$tmpfile")
-            terraform -chdir="terraform/$dir" validate >"$tmpfile" 2>&1 &
+            (
+              terraform -chdir="terraform/$dir" init -backend=false &&
+              terraform -chdir="terraform/$dir" validate
+            ) >"$tmpfile" 2>&1 &
             pids+=($!)
           done
           failed=0
@@ -88,7 +76,7 @@ jobs:
             echo "::group::terraform/${dirs[$i]}"
             cat "${tmpfiles[$i]}"
             if ! wait "${pids[$i]}"; then
-              echo "::error::terraform/${dirs[$i]} validation failed"
+              echo "::error::terraform/${dirs[$i]} failed"
               failed=1
             fi
             echo "::endgroup::"
