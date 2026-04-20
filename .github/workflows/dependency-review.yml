@@ -27,9 +27,6 @@ jobs:
           node-version: 24
           cache: 'npm'
           cache-dependency-path: 'server/package-lock.json'
-      - name: Install dependencies
-        working-directory: server
-        run: npm ci --no-fund --no-audit
       - name: Run npm audit
         working-directory: server
         run: npm audit --audit-level=high
@@ -45,9 +42,6 @@ jobs:
           node-version: 24
           cache: 'npm'
           cache-dependency-path: 'web/package-lock.json'
-      - name: Install dependencies
-        working-directory: web
-        run: npm ci --no-fund --no-audit
       - name: Run npm audit
         working-directory: web
         run: npm audit --audit-level=high
