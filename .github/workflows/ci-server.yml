@@ -27,7 +27,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
-      contents: read
       pull-requests: read
     outputs:
       deps_or_scan_config: ${{ steps.filter.outputs.deps_or_scan_config }}
