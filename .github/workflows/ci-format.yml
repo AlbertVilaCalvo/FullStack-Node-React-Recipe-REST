@@ -67,7 +67,7 @@ jobs:
   yamllint:
     name: YAMLLint
     needs: changes
-    if: needs.changes.outputs.yaml == 'true'
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.yaml == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     continue-on-error: true
