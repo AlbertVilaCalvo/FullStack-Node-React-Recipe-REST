@@ -106,3 +106,4 @@ The server follows a three-layer architecture for organizing business logic:
 
 - Lint GitHub Actions workflow files with actionlint.
 - Add a timeout (`timeout-minutes`) to all jobs to prevent hanging workflows.
+- Pin actions to a full-length commit SHA, adding the version as a comment. For example, use `actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2` instead of `actions/checkout@v6`.
