@@ -6,13 +6,13 @@
 # (CRD may not be installed) ... no matches for kind "EC2NodeClass" in group "karpenter.k8s.aws"".
 # Do this:
 # 1. Create VPC, EKS cluster, RDS database, ECR repository etc.:
-#    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.acm_certificates -target=module.app_secrets -target=module.github_actions_oidc_role_server
+#    terraform apply -target=module.vpc -target=module.eks -target=module.rds -target=module.ecr -target=module.pod_identity -target=module.acm_certificates -target=module.app_secrets -target=module.external_secrets -target=module.github_actions_oidc_role_server
 # 2. EKS cluster created -> install controllers and Argo CD Helm charts:
-#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.external_secrets -target=module.karpenter_controller -target=module.argocd
+#    terraform apply -target=module.lb_controller -target=module.external_dns -target=module.karpenter_controller -target=module.argocd
 #    LBC creates the Argo CD ALB via Ingress, and ExternalDNS creates Route53 A record for Argo CD endpoint.
 # 3. Argo CD and Karpenter CRDs installed -> create Argo CD root Application (App of Apps):
 #    terraform apply -target=module.argocd_apps
-#    Argo CD then syncs from Git: deploys the Karpenter NodePool + EC2NodeClass (which provisions worker nodes) and the server app.
+#    Argo CD then syncs from Git: deploys the External Secrets Operator, Karpenter NodePool + EC2NodeClass (which provisions worker nodes) and the server app.
 #    LBC creates the server ALB via Ingress, and ExternalDNS creates Route53 A record for the server endpoint.
 # This can be solved with Terraform Stacks, see https://developer.hashicorp.com/terraform/tutorials/cloud/stacks-eks-deferred
 
@@ -22,9 +22,8 @@ locals {
   cluster_name = "${var.app_name}-eks-cluster-${var.environment}"
   namespace    = "recipe-manager"
 
-  lb_controller_chart_path    = fileexists("${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null
-  external_dns_chart_path     = fileexists("${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz") ? "${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz" : null
-  external_secrets_chart_path = fileexists("${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz") ? "${path.module}/.charts/external-secrets-${var.external_secrets_chart_version}.tgz" : null
+  lb_controller_chart_path = fileexists("${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz") ? "${path.module}/.charts/aws-load-balancer-controller-${var.lb_controller_chart_version}.tgz" : null
+  external_dns_chart_path   = fileexists("${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz") ? "${path.module}/.charts/external-dns-${var.external_dns_chart_version}.tgz" : null
 }
 
 # Infrastructure
@@ -138,6 +137,26 @@ module "app_secrets" {
   email_password = var.email_password
 }
 
+module "external_secrets" {
+  source = "../../modules/external-secrets"
+
+  app_name    = var.app_name
+  environment = var.environment
+
+  cluster_name = module.eks.cluster_name
+
+  secrets_manager_secret_arns = [
+    module.rds.secrets_manager_secret_rds_credentials_arn,
+    module.app_secrets.jwt_secret_arn,
+    module.app_secrets.email_user_secret_arn,
+    module.app_secrets.email_password_secret_arn,
+  ]
+
+  ssm_parameter_arns = [
+    module.rds.ssm_parameter_arn_rds_address
+  ]
+}
+
 # Helm charts
 # ***********
 
@@ -168,29 +187,6 @@ module "external_dns" {
   cluster_name     = module.eks.cluster_name
   hosted_zone_name = var.server_hosted_zone_name
   domains          = [var.api_domain, var.argocd_domain]
-}
-
-module "external_secrets" {
-  source = "../../modules/external-secrets"
-
-  app_name    = var.app_name
-  environment = var.environment
-
-  chart_version = var.external_secrets_chart_version
-  chart_path    = local.external_secrets_chart_path
-
-  cluster_name = module.eks.cluster_name
-
-  secrets_manager_secret_arns = [
-    module.rds.secrets_manager_secret_rds_credentials_arn,
-    module.app_secrets.jwt_secret_arn,
-    module.app_secrets.email_user_secret_arn,
-    module.app_secrets.email_password_secret_arn,
-  ]
-
-  ssm_parameter_arns = [
-    module.rds.ssm_parameter_arn_rds_address
-  ]
 }
 
 module "karpenter_controller" {

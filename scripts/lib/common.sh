@@ -253,18 +253,18 @@ retry_with_backoff() {
 # Charts are downloaded to the environment-specific .charts/ directory.
 # We do not download the Karpenter and Argo CD charts because they use oci://,
 # and the download is reliable.
+# The External Secrets Operator chart is managed by Argo CD (not Terraform), so
+# it is not downloaded here.
 download_helm_charts() {
   local charts_dir="${TERRAFORM_DIR}/.charts"
 
   local lb_version
   local dns_version
-  local secrets_version
 
   lb_version="$(get_tfvars_value "lb_controller_chart_version")"
   dns_version="$(get_tfvars_value "external_dns_chart_version")"
-  secrets_version="$(get_tfvars_value "external_secrets_chart_version")"
 
-  if [[ -z "${lb_version}" || -z "${dns_version}" || -z "${secrets_version}" ]]; then
+  if [[ -z "${lb_version}" || -z "${dns_version}" ]]; then
     log_error "Could not read chart versions from terraform.tfvars"
     return 1
   fi
@@ -291,15 +291,5 @@ download_helm_charts() {
     fi
   else
     log_info "external-dns-${dns_version}.tgz already downloaded."
-  fi
-
-  if [[ ! -f "${charts_dir}/external-secrets-${secrets_version}.tgz" ]]; then
-    log_info "Downloading external-secrets-${secrets_version}.tgz"
-    if ! curl -4 -fsSLo "${charts_dir}/external-secrets-${secrets_version}.tgz" "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-${secrets_version}/external-secrets-${secrets_version}.tgz"; then
-      log_warn "Failed to download external-secrets-${secrets_version}.tgz. Terraform will download it from the Helm repository."
-      rm -f "${charts_dir}/external-secrets-${secrets_version}.tgz"
-    fi
-  else
-    log_info "external-secrets-${secrets_version}.tgz already downloaded."
   fi
 }

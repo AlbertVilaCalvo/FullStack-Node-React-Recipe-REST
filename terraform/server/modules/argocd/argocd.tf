@@ -7,6 +7,8 @@ locals {
   namespace = "argocd"
 }
 
+# https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd
+# https://artifacthub.io/packages/helm/argo-cd-oci/argo-cd
 resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "oci://ghcr.io/argoproj/argo-helm"

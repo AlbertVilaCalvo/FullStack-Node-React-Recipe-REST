@@ -6,6 +6,7 @@ locals {
   account_id           = data.aws_caller_identity.current.account_id
 }
 
+# https://github.com/aws/karpenter-provider-aws/tree/main/charts/karpenter
 resource "helm_release" "karpenter" {
   depends_on = [
     aws_eks_pod_identity_association.karpenter_controller,

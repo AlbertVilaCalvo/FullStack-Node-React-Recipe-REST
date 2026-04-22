@@ -1,47 +1,72 @@
+# The External Secrets Operator Helm chart is managed by Argo CD.
+# This module only manages the IAM resources (role, policy, Pod Identity association)
+# required by the operator. See kubernetes/argocd-apps/{dev,prod}/external-secrets-app.yaml.
+
 locals {
   service_account_name = "external-secrets"
   namespace            = "external-secrets"
 }
 
-resource "helm_release" "external_secrets" {
-  depends_on = [
-    aws_eks_pod_identity_association.external_secrets,
-    aws_iam_role_policy_attachment.external_secrets
-  ]
+resource "aws_iam_role" "external_secrets" {
+  name = "${var.app_name}-external-secrets-role-${var.environment}"
 
-  name             = "external-secrets"
-  repository       = var.chart_path != null ? null : "https://charts.external-secrets.io"
-  chart            = var.chart_path != null ? var.chart_path : "external-secrets"
-  version          = var.chart_path != null ? null : var.chart_version
-  namespace        = local.namespace
-  create_namespace = true
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "pods.eks.amazonaws.com"
+        }
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
+      }
+    ]
+  })
+}
 
-  values = [
-    yamlencode({
-      serviceAccount = {
-        create = true
-        name   = local.service_account_name
+resource "aws_eks_pod_identity_association" "external_secrets" {
+  cluster_name    = var.cluster_name
+  namespace       = local.namespace
+  service_account = local.service_account_name
+  role_arn        = aws_iam_role.external_secrets.arn
+
+  tags = {
+    Name = "${var.app_name}-pod-identity-association-external-secrets-${var.environment}"
+  }
+}
+
+resource "aws_iam_policy" "external_secrets" {
+  name        = "${var.app_name}-external-secrets-policy-${var.environment}"
+  description = "IAM policy for External Secrets Operator to read secrets from AWS Secrets Manager in ${var.app_name} ${var.environment} environment"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecretVersionIds"
+        ]
+        Resource = var.secrets_manager_secret_arns
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+        Resource = var.ssm_parameter_arns
       }
-      # Allow scheduling on the bootstrap nodes of the managed node group.
-      tolerations = [{
-        key      = "karpenter.sh/controller"
-        operator = "Exists"
-        effect   = "NoSchedule"
-      }]
-      webhook = {
-        tolerations = [{
-          key      = "karpenter.sh/controller"
-          operator = "Exists"
-          effect   = "NoSchedule"
-        }]
-      }
-      certController = {
-        tolerations = [{
-          key      = "karpenter.sh/controller"
-          operator = "Exists"
-          effect   = "NoSchedule"
-        }]
-      }
-    })
-  ]
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "external_secrets" {
+  role       = aws_iam_role.external_secrets.name
+  policy_arn = aws_iam_policy.external_secrets.arn
 }
