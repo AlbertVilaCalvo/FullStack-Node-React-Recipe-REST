@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/AlbertVilaCalvo/RecipeManager.git
-    targetRevision: main
+    targetRevision: eso-argo-migration # TODO revert to 'main'
     path: kubernetes/server/overlays/dev
   destination:
     server: https://kubernetes.default.svc
