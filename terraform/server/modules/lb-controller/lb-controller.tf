@@ -3,6 +3,8 @@ locals {
   namespace            = "aws-load-balancer-controller"
 }
 
+# https://github.com/aws/eks-charts/tree/master/stable/aws-load-balancer-controller
+# https://artifacthub.io/packages/helm/aws/aws-load-balancer-controller
 resource "helm_release" "aws_load_balancer_controller" {
   depends_on = [
     aws_eks_pod_identity_association.lb_controller,
