@@ -104,8 +104,6 @@ retry_with_backoff 3 "Install Kubernetes controllers and Argo CD using Helm" \
 
 # Step 4: Create Argo CD root Application (App of Apps)
 # The Argo CD CRDs need to be installed before creating the root Application.
-# The root Application deploys the External Secrets Operator, Karpenter
-# NodePool + EC2NodeClass (which provisions worker nodes) and the server app.
 log_step "Step 4/5: Creating Argo CD root Application (App of Apps)..."
 log_info "This deploys the External Secrets Operator, Karpenter NodePool + EC2NodeClass (which provisions worker nodes) and the server app"
 terraform apply -target=module.argocd_apps -auto-approve
