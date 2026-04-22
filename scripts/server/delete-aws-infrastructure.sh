@@ -317,6 +317,7 @@ for attempt in $(seq 1 ${MAX_ATTEMPTS}); do
     -target=module.pod_identity \
     -target=module.acm_certificates \
     -target=module.app_secrets \
+    -target=module.external_secrets \
     -target=module.github_actions_oidc_role_server \
     -auto-approve; then
     break
