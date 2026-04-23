@@ -1,0 +1,75 @@
+version: 2
+updates:
+  # GitHub Actions – updates action SHAs and version comments in workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Root npm (prettier)
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Server npm packages
+  - package-ecosystem: npm
+    directory: /server
+    schedule:
+      interval: weekly
+    # Keep the number of open PRs manageable given the number of outdated packages.
+    open-pull-requests-limit: 5
+    groups:
+      # Batch all devDependencies into one PR to reduce noise.
+      server-dev-dependencies:
+        dependency-type: development
+        patterns:
+          - '*'
+
+  # Web npm packages
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Batch all devDependencies into one PR to reduce noise.
+      web-dev-dependencies:
+        dependency-type: development
+        patterns:
+          - '*'
+
+  # Docker – server (covers both Dockerfile and Dockerfile.local)
+  - package-ecosystem: docker
+    directory: /server
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Docker – web (covers Dockerfile.local)
+  - package-ecosystem: docker
+    directory: /web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Terraform providers and modules
+  - package-ecosystem: terraform
+    directory: /terraform/bootstrap
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: terraform
+    directory: /terraform/server
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: terraform
+    directory: /terraform/web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
