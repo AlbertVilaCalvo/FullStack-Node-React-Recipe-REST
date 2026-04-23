@@ -3,6 +3,7 @@ FROM node:24.14.1-alpine3.23
 
 # Install Python and build tools required for bcrypt, otherwise we
 # get the error "Could not find any Python installation to use"
+# hadolint ignore=DL3018
 RUN apk add --no-cache python3 make g++
 
 WORKDIR /app

@@ -7,6 +7,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install Python and build tools required for native modules like bcrypt.
+# Ignore Hadolint DL3018 "Pin versions in apk add" (e.g. python3=3.12.13-r0)
+# since it causes build failures in Alpine as old packages are dropped.
+# To find the versions to pin run:
+#   docker run --rm node:24.14.1-alpine3.23 sh -c "apk update && apk list python3 make g++"
+# hadolint ignore=DL3018
 RUN apk add --no-cache python3 make g++
 
 COPY package.json package-lock.json ./
@@ -21,6 +26,7 @@ WORKDIR /app
 # to install devDependencies to build the application (we need tsc).
 
 # Install Python and build tools required for native modules like bcrypt.
+# hadolint ignore=DL3018
 RUN apk add --no-cache python3 make g++
 
 COPY package.json package-lock.json ./
