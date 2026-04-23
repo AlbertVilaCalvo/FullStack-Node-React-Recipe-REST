@@ -2,7 +2,7 @@
 
 # ---- Dependencies Stage ----
 # Install only production dependencies.
-FROM node:24.14.1-alpine3.23 AS dependencies
+FROM node:25.9.0-alpine3.23 AS dependencies
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -20,7 +20,7 @@ RUN npm ci --only=production --no-fund --no-audit
 
 # ---- Build Stage ----
 # Build the TypeScript source code into JavaScript. Requires devDependencies.
-FROM node:24.14.1-alpine3.23 AS build
+FROM node:25.9.0-alpine3.23 AS build
 WORKDIR /app
 # NODE_ENV is not set to 'production' in this stage because we need
 # to install devDependencies to build the application (we need tsc).
@@ -38,7 +38,7 @@ RUN npm run build
 
 
 # ---- Production Stage ----
-FROM node:24.14.1-alpine3.23
+FROM node:25.9.0-alpine3.23
 WORKDIR /app
 ENV NODE_ENV=production
 
