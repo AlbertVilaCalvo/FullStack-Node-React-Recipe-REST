@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - server/**
+      - '!server/Dockerfile.local'
       - .github/actions/install-kustomize/**
       - .github/workflows/cd-server.yml
   workflow_dispatch:
