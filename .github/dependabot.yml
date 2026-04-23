@@ -1,0 +1,138 @@
+version: 2
+
+updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Madrid'
+    open-pull-requests-limit: 2
+    groups:
+      github-actions:
+        patterns:
+          - '*'
+
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Madrid'
+    open-pull-requests-limit: 1
+    allow:
+      - dependency-type: 'direct'
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    groups:
+      root-npm-minor-patch:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  - package-ecosystem: 'npm'
+    directory: '/server'
+    schedule:
+      interval: 'monthly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Madrid'
+    open-pull-requests-limit: 2
+    allow:
+      - dependency-type: 'direct'
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    ignore:
+      - dependency-name: 'express'
+        update-types:
+          - 'version-update:semver-major'
+      - dependency-name: '@types/express'
+        update-types:
+          - 'version-update:semver-major'
+    groups:
+      server-npm-minor-patch:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  - package-ecosystem: 'npm'
+    directory: '/web'
+    schedule:
+      interval: 'monthly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Madrid'
+    open-pull-requests-limit: 2
+    allow:
+      - dependency-type: 'direct'
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    ignore:
+      - dependency-name: '@chakra-ui/*'
+        update-types:
+          - 'version-update:semver-major'
+    groups:
+      web-npm-minor-patch:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  - package-ecosystem: 'docker'
+    directories:
+      - '/server'
+      - '/web'
+    schedule:
+      interval: 'monthly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Madrid'
+    open-pull-requests-limit: 1
+    groups:
+      docker-node-images:
+        patterns:
+          - 'node'
+        group-by: 'dependency-name'
+
+  - package-ecosystem: 'docker-compose'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Madrid'
+    open-pull-requests-limit: 1
+    groups:
+      docker-compose-images:
+        patterns:
+          - '*'
+
+  - package-ecosystem: 'terraform'
+    directories:
+      - '/terraform/*/environments/*'
+    schedule:
+      interval: 'quarterly'
+      time: '09:00'
+      timezone: 'Europe/Madrid'
+    open-pull-requests-limit: 1
+    groups:
+      terraform-providers:
+        patterns:
+          - '*'
+        group-by: 'dependency-name'
