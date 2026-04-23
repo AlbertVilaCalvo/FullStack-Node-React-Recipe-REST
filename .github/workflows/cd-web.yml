@@ -5,10 +5,15 @@ on:
     branches:
       - main
     paths:
-      - web/**
-      - '!web/Dockerfile.local'
-      - .github/actions/deploy-web/**
-      - .github/workflows/cd-web.yml
+      - web/src/**
+      - web/public/**
+      - web/index.html
+      - web/package.json
+      - web/package-lock.json
+      - web/tsconfig.json
+      - web/tsconfig.app.json
+      - web/tsconfig.node.json
+      - web/vite.config.ts
   workflow_dispatch:
 
 # Allow only one concurrent deployment at a time.
