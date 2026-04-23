@@ -1,6 +1,7 @@
 version: 2
+
 updates:
-  # GitHub Actions – updates action SHAs and version comments in workflows
+  # GitHub Actions
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -19,14 +20,33 @@ updates:
     directory: /server
     schedule:
       interval: weekly
-    # Keep the number of open PRs manageable given the number of outdated packages.
     open-pull-requests-limit: 5
     groups:
-      # Batch all devDependencies into one PR to reduce noise.
-      server-dev-dependencies:
+      server-prod-minor-patch:
+        dependency-type: production
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+      server-dev-minor-patch:
         dependency-type: development
         patterns:
           - '*'
+        update-types:
+          - minor
+          - patch
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    # To upgrade to Express 5 we need to follow https://expressjs.com/en/guide/migrating-5.html
+    ignore:
+      - dependency-name: 'express'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@types/express'
+        update-types: ['version-update:semver-major']
 
   # Web npm packages
   - package-ecosystem: npm
@@ -35,20 +55,39 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
-      # Batch all devDependencies into one PR to reduce noise.
-      web-dev-dependencies:
+      web-prod-minor-patch:
+        dependency-type: production
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+      web-dev-minor-patch:
         dependency-type: development
         patterns:
           - '*'
+        update-types:
+          - minor
+          - patch
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    # Upgrade to Chakra UI 3 is complex, see https://chakra-ui.com/docs/get-started/migration
+    # and https://chakra-ui.com/blog/chakra-v2-vs-v3-a-detailed-comparison
+    ignore:
+      - dependency-name: '@chakra-ui/*'
+        update-types: ['version-update:semver-major']
 
-  # Docker – server (covers both Dockerfile and Dockerfile.local)
+  # Docker – server (Dockerfile and Dockerfile.local)
   - package-ecosystem: docker
     directory: /server
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
 
-  # Docker – web (covers Dockerfile.local)
+  # Docker – web (Dockerfile.local)
   - package-ecosystem: docker
     directory: /web
     schedule:
