@@ -1,0 +1,63 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+
+  # Maintain dependencies for the Server (npm)
+  - package-ecosystem: 'npm'
+    directory: '/server'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: 'express'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@types/express'
+        update-types: ['version-update:semver-major']
+
+  # Maintain dependencies for the Web (npm)
+  - package-ecosystem: 'npm'
+    directory: '/web'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: '@chakra-ui/*'
+        update-types: ['version-update:semver-major']
+
+  # Maintain dependencies for the Server Dockerfile
+  - package-ecosystem: 'docker'
+    directory: '/server'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 3
+
+  # Maintain dependencies for the Web Dockerfile (if any)
+  - package-ecosystem: 'docker'
+    directory: '/web'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 3
+
+  # Maintain Terraform modules
+  - package-ecosystem: 'terraform'
+    directory: '/terraform/bootstrap'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: 'terraform'
+    directory: '/terraform/server'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: 'terraform'
+    directory: '/terraform/web'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
