@@ -2,11 +2,16 @@
 
 # ---- Dependencies Stage ----
 # Install only production dependencies.
-FROM node:24-alpine AS dependencies
+FROM node:24.14.1-alpine3.23 AS dependencies
 WORKDIR /app
 ENV NODE_ENV=production
 
 # Install Python and build tools required for native modules like bcrypt.
+# Ignore Hadolint DL3018 "Pin versions in apk add" (e.g. python3=3.12.13-r0)
+# since it causes build failures in Alpine as old packages are dropped.
+# To find the versions to pin run:
+#   docker run --rm node:24.14.1-alpine3.23 sh -c "apk update && apk list python3 make g++"
+# hadolint ignore=DL3018
 RUN apk add --no-cache python3 make g++
 
 COPY package.json package-lock.json ./
@@ -15,12 +20,13 @@ RUN npm ci --only=production --no-fund --no-audit
 
 # ---- Build Stage ----
 # Build the TypeScript source code into JavaScript. Requires devDependencies.
-FROM node:24-alpine AS build
+FROM node:24.14.1-alpine3.23 AS build
 WORKDIR /app
 # NODE_ENV is not set to 'production' in this stage because we need
 # to install devDependencies to build the application (we need tsc).
 
 # Install Python and build tools required for native modules like bcrypt.
+# hadolint ignore=DL3018
 RUN apk add --no-cache python3 make g++
 
 COPY package.json package-lock.json ./
@@ -32,7 +38,7 @@ RUN npm run build
 
 
 # ---- Production Stage ----
-FROM node:24-alpine
+FROM node:24.14.1-alpine3.23
 WORKDIR /app
 ENV NODE_ENV=production
 
