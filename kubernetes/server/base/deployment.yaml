@@ -12,6 +12,15 @@ spec:
       labels:
         app: recipe-manager
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: recipe-manager
+                topologyKey: kubernetes.io/hostname
       serviceAccountName: recipe-manager-api
       containers:
         - name: api
