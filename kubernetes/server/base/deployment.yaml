@@ -12,10 +12,19 @@ spec:
       labels:
         app: recipe-manager
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: recipe-manager
+                topologyKey: kubernetes.io/hostname
       serviceAccountName: recipe-manager-api
       containers:
         - name: api
-          # Value is set with `kustomize edit set image`
+          # Value is set with `kustomize edit set image` in cd-server.yml, which edits kustomization.yaml
           image: recipe-manager-api-server:latest
           imagePullPolicy: Always
           ports:
@@ -54,7 +63,7 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
           securityContext:
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 1000
             allowPrivilegeEscalation: false

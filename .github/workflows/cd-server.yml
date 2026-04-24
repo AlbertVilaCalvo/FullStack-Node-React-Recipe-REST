@@ -98,7 +98,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin main
-      - name: Update image tag
+      - name: Update image tag in dev/kustomization.yaml
         working-directory: kubernetes/server/overlays/dev
         run: |
           kustomize edit set image recipe-manager-api-server=${{ needs.build_and_push_dev.outputs.ecr_repository_url }}:${{ needs.build_and_push_dev.outputs.image_tag }}
@@ -184,7 +184,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin main
-      - name: Update image tag
+      - name: Update image tag in prod/kustomization.yaml
         working-directory: kubernetes/server/overlays/prod
         run: |
           kustomize edit set image recipe-manager-api-server=${{ needs.push_to_prod.outputs.ecr_repository_url }}:${{ needs.push_to_prod.outputs.image_tag }}
