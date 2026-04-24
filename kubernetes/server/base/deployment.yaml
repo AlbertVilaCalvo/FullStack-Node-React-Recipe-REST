@@ -12,6 +12,7 @@ spec:
       labels:
         app: recipe-manager
     spec:
+      serviceAccountName: recipe-manager-api
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -21,7 +22,13 @@ spec:
                   matchLabels:
                     app: recipe-manager
                 topologyKey: kubernetes.io/hostname
-      serviceAccountName: recipe-manager-api
+      # Pod-level — applies to all containers in the pod
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: api
           # Value is set with `kustomize edit set image` in cd-server.yml, which edits kustomization.yaml
@@ -62,10 +69,9 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3
+          # Container-level — applies to this container only, can override pod-level settings
           securityContext:
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            runAsUser: 1000
             allowPrivilegeEscalation: false
             capabilities:
               drop:
