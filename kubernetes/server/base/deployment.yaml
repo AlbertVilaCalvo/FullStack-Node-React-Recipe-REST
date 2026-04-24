@@ -54,7 +54,7 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
           securityContext:
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 1000
             allowPrivilegeEscalation: false
