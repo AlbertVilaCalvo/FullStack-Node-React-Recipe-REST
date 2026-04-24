@@ -15,7 +15,7 @@ spec:
       serviceAccountName: recipe-manager-api
       containers:
         - name: api
-          # Value is set with `kustomize edit set image`
+          # Value is set with `kustomize edit set image` in cd-server.yaml, which edits kustomization.yaml
           image: recipe-manager-api-server:latest
           imagePullPolicy: Always
           ports:

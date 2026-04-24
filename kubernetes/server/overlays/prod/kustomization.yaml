@@ -16,3 +16,8 @@ patches:
   - path: ingress_patch.yaml
   - path: configmap_patch.yaml
   - path: deployment_patch.yaml
+
+images:
+  - name: recipe-manager-api-server
+    newName: 725270464668.dkr.ecr.us-east-1.amazonaws.com/recipe-manager-server-prod
+    newTag: '313e337'
