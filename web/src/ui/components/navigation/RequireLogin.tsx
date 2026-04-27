@@ -15,7 +15,7 @@ import { userStore } from '../../../user/userStore'
  *
  * Adapted from https://github.com/remix-run/react-router/tree/main/examples/auth
  */
-export function RequireLogin({ Page }: { Page: React.ComponentType<object> }) {
+export function RequireLogin({ Page }: { Page: React.ComponentType }) {
   if (userStore.user) {
     return <Page />
   } else {
