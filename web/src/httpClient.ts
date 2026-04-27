@@ -29,29 +29,24 @@ export type ApiError = {
   }
 }
 
-export function isApiError(arg: any): arg is ApiError {
-  return (
-    !!arg && // This is necessary because typeof null === 'object' is true
-    typeof arg === 'object' &&
-    arg.error &&
-    arg.error.code &&
-    typeof arg.error.code === 'string' &&
-    arg.error.message &&
-    typeof arg.error.message === 'string'
-  )
+export function isApiError(arg: unknown): arg is ApiError {
+  if (!arg || typeof arg !== 'object') return false
+  const obj = arg as Record<string, unknown>
+  if (!obj['error'] || typeof obj['error'] !== 'object') return false
+  const err = obj['error'] as Record<string, unknown>
+  return typeof err['code'] === 'string' && typeof err['message'] === 'string'
 }
 
 /**
  * @param error the error of an axios request catch.
  */
-export function extractApiError(error?: any): ApiError | undefined {
-  if (
-    error &&
-    error.response &&
-    error.response.data &&
-    isApiError(error.response.data)
-  ) {
-    return error.response.data
+export function extractApiError(error?: unknown): ApiError | undefined {
+  if (!error || typeof error !== 'object') return undefined
+  const err = error as Record<string, unknown>
+  if (!err['response'] || typeof err['response'] !== 'object') return undefined
+  const response = err['response'] as Record<string, unknown>
+  if (isApiError(response['data'])) {
+    return response['data']
   }
   return undefined
 }
@@ -59,12 +54,14 @@ export function extractApiError(error?: any): ApiError | undefined {
 /**
  * @param error the error of an axios request catch.
  */
-export function extractApiErrorMessage(error?: any): string {
+export function extractApiErrorMessage(error?: unknown): string {
   const apiError = extractApiError(error)
   if (apiError) {
     return apiError.error.message
-  } else {
+  } else if (error instanceof Error) {
     return error.message
+  } else {
+    return String(error)
   }
 }
 
@@ -83,6 +80,10 @@ export type AnApiError<ErrorCode extends string> = {
 /**
  * @param error the error of an axios request catch.
  */
-export function is404NotFound(error?: any): boolean {
-  return error && error.response && error.response.status === 404
+export function is404NotFound(error?: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const err = error as Record<string, unknown>
+  if (!err['response'] || typeof err['response'] !== 'object') return false
+  const response = err['response'] as Record<string, unknown>
+  return response['status'] === 404
 }
