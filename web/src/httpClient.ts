@@ -14,7 +14,7 @@ export const httpClient = axios.create()
 httpClient.interceptors.request.use((requestConfig) => {
   const token = userStore.authToken
   if (token) {
-    // @ts-ignore
+    // @ts-expect-error -- axios headers type does not include string index signature
     requestConfig.headers['Authorization'] = 'Bearer ' + token
   }
   return requestConfig
