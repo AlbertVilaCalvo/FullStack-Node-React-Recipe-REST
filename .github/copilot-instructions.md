@@ -39,6 +39,7 @@ The server follows a three-layer architecture for organizing business logic:
 
 - TypeScript: The entire codebase is written in TypeScript. Avoid JavaScript.
 - Code Style: Prettier is used for formatting. Format files with `npm run format`.
+- Linting: ESLint is used for linting JavaScript/TypeScript code. Run `npm run lint` to check for errors.
 - Asynchronous Code: Prefer `async/await` for asynchronous operations.
 
 ## Server Patterns
