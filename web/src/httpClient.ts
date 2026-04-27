@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { userStore } from './user/userStore'
+import { isRecord } from './misc/utils'
 
 if (!import.meta.env.VITE_API_BASE_URL) {
   throw new Error(`Missing required environment variable VITE_API_BASE_URL`)
@@ -14,7 +15,7 @@ export const httpClient = axios.create()
 httpClient.interceptors.request.use((requestConfig) => {
   const token = userStore.authToken
   if (token) {
-    // @ts-ignore
+    // @ts-expect-error -- axios headers type does not include string index signature
     requestConfig.headers['Authorization'] = 'Bearer ' + token
   }
   return requestConfig
@@ -29,28 +30,21 @@ export type ApiError = {
   }
 }
 
-export function isApiError(arg: any): arg is ApiError {
+export function isApiError(arg: unknown): arg is ApiError {
+  if (!isRecord(arg)) return false
+  if (!isRecord(arg.error)) return false
   return (
-    !!arg && // This is necessary because typeof null === 'object' is true
-    typeof arg === 'object' &&
-    arg.error &&
-    arg.error.code &&
-    typeof arg.error.code === 'string' &&
-    arg.error.message &&
-    typeof arg.error.message === 'string'
+    typeof arg.error.code === 'string' && typeof arg.error.message === 'string'
   )
 }
 
 /**
  * @param error the error of an axios request catch.
  */
-export function extractApiError(error?: any): ApiError | undefined {
-  if (
-    error &&
-    error.response &&
-    error.response.data &&
-    isApiError(error.response.data)
-  ) {
+export function extractApiError(error?: unknown): ApiError | undefined {
+  if (!isRecord(error)) return undefined
+  if (!isRecord(error.response)) return undefined
+  if (isApiError(error.response.data)) {
     return error.response.data
   }
   return undefined
@@ -59,13 +53,15 @@ export function extractApiError(error?: any): ApiError | undefined {
 /**
  * @param error the error of an axios request catch.
  */
-export function extractApiErrorMessage(error?: any): string {
+export function extractApiErrorMessage(error?: unknown): string {
   const apiError = extractApiError(error)
   if (apiError) {
     return apiError.error.message
-  } else {
+  }
+  if (isRecord(error) && typeof error.message === 'string') {
     return error.message
   }
+  return String(error)
 }
 
 /**
@@ -83,6 +79,8 @@ export type AnApiError<ErrorCode extends string> = {
 /**
  * @param error the error of an axios request catch.
  */
-export function is404NotFound(error?: any): boolean {
-  return error && error.response && error.response.status === 404
+export function is404NotFound(error?: unknown): boolean {
+  if (!isRecord(error)) return false
+  if (!isRecord(error.response)) return false
+  return error.response.status === 404
 }

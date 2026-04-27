@@ -7,3 +7,8 @@ console.log(
   `import.meta.env.VITE_API_BASE_URL:`,
   import.meta.env.VITE_API_BASE_URL
 )
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  // Exclude null since typeof null === 'object' is true
+  return typeof value === 'object' && value !== null
+}

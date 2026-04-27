@@ -31,19 +31,19 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
   const navigate = useNavigate()
   const showErrorToast = useErrorToast()
 
-  const [title, setTitle] = React.useState(recipe ? recipe.title : '')
-  const [cookingTimeMinutes, setCookingTimeMinutes] = React.useState(
-    recipe ? recipe.cookingTimeMinutes.toString(10) : '10'
+  const [title, setTitle] = React.useState<string>(recipe ? recipe.title : '')
+  const [cookingTimeMinutes, setCookingTimeMinutes] = React.useState<number>(
+    recipe ? recipe.cookingTimeMinutes : 10
   )
 
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState<boolean>(false)
 
   const onSubmitInternal = (event: React.SyntheticEvent) => {
     event.preventDefault()
     setLoading(true)
     onSubmit({
       title: title.trim(),
-      cookingTimeMinutes: Number(cookingTimeMinutes),
+      cookingTimeMinutes: cookingTimeMinutes,
     })
       .then((response) => {
         console.log(`RecipeApi response`, response)
@@ -80,8 +80,8 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           max={MAX_COOKING_TIME_MINUTES}
           allowMouseWheel
           value={cookingTimeMinutes}
-          onChange={(valueAsString, _valueAsNumber) => {
-            setCookingTimeMinutes(valueAsString)
+          onChange={(_valueAsString, valueAsNumber) => {
+            setCookingTimeMinutes(valueAsNumber)
           }}
         >
           <NumberInputField />

@@ -38,7 +38,7 @@ The server follows a three-layer architecture for organizing business logic:
 ## Coding Standards & Conventions
 
 - TypeScript: The entire codebase is written in TypeScript. Avoid JavaScript.
-- Code Style: Prettier is used for formatting. Adhere to its conventions (single quotes, no semicolons, 2-space indentation and trailing commas).
+- Code Style: Prettier is used for formatting. Format files with `npm run format`.
 - Asynchronous Code: Prefer `async/await` for asynchronous operations.
 
 ## Server Patterns
