@@ -29,24 +29,27 @@ export type ApiError = {
   }
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  // Exclude null since typeof null === 'object' is true
+  return typeof value === 'object' && value !== null
+}
+
 export function isApiError(arg: unknown): arg is ApiError {
-  if (!arg || typeof arg !== 'object') return false
-  const obj = arg as Record<string, unknown>
-  if (!obj['error'] || typeof obj['error'] !== 'object') return false
-  const err = obj['error'] as Record<string, unknown>
-  return typeof err['code'] === 'string' && typeof err['message'] === 'string'
+  if (!isRecord(arg)) return false
+  if (!isRecord(arg.error)) return false
+  return (
+    typeof arg.error.code === 'string' && typeof arg.error.message === 'string'
+  )
 }
 
 /**
  * @param error the error of an axios request catch.
  */
 export function extractApiError(error?: unknown): ApiError | undefined {
-  if (!error || typeof error !== 'object') return undefined
-  const err = error as Record<string, unknown>
-  if (!err['response'] || typeof err['response'] !== 'object') return undefined
-  const response = err['response'] as Record<string, unknown>
-  if (isApiError(response['data'])) {
-    return response['data']
+  if (!isRecord(error)) return undefined
+  if (!isRecord(error.response)) return undefined
+  if (isApiError(error.response.data)) {
+    return error.response.data
   }
   return undefined
 }
@@ -58,11 +61,11 @@ export function extractApiErrorMessage(error?: unknown): string {
   const apiError = extractApiError(error)
   if (apiError) {
     return apiError.error.message
-  } else if (error instanceof Error) {
-    return error.message
-  } else {
-    return String(error)
   }
+  if (isRecord(error) && typeof error.message === 'string') {
+    return error.message
+  }
+  return String(error)
 }
 
 /**
@@ -81,9 +84,7 @@ export type AnApiError<ErrorCode extends string> = {
  * @param error the error of an axios request catch.
  */
 export function is404NotFound(error?: unknown): boolean {
-  if (!error || typeof error !== 'object') return false
-  const err = error as Record<string, unknown>
-  if (!err['response'] || typeof err['response'] !== 'object') return false
-  const response = err['response'] as Record<string, unknown>
-  return response['status'] === 404
+  if (!isRecord(error)) return false
+  if (!isRecord(error.response)) return false
+  return error.response.status === 404
 }
