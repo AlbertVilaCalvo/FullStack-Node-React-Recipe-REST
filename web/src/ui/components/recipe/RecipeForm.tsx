@@ -81,6 +81,7 @@ export function RecipeForm({ recipe, onSubmit }: Props) {
           allowMouseWheel
           value={cookingTimeMinutes}
           onChange={(valueAsString, _valueAsNumber) => {
+            void _valueAsNumber
             setCookingTimeMinutes(valueAsString)
           }}
         >

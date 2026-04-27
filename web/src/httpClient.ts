@@ -14,8 +14,8 @@ export const httpClient = axios.create()
 httpClient.interceptors.request.use((requestConfig) => {
   const token = userStore.authToken
   if (token) {
-    // @ts-ignore
-    requestConfig.headers['Authorization'] = 'Bearer ' + token
+    requestConfig.headers = requestConfig.headers ?? {}
+    requestConfig.headers.Authorization = 'Bearer ' + token
   }
   return requestConfig
 })
@@ -29,43 +29,57 @@ export type ApiError = {
   }
 }
 
-export function isApiError(arg: any): arg is ApiError {
-  return (
-    !!arg && // This is necessary because typeof null === 'object' is true
-    typeof arg === 'object' &&
-    arg.error &&
-    arg.error.code &&
-    typeof arg.error.code === 'string' &&
-    arg.error.message &&
-    typeof arg.error.message === 'string'
-  )
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object'
+}
+
+export function isApiError(arg: unknown): arg is ApiError {
+  if (!isRecord(arg)) {
+    return false
+  }
+
+  const error = arg.error
+  if (!isRecord(error)) {
+    return false
+  }
+
+  return typeof error.code === 'string' && typeof error.message === 'string'
 }
 
 /**
  * @param error the error of an axios request catch.
  */
-export function extractApiError(error?: any): ApiError | undefined {
-  if (
-    error &&
-    error.response &&
-    error.response.data &&
-    isApiError(error.response.data)
-  ) {
-    return error.response.data
+export function extractApiError(error?: unknown): ApiError | undefined {
+  if (!isRecord(error)) {
+    return undefined
   }
+
+  const response = error.response
+  if (!isRecord(response)) {
+    return undefined
+  }
+
+  if (isApiError(response.data)) {
+    return response.data
+  }
+
   return undefined
 }
 
 /**
  * @param error the error of an axios request catch.
  */
-export function extractApiErrorMessage(error?: any): string {
+export function extractApiErrorMessage(error?: unknown): string {
   const apiError = extractApiError(error)
   if (apiError) {
     return apiError.error.message
-  } else {
+  }
+
+  if (isRecord(error) && typeof error.message === 'string') {
     return error.message
   }
+
+  return 'Unexpected error'
 }
 
 /**
@@ -83,6 +97,11 @@ export type AnApiError<ErrorCode extends string> = {
 /**
  * @param error the error of an axios request catch.
  */
-export function is404NotFound(error?: any): boolean {
-  return error && error.response && error.response.status === 404
+export function is404NotFound(error?: unknown): boolean {
+  if (!isRecord(error)) {
+    return false
+  }
+
+  const response = error.response
+  return isRecord(response) && response.status === 404
 }
