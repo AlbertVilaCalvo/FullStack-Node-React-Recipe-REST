@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { userStore } from './user/userStore'
+import { isRecord } from './misc/utils'
 
 if (!import.meta.env.VITE_API_BASE_URL) {
   throw new Error(`Missing required environment variable VITE_API_BASE_URL`)
@@ -27,11 +28,6 @@ export type ApiError = {
     code: string
     message: string
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  // Exclude null since typeof null === 'object' is true
-  return typeof value === 'object' && value !== null
 }
 
 export function isApiError(arg: unknown): arg is ApiError {
