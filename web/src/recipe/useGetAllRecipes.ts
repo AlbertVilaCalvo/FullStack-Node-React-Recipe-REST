@@ -8,7 +8,6 @@ export function useGetAllRecipes(): 'loading' | Recipe[] | Error {
   )
 
   React.useEffect(() => {
-    setResult('loading')
     RecipeApi.getAllRecipes()
       .then((recipes) => {
         setResult(recipes)
