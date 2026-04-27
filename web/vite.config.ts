@@ -14,15 +14,15 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    plugins: [react()],
     server: {
       port: parseInt(env.VITE_PORT),
     },
-    envDir: '../',
+    envDir: ENV_DIR,
     build: {
       outDir: 'build',
       // sourcemap: true
     },
-    plugins: [react()],
     test: {
       globals: true,
       environment: 'jsdom',

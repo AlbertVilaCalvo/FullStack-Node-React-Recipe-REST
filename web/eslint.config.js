@@ -13,12 +13,11 @@ export default defineConfig([
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
-      reactHooks.configs['recommended-latest'],
+      reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
       valtio.configs['flat/recommended'],
     ],
     languageOptions: {
-      ecmaVersion: 2020,
       globals: globals.browser,
     },
     rules: {
