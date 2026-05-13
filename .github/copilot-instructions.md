@@ -41,6 +41,7 @@ The server follows a three-layer architecture for organizing business logic:
 - Code Style: Prettier is used for formatting. Format files with `npm run format`.
 - Linting: ESLint is used for linting JavaScript/TypeScript code. Run `npm run lint` to check for errors.
 - Asynchronous Code: Prefer `async/await` for asynchronous operations.
+- When installing or upgrading npm packages, use the `-E` flag to install exact versions (`1.2.3`), not version ranges (`^1.2.3` or `~1.2.3`).
 
 ## Server Patterns
 
