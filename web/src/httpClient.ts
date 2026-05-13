@@ -17,6 +17,10 @@ httpClient.interceptors.request.use((requestConfig) => {
   if (token) {
     // @ts-expect-error -- axios headers type does not include string index signature
     requestConfig.headers['Authorization'] = 'Bearer ' + token
+    // TODO use headers.set() and remove @ts-expect-error when we upgrade to v1.x, see:
+    // https://axios.rest/pages/getting-started/upgrade-guide.html
+    // https://axios.rest/pages/advanced/headers.html
+    // requestConfig.headers.set('Authorization', 'Bearer ' + token)
   }
   return requestConfig
 })
