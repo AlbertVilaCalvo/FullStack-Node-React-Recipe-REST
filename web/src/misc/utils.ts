@@ -9,6 +9,6 @@ console.log(
 )
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
-  // Exclude null since typeof null === 'object' is true
-  return typeof value === 'object' && value !== null
+  // Exclude null (typeof null === 'object') and arrays (typeof [] === 'object')
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
