@@ -7,28 +7,51 @@ import { is404NotFound } from '../httpClient'
 export function useGetUser(
   userId: number
 ): 'loading' | PublicUser | '404-not-found' | Error {
-  const [result, setResult] =
-    React.useState<ReturnType<typeof useGetUser>>('loading')
+  const [result, setResult] = React.useState<
+    | {
+        userId: number
+        value: PublicUser | '404-not-found' | Error
+      }
+    | undefined
+  >()
 
   React.useEffect(() => {
     if (!isValidId(userId)) {
-      setResult('404-not-found')
       return
     }
-    setResult('loading')
+
+    let cancelled = false
+
     UserApi.getUser(userId)
       .then((user) => {
-        setResult(user)
+        if (!cancelled) {
+          setResult({ userId, value: user })
+        }
       })
       .catch((error) => {
         console.log(`useGetUser error`, error)
+        if (cancelled) {
+          return
+        }
         if (is404NotFound(error)) {
-          setResult('404-not-found')
+          setResult({ userId, value: '404-not-found' })
         } else {
-          setResult(error)
+          setResult({ userId, value: error })
         }
       })
+
+    return () => {
+      cancelled = true
+    }
   }, [userId])
 
-  return result
+  if (!isValidId(userId)) {
+    return '404-not-found'
+  }
+
+  if (!result || result.userId !== userId) {
+    return 'loading'
+  }
+
+  return result.value
 }
