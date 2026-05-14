@@ -25,6 +25,8 @@ export default defineConfig([
         'error',
         { argsIgnorePattern: '^_' },
       ],
+      'valtio/state-snapshot-rule': ['warn'],
+      'valtio/avoid-this-in-proxy': ['warn'],
     },
   },
 ])
