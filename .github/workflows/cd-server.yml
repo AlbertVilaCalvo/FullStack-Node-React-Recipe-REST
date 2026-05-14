@@ -58,7 +58,7 @@ jobs:
           role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER }}
           role-session-name: 'GitHubActions-server-ecr-push-dev'
       - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7 # v2.1.4
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
       - name: Build, push and save Docker image
         working-directory: server
         run: |
@@ -152,7 +152,7 @@ jobs:
           role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_OIDC_ROLE_ARN_SERVER }}
           role-session-name: 'GitHubActions-server-ecr-push-prod'
       - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7 # v2.1.4
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
       - name: Load, tag and push Docker image
         run: |
           docker load -i /tmp/server-image.tar
