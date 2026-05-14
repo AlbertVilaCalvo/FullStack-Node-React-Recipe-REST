@@ -7,28 +7,51 @@ import { is404NotFound } from '../httpClient'
 export function useGetRecipe(
   recipeId: number
 ): 'loading' | RecipeWithUser | '404-not-found' | Error {
-  const [result, setResult] =
-    React.useState<ReturnType<typeof useGetRecipe>>('loading')
+  const [result, setResult] = React.useState<
+    | {
+        recipeId: number
+        value: RecipeWithUser | '404-not-found' | Error
+      }
+    | undefined
+  >()
 
   React.useEffect(() => {
     if (!isValidId(recipeId)) {
-      setResult('404-not-found')
       return
     }
-    setResult('loading')
+
+    let cancelled = false
+
     RecipeApi.getRecipe(recipeId)
       .then((recipe) => {
-        setResult(recipe)
+        if (!cancelled) {
+          setResult({ recipeId, value: recipe })
+        }
       })
       .catch((error) => {
         console.log(`useGetRecipe error`, error)
+        if (cancelled) {
+          return
+        }
         if (is404NotFound(error)) {
-          setResult('404-not-found')
+          setResult({ recipeId, value: '404-not-found' })
         } else {
-          setResult(error)
+          setResult({ recipeId, value: error })
         }
       })
+
+    return () => {
+      cancelled = true
+    }
   }, [recipeId])
 
-  return result
+  if (!isValidId(recipeId)) {
+    return '404-not-found'
+  }
+
+  if (!result || result.recipeId !== recipeId) {
+    return 'loading'
+  }
+
+  return result.value
 }

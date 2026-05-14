@@ -22,7 +22,6 @@ export function VerifyEmailPage() {
     if (!token) {
       return
     }
-    setLoading(true)
     AuthApi.verifyEmail(token)
       .then((response) => {
         if (isApiError(response)) {
